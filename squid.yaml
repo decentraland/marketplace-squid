@@ -1,0 +1,21 @@
+manifestVersion: subsquid.io/v0.1
+name: multichain-dcl-squid
+version: 1
+description: 'A squid that indexes DCL contracts'
+build: 
+deploy:
+  addons:
+    postgres: 
+  processor:
+    - name: eth-processor
+      cmd: [ "sqd", "process:prod:eth" ]
+      env:
+        RPC_ENDPOINT_ETH: ${{ secrets.RPC_ENDPOINT_ETH }}
+    # - name: polygon-processor
+    #   cmd: [ "sqd", "process:prod:polygon" ]
+    #   env:
+    #     RPC_ENDPOINT_POLYGON: ${{ secrets.RPC_ENDPOINT_POLYGON }}
+  api:
+    cmd: [ "sqd", "serve:prod" ]
+  # api:
+  #   cmd: [ "sqd", "api:prod" ]
