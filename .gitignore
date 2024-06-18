@@ -1,0 +1,10 @@
+/lib
+/builds
+.vscode
+.env
+
+/**Versions.json
+
+# IDE files
+/.idea
+node_modules
