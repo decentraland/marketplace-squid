@@ -21,8 +21,3 @@ sqd build
 # Start the processor service and the GraphQL server
 sqd run . &
 
-# Wait for all background processes to finish
-wait -n
-
-# Exit with the status of the first failed process
-exit $?
