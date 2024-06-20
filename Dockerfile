@@ -1,6 +1,6 @@
 FROM node:16-alpine AS node
 FROM node AS node-with-gyp
-RUN apk add g++ make python3
+RUN apk add g++ make python3 postgresql-client tini
 FROM node-with-gyp AS builder
 WORKDIR /squid
 ADD package.json .
@@ -29,3 +29,8 @@ ADD commands.json .
 RUN echo -e "loglevel=silent\\nupdate-notifier=false" > /squid/.npmrc
 RUN npm i -g @subsquid/commands && mv $(which squid-commands) /usr/local/bin/sqd
 ENV PROCESSOR_PROMETHEUS_PORT 3000
+
+# Entry point script
+ADD entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
