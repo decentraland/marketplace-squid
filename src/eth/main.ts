@@ -54,8 +54,13 @@ const tokenURIs: Map<string, string> = new Map();
 
 let bytesRead = 0; // amount of bytes received
 
+const schemaName = process.env.DB_SCHEMA;
+
 processor.run(
-  new TypeormDatabase({ supportHotBlocks: true, stateSchema: "eth_processor" }),
+  new TypeormDatabase({
+    supportHotBlocks: true,
+    stateSchema: `eth_processor_${schemaName}`,
+  }),
   async (ctx) => {
     // update the amount of bytes read
     bytesRead += ctx.blocks.reduce(
@@ -444,12 +449,14 @@ processor.run(
     );
 
     console.time("multicall tokenURIs");
-    // console.log("tokenIds: ", tokenIds);
-    const newTokenURIs = await tokenURIMutilcall(
-      ctx,
-      ctx.blocks[ctx.blocks.length - 1].header, // use latest block of the batch to multicall fetch
-      tokenIds
-    );
+    const newTokenURIs =
+      tokenIds.size > 0
+        ? await tokenURIMutilcall(
+            ctx,
+            ctx.blocks[ctx.blocks.length - 1].header, // use latest block of the batch to multicall fetch
+            tokenIds
+          )
+        : new Map<string, string>();
     console.timeEnd("multicall tokenURIs");
 
     [...newTokenURIs.entries()].forEach(([contractAndTokenId, value]) => {

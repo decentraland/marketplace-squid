@@ -1,10 +1,10 @@
+import { ChainId, Network } from "@dcl/schemas";
 import { Multicall } from "../../abi/multicall";
 import { functions as LANDRegistryFunctions } from "../../abi/LANDRegistry";
 import { functions as erc721Functions } from "../../abi/ERC721";
 import { Block, Context } from "../../eth/processor";
 import { Coordinate } from "../../types";
 import { getAddresses } from "./addresses";
-import { Network } from "@dcl/schemas";
 
 const MULTICALL_CONTRACT = "0xcA11bde05977b3631167028862bE2a173976CA11"; // has the same address on different networks
 const hardcodedMulticallCreationBlock = {
@@ -21,13 +21,18 @@ export async function tokenURIMutilcall(
   lastBlock: Block,
   tokenIds: Map<string, bigint[]> // contractAddress => tokenIds[]
 ): Promise<Map<string, string>> {
-  const multicall = new Multicall(
-    ctx,
-    lastBlock.height > hardcodedMulticallCreationBlock.height
-      ? lastBlock
-      : hardcodedMulticallCreationBlock,
-    MULTICALL_CONTRACT
-  );
+  const chainId = process.env.ETHEREUM_CHAIN_ID || ChainId.ETHEREUM_MAINNET;
+
+  let multiCallBlock = lastBlock;
+  // If the chain is Ethereum Mainnet and the last block is before the hardcodedMulticallCreationBlock, use the hardcodedMulticallCreationBlock
+  if (
+    chainId.toString() === ChainId.ETHEREUM_MAINNET.toString() &&
+    lastBlock.height < hardcodedMulticallCreationBlock.height
+  ) {
+    multiCallBlock = hardcodedMulticallCreationBlock;
+  }
+
+  const multicall = new Multicall(ctx, multiCallBlock, MULTICALL_CONTRACT);
 
   const tokenIdsArray: [string, bigint][] = [];
   Array.from(tokenIds.entries()).forEach(([contractAddress, tokenIds]) => {

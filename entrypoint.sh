@@ -1,23 +1,33 @@
 #!/bin/sh
 
 # Generate a unique schema name and user credentials using a timestamp
-SCHEMA_NAME="schema_$(date +%s)"
-NEW_DB_USER="user_$(date +%s)"
+NEW_SCHEMA_NAME="marketplace_squid_$(date +%s)"
+NEW_DB_USER="marketplace_squid_user_$(date +%s)"
+
+# Log the generated variables
+echo "Generated schema name: $NEW_SCHEMA_NAME"
+echo "Generated user: $NEW_DB_USER"
 
 # Connect to the database and create the new schema and user
-psql -v ON_ERROR_STOP=1 --username "$DB_USER" --dbname "$DB_PASSWORD" <<-EOSQL
-  CREATE SCHEMA $SCHEMA_NAME;
+psql -v ON_ERROR_STOP=1 --username "$DB_USER" --dbname "$DB_NAME" <<-EOSQL
+  CREATE SCHEMA $NEW_SCHEMA_NAME;
   CREATE USER $NEW_DB_USER WITH PASSWORD '$DB_PASSWORD';
-  GRANT ALL PRIVILEGES ON SCHEMA $SCHEMA_NAME TO $NEW_DB_USER;
-  ALTER USER $NEW_DB_USER SET search_path TO $SCHEMA_NAME;
+  GRANT ALL PRIVILEGES ON SCHEMA $NEW_SCHEMA_NAME TO $NEW_DB_USER;
+  ALTER USER $NEW_DB_USER SET search_path TO $NEW_SCHEMA_NAME;
+  GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO $NEW_DB_USER;
 EOSQL
 
 # Construct the DB_URL with the new user
 export DB_URL=postgresql://$NEW_DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME
+export DB_SCHEMA=$NEW_SCHEMA_NAME
+
+# Log the constructed DB_URL
+echo "Exported DB_SCHEMA: $DB_SCHEMA"
 
 # Build the squid
+echo "Building squid..."
 sqd build
 
 # Start the processor service and the GraphQL server
-sqd run . &
-
+echo "Starting squid services..."
+sqd run .
