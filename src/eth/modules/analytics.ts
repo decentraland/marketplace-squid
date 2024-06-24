@@ -53,7 +53,7 @@ export function trackSale(
   if (nft) {
     sale.nft = nft;
     sale.searchTokenId = nft.tokenId;
-    sale.searchContractAddress = nft.contractAddress;
+    sale.searchContractAddress = Buffer.from(nft.contractAddress);
     sale.searchCategory = nft.category;
   } else {
     console.log("NFT not found for sale", nftId);

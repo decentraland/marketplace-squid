@@ -145,7 +145,7 @@ export function handleTransfer(
 
   nft.tokenId = tokenId;
   nft.owner = toAccount;
-  nft.contractAddress = contractAddress;
+  nft.contractAddress = Buffer.from(contractAddress);
   nft.category = category as Category;
   nft.updatedAt = timestamp;
   nft.soldAt = null;

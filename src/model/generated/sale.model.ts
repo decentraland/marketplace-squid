@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, BigIntColumn as BigIntColumn_, ManyToOne as ManyToOne_, Index as Index_} from "@subsquid/typeorm-store"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, BigIntColumn as BigIntColumn_, ManyToOne as ManyToOne_, Index as Index_, BytesColumn as BytesColumn_} from "@subsquid/typeorm-store"
 import {SaleType} from "./_saleType"
 import {NFT} from "./nft.model"
 
@@ -36,8 +36,8 @@ export class Sale {
     @BigIntColumn_({nullable: false})
     searchTokenId!: bigint
 
-    @StringColumn_({nullable: false})
-    searchContractAddress!: string
+    @BytesColumn_({nullable: false})
+    searchContractAddress!: Uint8Array
 
     @StringColumn_({nullable: false})
     searchCategory!: string
