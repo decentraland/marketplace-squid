@@ -15,6 +15,9 @@ fi
 echo "Generated schema name: $NEW_SCHEMA_NAME"
 echo "Generated user: $NEW_DB_USER"
 
+# Set PGPASSWORD to handle password prompt
+export PGPASSWORD=$DB_PASSWORD
+
 # Connect to the database and create the new schema and user
 psql -v ON_ERROR_STOP=1 --username "$DB_USER" --dbname "$DB_NAME" --host "$DB_HOST" --port "$DB_PORT" <<-EOSQL
   CREATE SCHEMA $NEW_SCHEMA_NAME;
@@ -23,6 +26,9 @@ psql -v ON_ERROR_STOP=1 --username "$DB_USER" --dbname "$DB_NAME" --host "$DB_HO
   ALTER USER $NEW_DB_USER SET search_path TO $NEW_SCHEMA_NAME;
   GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO $NEW_DB_USER;
 EOSQL
+
+# Unset PGPASSWORD
+unset PGPASSWORD
 
 # Construct the DB_URL with the new user
 export DB_URL=postgresql://$NEW_DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME
@@ -34,6 +40,8 @@ echo "Exported DB_SCHEMA: $DB_SCHEMA"
 # Build the squid
 echo "Building squid..."
 sqd build
+
+sqd --version
 
 # Start the processor service and the GraphQL server
 echo "Starting squid services..."
