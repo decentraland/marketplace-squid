@@ -7,6 +7,7 @@
   "dependencies": {
     "@dcl/schemas": "^11.9.1",
     "@graphile/pg-aggregates": "^0.1.1",
+    "@subsquid/evm-abi": "^0.2.1",
     "@subsquid/evm-codec": "^0.2.1",
     "@subsquid/evm-processor": "^1.19.1",
     "@subsquid/graphql-server": "^4.6.0",
