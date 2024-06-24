@@ -4,12 +4,19 @@
 NEW_SCHEMA_NAME="marketplace_squid_$(date +%s)"
 NEW_DB_USER="marketplace_squid_user_$(date +%s)"
 
+# Check if required environment variables are set
+if [ -z "$DB_USER" ] || [ -z "$DB_NAME" ] || [ -z "$DB_PASSWORD" ] || [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ]; then
+  echo "Error: Required environment variables are not set."
+  echo "Ensure DB_USER, DB_NAME, DB_PASSWORD, DB_HOST, and DB_PORT are set."
+  exit 1
+fi
+
 # Log the generated variables
 echo "Generated schema name: $NEW_SCHEMA_NAME"
 echo "Generated user: $NEW_DB_USER"
 
 # Connect to the database and create the new schema and user
-psql -v ON_ERROR_STOP=1 --username "$DB_USER" --dbname "$DB_NAME" <<-EOSQL
+psql -v ON_ERROR_STOP=1 --username "$DB_USER" --dbname "$DB_NAME" --host "$DB_HOST" --port "$DB_PORT" <<-EOSQL
   CREATE SCHEMA $NEW_SCHEMA_NAME;
   CREATE USER $NEW_DB_USER WITH PASSWORD '$DB_PASSWORD';
   GRANT ALL PRIVILEGES ON SCHEMA $NEW_SCHEMA_NAME TO $NEW_DB_USER;
