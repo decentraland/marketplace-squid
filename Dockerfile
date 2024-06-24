@@ -30,6 +30,9 @@ RUN echo -e "loglevel=silent\\nupdate-notifier=false" > /squid/.npmrc
 RUN npm i -g @subsquid/commands && mv $(which squid-commands) /usr/local/bin/sqd
 ENV PROCESSOR_PROMETHEUS_PORT 3000
 
+FROM node:16-alpine
+RUN apk update && apk add --no-cache tini
+
 # Entry point script
 ADD entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
