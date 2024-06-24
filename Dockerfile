@@ -37,6 +37,8 @@ RUN npm i -g @subsquid/cli@latest && mv $(which sqd) /usr/local/bin/sqd
 ENV PROCESSOR_PROMETHEUS_PORT 3000
 RUN apk update && apk add --no-cache tini postgresql-client
 
+RUN touch /squid/.env
+
 # Entry point script
 ADD entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
