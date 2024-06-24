@@ -96,7 +96,6 @@ export function handleAddLand(
     // @TODO: fix this ugly check
     estate.size += 1;
   } else {
-    console.log("estate ", estate);
     console.log(`estate not found to increase size in handleAddLand!: ${id}`);
     // @todo WARN
   }
