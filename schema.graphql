@@ -120,7 +120,7 @@ type Data @entity {
 type NFT @entity {
   id: ID!
   tokenId: BigInt!
-  contractAddress: String!
+  contractAddress: Bytes!
   category: Category!
   owner: Account!
   tokenURI: String
@@ -286,7 +286,7 @@ type Sale @entity {
 
   # search
   searchTokenId: BigInt!
-  searchContractAddress: String!
+  searchContractAddress: Bytes!
   searchCategory: String!
 }
 

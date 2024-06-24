@@ -55,7 +55,6 @@ const tokenURIs: Map<string, string> = new Map();
 let bytesRead = 0; // amount of bytes received
 
 const schemaName = process.env.DB_SCHEMA;
-
 processor.run(
   new TypeormDatabase({
     supportHotBlocks: true,
