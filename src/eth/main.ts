@@ -414,12 +414,12 @@ processor.run(
 
     const sales = new Map<string, Sale>();
 
-    console.log(
-      `about to get ${[...tokenIds.values()].reduce(
-        (acc, curr) => acc + curr.length,
-        0
-      )} token URIs without filtering`
-    );
+    // console.log(
+    //   `about to get ${[...tokenIds.values()].reduce(
+    //     (acc, curr) => acc + curr.length,
+    //     0
+    //   )} token URIs without filtering`
+    // );
 
     // delete tokenIds from tokenIds array if they have been created and are in the nfts map
     Array.from(tokenIds.entries()).forEach(([contractAddress, ids]) => {
@@ -440,14 +440,16 @@ processor.run(
         }
       });
     });
-    console.log(
-      `about to get ${[...tokenIds.values()].reduce(
-        (acc, curr) => acc + curr.length,
-        0
-      )} non created token URIs`
-    );
+    // console.log(
+    //   `about to get ${[...tokenIds.values()].reduce(
+    //     (acc, curr) => acc + curr.length,
+    //     0
+    //   )} non created token URIs`
+    // );
 
-    console.time("multicall tokenURIs");
+    if (tokenIds.size) {
+      console.time("multicall tokenURIs");
+    }
     const newTokenURIs =
       tokenIds.size > 0
         ? await tokenURIMutilcall(
@@ -456,7 +458,10 @@ processor.run(
             tokenIds
           )
         : new Map<string, string>();
-    console.timeEnd("multicall tokenURIs");
+
+    if (tokenIds.size) {
+      console.timeEnd("multicall tokenURIs");
+    }
 
     [...newTokenURIs.entries()].forEach(([contractAndTokenId, value]) => {
       tokenURIs.set(contractAndTokenId, value);
@@ -684,6 +689,5 @@ processor.run(
     } catch (error) {
       ctx.log.error(`error: ${error}`);
     }
-    console.log(`----- batch of ${ctx.blocks.length} blocks processed -------`);
   }
 );
