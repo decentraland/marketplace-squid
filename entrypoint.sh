@@ -1,8 +1,9 @@
 #!/bin/sh
 
 # Generate a unique schema name and user credentials using a timestamp
-NEW_SCHEMA_NAME="marketplace_squid_$(date +%s)"
-NEW_DB_USER="marketplace_squid_user_$(date +%s)"
+CURRENT_TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+NEW_SCHEMA_NAME="marketplace_squid_${CURRENT_TIMESTAMP}"
+NEW_DB_USER="marketplace_squid_user_${CURRENT_TIMESTAMP}"
 
 # Check if required environment variables are set
 if [ -z "$DB_USER" ] || [ -z "$DB_NAME" ] || [ -z "$DB_PASSWORD" ] || [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ]; then
