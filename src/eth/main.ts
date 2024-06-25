@@ -57,6 +57,7 @@ let bytesRead = 0; // amount of bytes received
 const schemaName = process.env.DB_SCHEMA;
 processor.run(
   new TypeormDatabase({
+    isolationLevel: 'READ COMMITTED',
     supportHotBlocks: true,
     stateSchema: `eth_processor_${schemaName}`,
   }),
