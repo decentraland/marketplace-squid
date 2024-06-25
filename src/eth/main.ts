@@ -76,7 +76,6 @@ processor.run(
       ensTokenIds,
       parcelEvents,
       tokenIds,
-      transferEvents,
       transfers,
       bidIds,
       ensEvents,
