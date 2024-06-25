@@ -38,6 +38,8 @@ RUN echo -e "loglevel=silent\\nupdate-notifier=false" > /squid/.npmrc
 RUN npm i -g @subsquid/cli@latest && mv $(which sqd) /usr/local/bin/sqd
 ENV PROMETHEUS_PORT 3000
 ENV GQL_PORT 5000
+ENV SQD_DEBUG *
+
 RUN apk update && apk add --no-cache tini postgresql-client
 
 RUN touch /squid/.env
