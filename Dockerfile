@@ -34,7 +34,6 @@ COPY --from=builder /squid/squid.yaml squid.yaml
 # remove if no commands.json is in the root
 ADD commands.json .
 RUN echo -e "loglevel=silent\\nupdate-notifier=false" > /squid/.npmrc
-# RUN npm i -g @subsquid/commands && mv $(which squid-commands) /usr/local/bin/sqd
 RUN npm i -g @subsquid/cli@latest && mv $(which sqd) /usr/local/bin/sqd
 ENV PROMETHEUS_PORT 3000
 ENV GQL_PORT 5000
@@ -47,4 +46,4 @@ RUN touch /squid/.env
 # Entry point script
 ADD entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
