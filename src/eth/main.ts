@@ -476,7 +476,7 @@ processor.run(
     }
 
     // markteplaceEvents Events
-    console.log(`Processing ${markteplaceEvents.length} order events`);
+    // console.log(`Processing ${markteplaceEvents.length} order events`);
     for (const {
       block,
       event,
@@ -574,7 +574,7 @@ processor.run(
       }
     }
 
-    console.log(`Processing ${estateEvents.length} estate events`);
+    // console.log(`Processing ${estateEvents.length} estate events`);
     for (const { block, event, topic } of estateEvents) {
       if (
         topic === estateRegistryABI.events.CreateEstate.topic &&
@@ -607,7 +607,7 @@ processor.run(
     }
 
     // Parcel events
-    console.log(`Processing ${parcelEvents.length} parcel events`);
+    // console.log(`Processing ${parcelEvents.length} parcel events`);
     for (const { block, event, topic } of parcelEvents) {
       if (topic === landRegistryABI.events.Update.topic) {
         handleLandUpdate(event, block, parcels, nfts, landCoordinates, datas);
@@ -615,7 +615,7 @@ processor.run(
     }
 
     // ENS Events
-    console.log(`Processing ${ensEvents.length} ens events`);
+    // console.log(`Processing ${ensEvents.length} ens events`);
     for (const { block, event, topic } of ensEvents) {
       if (topic === dclRegistrarAbi.events.NameRegistered.topic) {
         handleNameRegistered(
