@@ -38,8 +38,6 @@ export DB_SCHEMA=$NEW_SCHEMA_NAME
 # Log the constructed DB_URL
 echo "Exported DB_SCHEMA: $DB_SCHEMA"
 
-sqd --version
-
 # Start the processor service and the GraphQL server
 echo "Starting squid services..."
 sqd run .
