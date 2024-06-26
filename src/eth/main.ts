@@ -236,12 +236,6 @@ processor.run(
               ensTokenIds,
               tokenIds,
             });
-            const category = getCategory(Network.ETHEREUM, event.nftAddress);
-            const nftId = getNFTId(
-              category,
-              event.nftAddress,
-              event.assetId.toString()
-            );
 
             markteplaceEvents.push({
               topic,
