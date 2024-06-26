@@ -40,4 +40,5 @@ echo "Exported DB_SCHEMA: $DB_SCHEMA"
 
 # Start the processor service and the GraphQL server
 echo "Starting squid services..."
-sqd run .
+npx squid-typeorm-migration apply
+node lib/eth/main.js
