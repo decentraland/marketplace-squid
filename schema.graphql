@@ -21,6 +21,18 @@ type Count @entity {
   salesManaTotal: BigInt!
   creatorEarningsManaTotal: BigInt!
   daoEarningsManaTotal: BigInt!
+
+  ## collections subgraph counts
+
+  bidTotal: Int!
+  collectionTotal: Int!
+  itemTotal: Int!
+  nftTotal: Int!
+  primarySalesTotal: Int!
+  primarySalesManaTotal: BigInt!
+  secondarySalesTotal: Int!
+  secondarySalesManaTotal: BigInt!
+  royaltiesManaTotal: BigInt!
 }
 
 # ---------------------------------------------------------
@@ -45,6 +57,14 @@ type Order @entity {
   expiresAt: BigInt!
   createdAt: BigInt!
   updatedAt: BigInt!
+
+  ## collections subgraph Order fields
+  # marketplaceAddress: Bytes!
+  item: Item
+  # nftAddress: Bytes!
+  # txHash: Bytes!
+  # owner: Bytes!
+  # buyer: Bytes
 }
 
 # ---------------------------------------------------------
@@ -68,6 +88,10 @@ type Bid @entity {
   expiresAt: BigInt!
   createdAt: BigInt!
   updatedAt: BigInt!
+
+
+  #bidAddress: Bytes!
+  #nftAddress: Bytes!
 }
 
 type Wearable @entity {
@@ -169,6 +193,25 @@ type NFT @entity {
   searchWearableRarity: String # We're using String instead of WearableRarity here so we can later query this field via ()_in
   searchWearableCategory: WearableCategory
   searchWearableBodyShapes: [WearableBodyShape!]
+
+  ### collections subgraph NFT fields
+
+  itemBlockchainId: BigInt
+  issuedId: BigInt
+  itemType: ItemType
+  # itemType: ItemType!
+  urn: String
+  # urn: String!
+  collection: Collection
+  # collection: Collection!
+  item: Item
+  metadata: Metadata
+  searchItemType: String
+  searchEmoteCategory: EmoteCategory
+  searchEmoteLoop: Boolean
+  searchEmoteRarity: String
+  searchEmoteBodyShapes: [WearableBodyShape]
+  # searchEmoteBodyShapes: [WearableBodyShape!]
 }
 
 type Parcel @entity {
@@ -209,6 +252,21 @@ type Account @entity {
   purchases: Int!
   spent: BigInt!
   earned: BigInt!
+
+  ## collections subgraph fields
+
+  isCommitteeMember: Boolean
+  totalCurations: Int
+  primarySales: Int!
+  primarySalesEarned: BigInt!
+  royalties: BigInt!
+  uniqueAndMythicItems: [ID!]!
+  uniqueAndMythicItemsTotal: Int!
+  collections: Int!
+  creatorsSupported: [String!]!
+  creatorsSupportedTotal: Int!
+  uniqueCollectors: [String!]!
+  uniqueCollectorsTotal: Int!
 }
 
 # ---------------------------------------------------------
@@ -245,6 +303,7 @@ enum WearableCategory {
   tiara
   top_head
   skin
+  hands_wear
 }
 
 enum WearableRarity {
@@ -288,6 +347,22 @@ type Sale @entity {
   searchTokenId: BigInt!
   searchContractAddress: Bytes!
   searchCategory: String!
+
+  ## collections subgraph fields
+
+  #buyer: Bytes!
+  #seller: Bytes!
+  beneficiary: Bytes!
+  feesCollectorCut: BigInt!
+  feesCollector: Bytes!
+  royaltiesCut: BigInt!
+  royaltiesCollector: Bytes!
+  item: Item!
+  #txHash: Bytes!
+
+  # search
+  searchItemId: BigInt!
+  #searchContractAddress: String!
 }
 
 # Data accumulated and condensed into day stats for all of the Marketplace activity
@@ -298,4 +373,208 @@ type AnalyticsDayData @entity {
   volume: BigInt!
   creatorsEarnings: BigInt!
   daoEarnings: BigInt!
+}
+
+#### Collections Graph
+
+type Collection @entity {
+  id: ID!
+  items: [Item!] @derivedFrom(field: "collection")
+  owner: String!
+  creator: String!
+  name: String!
+  symbol: String!
+  isCompleted: Boolean
+  isApproved: Boolean
+  isEditable: Boolean
+  minters: [String!]!
+  managers: [String!]!
+  urn: String!
+  itemsCount: Int!
+  createdAt: BigInt!
+  updatedAt: BigInt!
+  reviewedAt: BigInt!
+  firstListedAt: BigInt
+
+  # Searcheable fields
+  searchIsStoreMinter: Boolean!
+  searchText: String!
+}
+
+type Item @entity {
+  id: ID! # ${Collection address}_${item Id}
+  collection: Collection!
+  blockchainId: BigInt!
+  creator: String!
+  itemType: ItemType!
+  totalSupply: BigInt!
+  maxSupply: BigInt!
+  rarity: String!
+  creationFee: BigInt!
+  available: BigInt!
+  price: BigInt!
+  beneficiary: String!
+  contentHash: String
+  URI: String!
+  image: String
+  minters: [String!]!
+  managers: [String!]!
+  metadata: Metadata
+  rawMetadata: String!
+  urn: String!
+  nfts: [NFT!] @derivedFrom(field: "item")
+  createdAt: BigInt!
+  updatedAt: BigInt!
+  "Last time the item was reviewed"
+  reviewedAt: BigInt!
+  "Last time the Item was sold"
+  soldAt: BigInt
+  "First time the Item was listed"
+  firstListedAt: BigInt
+
+  # analytics
+  sales: Int!
+  volume: BigInt!
+
+  # Searcheable fields
+  searchText: String
+  searchItemType: String
+
+  ## Collection fields
+  searchIsCollectionApproved: Boolean
+  searchIsStoreMinter: Boolean!
+
+  ## Wearables search fields
+  searchIsWearableHead: Boolean
+  searchIsWearableAccessory: Boolean
+  searchWearableCategory: WearableCategory
+  searchWearableRarity: String # We're using String instead of WearableRarity here so we can later query this field via ()_in
+  searchWearableBodyShapes: [WearableBodyShape!]
+
+  ## Emote search fields
+  searchEmoteCategory: EmoteCategory
+  searchEmoteLoop: Boolean
+  searchEmoteRarity: String # We're using String instead of WearableRarity here so we can later query this field via ()_in
+  searchEmoteBodyShapes: [WearableBodyShape!]
+  searchEmoteHasSound: Boolean
+  searchEmoteHasGeometry: Boolean
+
+  ## Unique collectors
+  uniqueCollectors: [String!]!
+  uniqueCollectorsTotal: Int!
+}
+
+type Metadata @entity {
+  id: ID!
+  itemType: ItemType!
+  wearable: Wearable
+  emote: Emote
+}
+
+enum ItemType @entity {
+  undefined
+  wearable_v1
+  wearable_v2
+  smart_wearable_v1
+  emote_v1
+}
+
+type Emote @entity {
+  id: ID!
+  name: String!
+  description: String!
+  collection: String!
+  category: EmoteCategory!
+  loop: Boolean!
+  rarity: WearableRarity!
+  bodyShapes: [WearableBodyShape!]
+  hasSound: Boolean
+  hasGeometry: Boolean
+}
+
+enum EmoteCategory @entity {
+  dance
+  stunt
+  greetings
+  fun
+  poses
+  reactions
+  horror
+  miscellaneous
+}
+
+type Rarity @entity {
+  id: ID!
+  name: String!
+  maxSupply: BigInt!
+  price: BigInt!
+  currency: Currency!
+}
+
+enum Currency @entity {
+  MANA
+  USD
+}
+
+type Mint @entity {
+  id: ID!
+
+  item: Item!
+  nft: NFT!
+
+  creator: String!
+  beneficiary: String!
+  minter: String!
+  timestamp: BigInt!
+
+  searchPrimarySalePrice: BigInt
+  searchContractAddress: String!
+  searchItemId: BigInt!
+  searchTokenId: BigInt!
+  searchIssuedId: BigInt
+  searchIsStoreMinter: Boolean!
+}
+
+type Curation @entity {
+  id: ID!
+  txHash: Bytes!
+  curator: Account!
+  collection: Collection!
+  item: Item
+  isApproved: Boolean!
+  timestamp: BigInt!
+}
+
+enum SaleType @entity {
+  bid
+  order
+  mint
+}
+
+# Data accumulated and condensed into day stats for an item
+type ItemsDayData @entity {
+  id: ID! # timestamp rounded to current day by dividing by 86400 + ${Collection address}_${item Id}
+  date: Int!
+  sales: Int!
+  volume: BigInt!
+  searchEmoteCategory: EmoteCategory
+  searchWearableCategory: WearableCategory
+  searchRarity: String # We're using String instead of WearableRarity here so we can later query this field via ()_in
+}
+
+# Data accumulated and condensed into day stats for an account address
+type AccountsDayData @entity {
+  id: ID! # timestamp rounded to current day by dividing by 86400 + ${creator_address}
+  date: Int!
+  sales: Int!
+  purchases: Int!
+  earned: BigInt!
+  spent: BigInt!
+  uniqueCollectionsSales: [String!]!
+  uniqueCollectors: [String!]!
+  uniqueCollectorsTotal: Int!
+  uniqueAndMythicItems: [ID!]!
+  uniqueAndMythicItemsTotal: Int!
+  creatorsSupported: [String!]!
+  creatorsSupportedTotal: Int!
 }
