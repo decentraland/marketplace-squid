@@ -141,18 +141,6 @@ export function buildCountFromSecondarySale(
   return count;
 }
 
-// export function buildCountFromEarnings(
-//   counts: Map<string, Count>,
-//   creatorsEarnings: bigint,
-//   daoEarnings: bigint
-// ): Count {
-//   const count = buildCount(counts);
-//   count.creatorEarningsManaTotal =
-//     count.creatorEarningsManaTotal + creatorsEarnings;
-//   count.daoEarningsManaTotal = count.daoEarningsManaTotal + daoEarnings;
-//   return count;
-// }
-
 export function buildCountFromBid(counts: Map<string, Count>): Count {
   let count = buildCount(counts, Network.polygon);
 
