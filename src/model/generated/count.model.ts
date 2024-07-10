@@ -1,4 +1,5 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, IntColumn as IntColumn_, BigIntColumn as BigIntColumn_} from "@subsquid/typeorm-store"
+import {Network} from "./_network"
 
 @Entity_()
 export class Count {
@@ -50,4 +51,34 @@ export class Count {
 
     @BigIntColumn_({nullable: false})
     daoEarningsManaTotal!: bigint
+
+    @IntColumn_({nullable: false})
+    bidTotal!: number
+
+    @IntColumn_({nullable: false})
+    collectionTotal!: number
+
+    @IntColumn_({nullable: false})
+    itemTotal!: number
+
+    @IntColumn_({nullable: false})
+    nftTotal!: number
+
+    @IntColumn_({nullable: false})
+    primarySalesTotal!: number
+
+    @BigIntColumn_({nullable: false})
+    primarySalesManaTotal!: bigint
+
+    @IntColumn_({nullable: false})
+    secondarySalesTotal!: number
+
+    @BigIntColumn_({nullable: false})
+    secondarySalesManaTotal!: bigint
+
+    @BigIntColumn_({nullable: false})
+    royaltiesManaTotal!: bigint
+
+    @Column_("varchar", {length: 8, nullable: false})
+    network!: Network
 }

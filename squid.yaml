@@ -9,12 +9,8 @@ deploy:
   processor:
     - name: eth-processor
       cmd: [ "sqd", "process:prod:eth" ]
-      env:
-        RPC_ENDPOINT_ETH: ${{ secrets.RPC_ENDPOINT_ETH }}
-    # - name: polygon-processor
-    #   cmd: [ "sqd", "process:prod:polygon" ]
-    #   env:
-    #     RPC_ENDPOINT_POLYGON: ${{ secrets.RPC_ENDPOINT_POLYGON }}
+    - name: polygon-processor
+      cmd: [ "sqd", "process:prod:polygon" ]
   api:
     cmd: [ "sqd", "serve:prod" ]
   # api:

@@ -1,14 +1,10 @@
 import { BlockData } from "@subsquid/evm-processor";
 import { Network } from "@dcl/schemas";
-import {
-  BidCancelledEventArgs,
-  Contract as ERC721BidContract,
-} from "../../abi/ERC721Bid";
+import { BidCancelledEventArgs } from "../../abi/ERC721Bid";
 import { BidAcceptedEventArgs, BidCreatedEventArgs } from "../../abi/ERC721Bid";
 import { getCategory } from "../../common/utils/category";
 import { BID_SALE_TYPE, trackSale } from "../modules/analytics";
 import { getNFTId } from "../../common/utils";
-import { getBidId } from "../modules";
 import {
   Bid,
   Category,
@@ -18,9 +14,10 @@ import {
   AnalyticsDayData,
   Sale,
   Account,
+  Network as NetworkModel,
 } from "../../model";
 import { getAddresses } from "../../common/utils/addresses";
-import { Context } from "../processor";
+import { getBidId } from "../../common/handlers/bid";
 
 export function handleBidCreated(
   event: BidCreatedEventArgs,
@@ -39,16 +36,18 @@ export function handleBidCreated(
     _expiresAt,
   } = event;
   const category = getCategory(Network.ETHEREUM, _tokenAddress);
-  const nftId = getNFTId(category, _tokenAddress, _tokenId.toString());
+
+  const nftId = getNFTId(_tokenAddress, _tokenId.toString(), category);
   const id = getBidId(_tokenAddress, _tokenId.toString(), _bidder);
 
   const bid = new Bid({ id });
   const nft = nfts.get(nftId);
 
   if (nft) {
+    bid.network = NetworkModel.ethereum;
     bid.bidAddress = contractAddress;
     bid.status = OrderStatus.open;
-    bid.category = category as Category;
+    bid.category = category ? (category as Category) : Category.wearable;
     bid.nftAddress = _tokenAddress;
     bid.bidder = Buffer.from(_bidder.slice(2), "hex");
     bid.price = _price;
@@ -70,12 +69,11 @@ export function handleBidCreated(
 
     nft.updatedAt = timestamp;
   } else {
-    console.error("NFT not found for when creating bid: ", nftId);
+    console.log("ERROR: NFT not found for when creating bid: ", nftId);
   }
 }
 
 export async function handleBidAccepted(
-  ctx: Context,
   event: BidAcceptedEventArgs,
   block: BlockData,
   txHash: string,
@@ -93,7 +91,7 @@ export async function handleBidAccepted(
   const id = getBidId(_tokenAddress, _tokenId.toString(), _bidder);
   const bid = bids.get(id);
   if (!bid) {
-    console.error("Bid not found on handleBidAccepted: ", id);
+    console.log("ERROR: Bid not found on handleBidAccepted: ", id);
     return;
   }
   if (bid.nft) {
@@ -130,7 +128,7 @@ export async function handleBidAccepted(
       counts
     );
   } else {
-    console.error("NFT not found for bid in accepted: ", id);
+    console.log("NFT not found for bid in accepted: ", id);
   }
 }
 
@@ -145,13 +143,13 @@ export function handleBidCancelled(
 
   const bid = bids.get(id);
   if (!bid) {
-    console.error("Bid not found on handleBidCancelled: ", id);
+    console.log("ERROR: Bid not found on handleBidCancelled: ", id);
     return;
   }
   if (bid.nft) {
     const nft = nfts.get(bid.nft.id);
     if (!nft) {
-      console.error("NFT not found for bid: ", bid.nft);
+      console.log("ERROR: NFT not found for bid: ", bid.nft);
       return;
     }
 

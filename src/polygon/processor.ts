@@ -8,38 +8,125 @@ import {
   Transaction as _Transaction,
 } from "@subsquid/evm-processor";
 import { Store } from "@subsquid/typeorm-store";
-import { Network } from "@dcl/schemas";
-import * as erc20abi from "../abi/erc20";
+import { ChainId, Network } from "@dcl/schemas";
+import * as CollectionFactoryABI from "./abi/CollectionFactory";
+import * as CollectionFactoryV3ABI from "./abi/CollectionFactoryV3";
+import * as MarketplaceABI from "./abi/Marketplace";
+import * as BidABI from "./abi/ERC721Bid";
+import * as BidV2ABI from "./abi/ERC721BidV2";
+import * as MarketplaceV2ABI from "./abi/MarketplaceV2";
+import * as CommitteeABI from "./abi/Committee";
+import * as CollectionV2ABI from "./abi/CollectionV2";
+import * as RaritiesABI from "./abi/Rarity";
 import { getBlockRange } from "../config";
+import { getAddresses } from "../common/utils/addresses";
+import { loadCollections } from "./utils/loaders";
 
-export const BSC_USDC_ADDRESS =
-  "0x8965349fb649A33a30cbFDa057D8eC2C48AbE2A2".toLowerCase();
+const addresses = getAddresses(Network.MATIC);
+const chainId = process.env.POLYGON_CHAIN_ID || ChainId.MATIC_MAINNET;
+
+const GATEWAY = `https://v2.archive.subsquid.io/network/polygon-${
+  chainId == ChainId.MATIC_MAINNET ? "mainnet" : "amoy-testnet"
+}`; // see https://docs.subsquid.io/evm-indexing/supported-networks/
+const RPC_ENDPOINT = process.env.RPC_ENDPOINT_POLYGON;
+
+const collections = loadCollections();
 
 export const processor = new EvmBatchProcessor()
-  // Lookup archive by the network name in Subsquid registry
-  // See https://docs.subsquid.io/evm-indexing/supported-networks/
-  .setGateway("https://v2.archive.subsquid.io/network/polygon-mainnet")
-  // Chain RPC endpoint is required for
-  //  - indexing unfinalized blocks https://docs.subsquid.io/basics/unfinalized-blocks/
-  //  - querying the contract state https://docs.subsquid.io/evm-indexing/query-state/
+  .setGateway(GATEWAY)
+  .setPrometheusPort(parseInt(process.env.POLYGON_PROMETHEUS_PORT || "3001"))
   .setRpcEndpoint({
-    // Set via .env for local runs or via secrets when deploying to Subsquid Cloud
-    // https://docs.subsquid.io/deploy-squid/env-variables/
-    url: assertNotNull(process.env.RPC_ENDPOINT_POLYGON),
-    // More RPC connection options at https://docs.subsquid.io/evm-indexing/configuration/initialization/#set-data-source
+    url: assertNotNull(RPC_ENDPOINT),
     rateLimit: 10,
   })
   .setFinalityConfirmation(75)
   .setFields({
+    transaction: {
+      input: true,
+    },
     log: {
       transactionHash: true,
     },
   })
   .setBlockRange(getBlockRange(Network.MATIC))
   .addLog({
-    address: [BSC_USDC_ADDRESS],
-    topic0: [erc20abi.events.Transfer.topic],
-    
+    address: [addresses.CollectionFactory, addresses.CollectionFactoryV3],
+    topic0: [
+      CollectionFactoryABI.events.ProxyCreated.topic,
+      CollectionFactoryV3ABI.events.ProxyCreated.topic,
+    ],
+  })
+  .addLog({
+    address: [addresses.Marketplace, addresses.MarketplaceV2],
+    topic0: [
+      MarketplaceABI.events.OrderCreated.topic,
+      MarketplaceABI.events.OrderSuccessful.topic,
+      MarketplaceABI.events.OrderCancelled.topic,
+      MarketplaceV2ABI.events.OrderCreated.topic,
+      MarketplaceV2ABI.events.OrderSuccessful.topic,
+      MarketplaceV2ABI.events.OrderCancelled.topic,
+    ],
+  })
+  .addLog({
+    address: [addresses.Bid, addresses.BidV2],
+    topic0: [
+      BidABI.events.BidCreated.topic,
+      BidABI.events.BidAccepted.topic,
+      BidABI.events.BidCancelled.topic,
+    ],
+  })
+  .addLog({
+    address: [addresses.OldCommittee, addresses.Committee],
+    topic0: [CommitteeABI.events.MemberSet.topic],
+  })
+  .addLog({
+    transaction: true,
+    address: collections.addresses,
+    topic0: [
+      CollectionV2ABI.events.SetGlobalMinter.topic,
+      CollectionV2ABI.events.SetGlobalManager.topic,
+      CollectionV2ABI.events.SetItemMinter.topic,
+      CollectionV2ABI.events.SetItemManager.topic,
+      CollectionV2ABI.events.AddItem.topic,
+      CollectionV2ABI.events.RescueItem.topic,
+      CollectionV2ABI.events.UpdateItemData.topic,
+      CollectionV2ABI.events.Issue.topic,
+      CollectionV2ABI.events.SetApproved.topic,
+      CollectionV2ABI.events.SetEditable.topic,
+      CollectionV2ABI.events.Complete.topic,
+      CollectionV2ABI.events.CreatorshipTransferred.topic,
+      CollectionV2ABI.events.OwnershipTransferred.topic,
+      CollectionV2ABI.events.Transfer.topic,
+    ],
+    range: { from: 0, to: collections.height },
+  })
+  .addLog({
+    transaction: true,
+    topic0: [
+      CollectionV2ABI.events.SetGlobalMinter.topic,
+      CollectionV2ABI.events.SetGlobalManager.topic,
+      CollectionV2ABI.events.SetItemMinter.topic,
+      CollectionV2ABI.events.SetItemManager.topic,
+      CollectionV2ABI.events.AddItem.topic,
+      CollectionV2ABI.events.RescueItem.topic,
+      CollectionV2ABI.events.UpdateItemData.topic,
+      CollectionV2ABI.events.Issue.topic,
+      CollectionV2ABI.events.SetApproved.topic,
+      CollectionV2ABI.events.SetEditable.topic,
+      CollectionV2ABI.events.Complete.topic,
+      CollectionV2ABI.events.CreatorshipTransferred.topic,
+      CollectionV2ABI.events.OwnershipTransferred.topic,
+      CollectionV2ABI.events.Transfer.topic,
+    ],
+    range: { from: collections.height + 1 },
+  })
+  .addLog({
+    transaction: true,
+    address: [addresses.Rarity],
+    topic0: [
+      RaritiesABI.events.AddRarity.topic,
+      RaritiesABI.events.UpdatePrice.topic,
+    ],
   });
 
 export type Fields = EvmBatchProcessorFields<typeof processor>;

@@ -1,15 +1,17 @@
 import { BlockData } from "@subsquid/evm-processor";
-import { createOrLoadAccount } from "../../common/utils/account";
+import { createOrLoadAccount } from "../../common/modules/account";
 import { ONE_MILLION } from "../../common/utils/utils";
 import {
   Account,
   AnalyticsDayData,
   Count,
   NFT,
+  Network,
   Sale,
   SaleType,
 } from "../../model";
 import { buildCountFromSale } from "./count";
+import { getOrCreateAnalyticsDayData } from "../../common/modules/analytics";
 
 export let BID_SALE_TYPE = "bid";
 export let ORDER_SALE_TYPE = "order";
@@ -44,7 +46,7 @@ export function trackSale(
   const nft = nfts.get(nftId);
 
   // save sale
-  const saleId = count.salesTotal.toString();
+  const saleId = `${BigInt(count.salesTotal).toString()}-${Network.ethereum}`;
   const sale = new Sale({ id: saleId });
   sale.type = type as SaleType;
   sale.buyer = buyer;
@@ -60,6 +62,7 @@ export function trackSale(
   }
   sale.timestamp = timestamp;
   sale.txHash = txHash;
+  sale.network = Network.ethereum;
   sales.set(saleId, sale);
 
   // update buyer account
@@ -67,7 +70,7 @@ export function trackSale(
   if (buyerAccount) {
     buyerAccount.purchases += 1;
     buyerAccount.spent = buyerAccount.spent + price;
-    accounts.set(buyer, buyerAccount);
+    // accounts.set(buyer, buyerAccount);
   }
 
   // update seller account
@@ -75,7 +78,7 @@ export function trackSale(
   if (sellerAccount) {
     sellerAccount.sales += 1;
     sellerAccount.earned = sellerAccount.earned + price;
-    accounts.set(seller, sellerAccount);
+    // accounts.set(seller, sellerAccount);
   }
 
   // update nft
@@ -95,24 +98,24 @@ export function trackSale(
   analytics.set(analyticsDayData.id, analyticsDayData);
 }
 
-export function getOrCreateAnalyticsDayData(
-  blockTimestamp: bigint,
-  analytics: Map<string, AnalyticsDayData>
-): AnalyticsDayData {
-  const timestamp = blockTimestamp;
-  const dayID = timestamp / BigInt(86400); // unix timestamp for start of day / 86400 giving a unique day index
-  const dayStartTimestamp = dayID * BigInt(86400);
-  let analyticsDayData = analytics.get(dayID.toString());
-  if (analyticsDayData == null) {
-    analyticsDayData = new AnalyticsDayData({ id: dayID.toString() });
-    analyticsDayData.date = +dayStartTimestamp.toString(); // unix timestamp for start of day
-    analyticsDayData.sales = 0;
-    analyticsDayData.volume = BigInt(0);
-    analyticsDayData.creatorsEarnings = BigInt(0); // won't be used at all, the bids and transfer from here have no fees for creators
-    analyticsDayData.daoEarnings = BigInt(0);
-  }
-  return analyticsDayData;
-}
+// export function getOrCreateAnalyticsDayData(
+//   blockTimestamp: bigint,
+//   analytics: Map<string, AnalyticsDayData>
+// ): AnalyticsDayData {
+//   const timestamp = blockTimestamp;
+//   const dayID = timestamp / BigInt(86400); // unix timestamp for start of day / 86400 giving a unique day index
+//   const dayStartTimestamp = dayID * BigInt(86400);
+//   let analyticsDayData = analytics.get(dayID.toString());
+//   if (analyticsDayData == null) {
+//     analyticsDayData = new AnalyticsDayData({ id: dayID.toString() });
+//     analyticsDayData.date = +dayStartTimestamp.toString(); // unix timestamp for start of day
+//     analyticsDayData.sales = 0;
+//     analyticsDayData.volume = BigInt(0);
+//     analyticsDayData.creatorsEarnings = BigInt(0); // won't be used at all, the bids and transfer from here have no fees for creators
+//     analyticsDayData.daoEarnings = BigInt(0);
+//   }
+//   return analyticsDayData;
+// }
 
 export function updateAnalyticsDayData(
   sale: Sale,

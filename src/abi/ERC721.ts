@@ -29,8 +29,8 @@ export class Contract extends ContractBase {
 /// Event types
 export type TransferEventArgs_0 = EParams<typeof events["Transfer(address,address,uint256,address,bytes,bytes)"]>
 export type TransferEventArgs_1 = EParams<typeof events["Transfer(address,address,uint256,address,bytes)"]>
-export type TransferEventArgs_2 = EParams<typeof events["Transfer(address,address,uint256)"]>
 // export type TransferEventArgs_2 = EParams<typeof events["Transfer(address,address,uint256)"]>
+export type TransferEventArgs_2 = EParams<typeof events["Transfer(address,address,uint256)"]>
 
 /// Function types
 export type OwnerOfParams = FunctionArguments<typeof functions.ownerOf>

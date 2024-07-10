@@ -4,6 +4,7 @@ import {WearableCategory} from "./_wearableCategory"
 import {WearableRarity} from "./_wearableRarity"
 import {WearableBodyShape} from "./_wearableBodyShape"
 import {NFT} from "./nft.model"
+import {Network} from "./_network"
 
 @Entity_()
 export class Wearable {
@@ -16,10 +17,10 @@ export class Wearable {
 
     @Index_()
     @ManyToOne_(() => Account, {nullable: true})
-    owner!: Account
+    owner!: Account | undefined | null
 
-    @StringColumn_({nullable: false})
-    representationId!: string
+    @StringColumn_({nullable: true})
+    representationId!: string | undefined | null
 
     @StringColumn_({nullable: false})
     collection!: string
@@ -41,4 +42,7 @@ export class Wearable {
 
     @OneToOne_(() => NFT, e => e.wearable)
     nft!: NFT | undefined | null
+
+    @Column_("varchar", {length: 8, nullable: false})
+    network!: Network
 }

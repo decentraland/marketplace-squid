@@ -35,7 +35,8 @@ COPY --from=builder /squid/squid.yaml squid.yaml
 ADD commands.json .
 RUN echo -e "loglevel=silent\\nupdate-notifier=false" > /squid/.npmrc
 RUN npm i -g @subsquid/cli@latest && mv $(which sqd) /usr/local/bin/sqd
-ENV PROMETHEUS_PORT 3000
+ENV ETH_PROMETHEUS_PORT 3000
+ENV POLYGON_PROMETHEUS_PORT 3001
 ENV GQL_PORT 5000
 
 RUN apk update && apk add --no-cache tini postgresql-client curl

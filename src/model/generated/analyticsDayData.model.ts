@@ -1,4 +1,5 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, IntColumn as IntColumn_, BigIntColumn as BigIntColumn_} from "@subsquid/typeorm-store"
+import {Network} from "./_network"
 
 @Entity_()
 export class AnalyticsDayData {
@@ -23,4 +24,7 @@ export class AnalyticsDayData {
 
     @BigIntColumn_({nullable: false})
     daoEarnings!: bigint
+
+    @Column_("varchar", {length: 8, nullable: false})
+    network!: Network
 }

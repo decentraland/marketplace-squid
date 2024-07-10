@@ -1,11 +1,21 @@
 import { Network } from "@dcl/schemas";
 import { NameRegisteredEventArgs } from "../../abi/DCLRegistrar";
 import { getAddresses } from "../../common/utils/addresses";
-import { Account, AnalyticsDayData, Category, ENS, NFT } from "../../model";
+import {
+  Account,
+  AnalyticsDayData,
+  Category,
+  ENS,
+  NFT,
+  Network as ModelNetwork,
+} from "../../model";
 import { getNFTId } from "../../common/utils";
-import { createAccount, createOrLoadAccount } from "../../common/utils/account";
+import {
+  createAccount,
+  createOrLoadAccount,
+} from "../../common/modules/account";
 import { NameBoughtEventArgs } from "../../abi/DCLControllerV2";
-import { getOrCreateAnalyticsDayData } from "../modules/analytics";
+import { getOrCreateAnalyticsDayData } from "../../common/modules/analytics";
 
 export function handleNameRegistered(
   event: NameRegisteredEventArgs,
@@ -17,14 +27,14 @@ export function handleNameRegistered(
   const tokenId = BigInt(_labelHash);
 
   const addresses = getAddresses(Network.ETHEREUM);
-  const id = getNFTId(Category.ens, addresses.DCLRegistrar, tokenId.toString());
+  const id = getNFTId(addresses.DCLRegistrar, tokenId.toString(), Category.ens);
 
   const ens = new ENS({ id });
   ens.tokenId = BigInt(tokenId);
-  let owner = accounts.get(_caller);
+  let owner = accounts.get(`${_caller}-${ModelNetwork.ethereum}`);
   if (!owner) {
     owner = createAccount(_caller);
-    accounts.set(_caller, owner);
+    accounts.set(`${_caller}-${ModelNetwork.ethereum}`, owner);
   }
   ens.owner = owner;
   ens.caller = _caller;
@@ -36,6 +46,7 @@ export function handleNameRegistered(
 
   const nft = nfts.get(id) || new NFT({ id });
   nft.name = ens.subdomain;
+  nft.network = ModelNetwork.ethereum;
   nft.searchText = ens.subdomain.toLowerCase();
   nfts.set(id, nft);
 

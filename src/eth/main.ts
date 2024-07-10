@@ -7,9 +7,9 @@ import * as dclRegistrarAbi from "../abi/DCLRegistrar";
 import * as marketplaceAbi from "../abi/Marketplace";
 import * as erc721Bid from "../abi/ERC721Bid";
 import * as dclControllerV2abi from "../abi/DCLControllerV2";
-import { Order, Sale, Transfer } from "../model";
+import { Order, Sale, Transfer, Network as ModelNetwork } from "../model";
 import { processor } from "./processor";
-import { getNFTId, handleTransfer } from "../common/utils";
+import { getNFTId } from "../common/utils";
 import { tokenURIMutilcall } from "../common/utils/multicall";
 import { getAddresses } from "../common/utils/addresses";
 import {
@@ -47,7 +47,8 @@ import {
   handleBidCancelled,
   handleBidCreated,
 } from "./handlers/bid";
-import { getBidId } from "./modules";
+import { handleTransfer } from "./handlers/nft";
+import { getBidId } from "../common/handlers/bid";
 
 const landCoordinates: Map<bigint, Coordinate> = new Map();
 const tokenURIs: Map<string, string> = new Map();
@@ -57,7 +58,7 @@ let bytesRead = 0; // amount of bytes received
 const schemaName = process.env.DB_SCHEMA;
 processor.run(
   new TypeormDatabase({
-    isolationLevel: 'READ COMMITTED',
+    isolationLevel: "READ COMMITTED",
     supportHotBlocks: true,
     stateSchema: `eth_processor_${schemaName}`,
   }),
@@ -84,7 +85,7 @@ processor.run(
       analyticsIds,
     } = getBatchInMemoryState();
 
-    ctx.log.warn(`blocks, ${ctx.blocks.length}`);
+    ctx.log.info(`blocks, ${ctx.blocks.length}`);
     for (let block of ctx.blocks) {
       await getOwnerCutsValues(ctx, block);
       for (let log of block.logs) {
@@ -130,9 +131,9 @@ processor.run(
             }
             const category = getCategory(Network.ETHEREUM, contractAddress);
             const nftId = getNFTId(
-              category,
               contractAddress,
-              event.tokenId.toString()
+              event.tokenId.toString(),
+              category
             );
             const timestamp = block.header.timestamp / 1000;
             transfers.set(
@@ -143,7 +144,8 @@ processor.run(
                 block: block.header.height,
                 from: event.from,
                 to: event.to,
-                network: Network.ETHEREUM.toString(),
+                // network: Network.ETHEREUM.toString(),
+                network: ModelNetwork.ethereum,
                 timestamp: BigInt(timestamp),
                 txHash: log.transactionHash,
               })
@@ -419,9 +421,9 @@ processor.run(
     Array.from(tokenIds.entries()).forEach(([contractAddress, ids]) => {
       ids.forEach((tokenId) => {
         const nftId = getNFTId(
-          getCategory(Network.ETHEREUM, contractAddress),
           contractAddress,
-          tokenId.toString()
+          tokenId.toString(),
+          getCategory(Network.ETHEREUM, contractAddress)
         );
         if (nfts.has(nftId)) {
           const ids = tokenIds.get(contractAddress);
@@ -520,7 +522,6 @@ processor.run(
         );
       } else if (topic === erc721Bid.events.BidAccepted.topic) {
         await handleBidAccepted(
-          ctx,
           event as erc721Bid.BidAcceptedEventArgs,
           block,
           log.transactionHash,
@@ -550,7 +551,6 @@ processor.run(
           ].topic
       ) {
         handleTransfer(
-          Network.ETHEREUM,
           block,
           log.address,
           event as erc721abi.TransferEventArgs_2,
@@ -671,7 +671,7 @@ processor.run(
       await ctx.store.insert([...transfers.values()]);
 
       // log some stats
-      console.log(
+      ctx.log.info(
         `Batch from block: ${ctx.blocks[0].header.height} to ${
           ctx.blocks[ctx.blocks.length - 1].header.height
         } saved: parcels: ${parcels.size}, nfts: ${nfts.size}, accounts: ${

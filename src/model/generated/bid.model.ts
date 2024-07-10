@@ -2,6 +2,7 @@ import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, S
 import {Category} from "./_category"
 import {NFT} from "./nft.model"
 import {OrderStatus} from "./_orderStatus"
+import {Network} from "./_network"
 
 @Entity_()
 export class Bid {
@@ -57,4 +58,7 @@ export class Bid {
 
     @BigIntColumn_({nullable: false})
     updatedAt!: bigint
+
+    @Column_("varchar", {length: 8, nullable: false})
+    network!: Network
 }

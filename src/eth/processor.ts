@@ -29,6 +29,7 @@ const RPC_ENDPOINT = process.env.RPC_ENDPOINT_ETH;
 
 export const processor = new EvmBatchProcessor()
   .setGateway(GATEWAY)
+  .setPrometheusPort(parseInt(process.env.ETH_PROMETHEUS_PORT || "3000"))
   .setRpcEndpoint({
     url: assertNotNull(RPC_ENDPOINT),
     rateLimit: 10,

@@ -15,4 +15,5 @@ export enum WearableCategory {
     tiara = "tiara",
     top_head = "top_head",
     skin = "skin",
+    hands_wear = "hands_wear",
 }

@@ -1,14 +1,15 @@
 import { ONE_MILLION } from "../../common/utils/utils";
-import { Category, Count, NFT, Order } from "../../model";
+import { Category, Count, NFT, Network, Order } from "../../model";
 
 export const DEFAULT_ID = "all";
 
 export function buildCount(counts: Map<string, Count>): Count {
-  let count = counts.get(DEFAULT_ID);
+  const id = `${DEFAULT_ID}-${Network.ethereum}`;
+  let count = counts.get(id);
 
   if (!count) {
     console.log("count not found, creating new one");
-    count = new Count({ id: DEFAULT_ID });
+    count = new Count({ id });
     count.orderTotal = 0;
     count.orderParcel = 0;
     count.orderEstate = 0;
@@ -24,6 +25,18 @@ export function buildCount(counts: Map<string, Count>): Count {
     count.creatorEarningsManaTotal = BigInt(0);
     count.daoEarningsManaTotal = BigInt(0);
     count.started = 1;
+
+    count.bidTotal = 0;
+    count.collectionTotal = 0;
+    count.itemTotal = 0;
+    count.nftTotal = 0;
+    count.primarySalesTotal = 0;
+    count.primarySalesManaTotal = BigInt(0);
+    count.secondarySalesTotal = 0;
+    count.secondarySalesManaTotal = BigInt(0);
+    count.royaltiesManaTotal = BigInt(0);
+
+    count.network = Network.ethereum;
   }
 
   return count as Count;

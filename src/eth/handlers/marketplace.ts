@@ -20,6 +20,7 @@ import {
   Order,
   OrderStatus,
   Sale,
+  Network as ModelNetwork,
 } from "../../model";
 import { ORDER_SALE_TYPE, trackSale } from "../modules/analytics";
 import { Context } from "../processor";
@@ -42,12 +43,13 @@ export function handleOrderCreated(
   const { assetId, nftAddress, id, seller, priceInWei, expiresAt } = event;
 
   const category = getCategory(Network.ETHEREUM, nftAddress);
-  const nftId = getNFTId(category, nftAddress, assetId.toString());
+  const nftId = getNFTId(nftAddress, assetId.toString(), category);
   const nft = nfts.get(nftId);
   if (nft) {
     const orderId = id;
 
     const order = new Order({ id: orderId });
+    order.network = ModelNetwork.ethereum;
     order.marketplaceAddress = contractAddress;
     order.status = OrderStatus.open;
     order.category = category as Category;
@@ -95,7 +97,7 @@ export async function handleOrderSuccessful(
 ): Promise<void> {
   const { assetId, buyer, id, nftAddress, seller, totalPrice } = event;
   const category = getCategory(Network.ETHEREUM, nftAddress);
-  const nftId = getNFTId(category, nftAddress, assetId.toString());
+  const nftId = getNFTId(nftAddress, assetId.toString(), category);
   const orderId = id;
   const order = orders.get(orderId);
   if (!order) {
@@ -117,7 +119,7 @@ export async function handleOrderSuccessful(
     return;
   }
 
-  const buyerAccount = accounts.get(buyer);
+  const buyerAccount = accounts.get(`${buyer}-${ModelNetwork.ethereum}`);
   if (buyerAccount) {
     nft.owner = buyerAccount;
   } else {
@@ -153,7 +155,7 @@ export function handleOrderCancelled(
 ): void {
   const { assetId, id, nftAddress, seller } = event;
   const category = getCategory(Network.ETHEREUM, nftAddress);
-  const nftId = getNFTId(category, nftAddress, assetId.toString());
+  const nftId = getNFTId(nftAddress, assetId.toString(), category);
   const orderId = id;
 
   const nft = nfts.get(nftId);
