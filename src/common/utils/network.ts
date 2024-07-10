@@ -1,5 +1,31 @@
-import { Network } from "@dcl/schemas";
+import { ChainId, Network } from "@dcl/schemas";
 
-export function getURNNetwork(network: Network): string {
-  return network === Network.ETHEREUM ? "ethereum" : network;
+export function getNetwork(network: Network): string {
+  const chainId =
+    network === Network.ETHEREUM
+      ? process.env.ETHEREUM_CHAIN_ID
+      : process.env.MATIC_CHAIN_ID;
+  const chainName =
+    network === Network.ETHEREUM
+      ? chainId === ChainId.ETHEREUM_MAINNET.toString()
+        ? "mainnet"
+        : "sepolia"
+      : chainId === ChainId.MATIC_MAINNET.toString()
+      ? "matic"
+      : "amoy";
+  return chainName;
+}
+
+const baseDecentralandURN = "urn:decentraland:";
+
+export function getURNForCollectionV2(
+  network: Network,
+  collectionAddress: string
+): string {
+  return (
+    baseDecentralandURN +
+    getNetwork(network) +
+    ":collections-v2:" +
+    collectionAddress
+  );
 }

@@ -10,6 +10,12 @@ import {ENS} from "./ens.model"
 import {OrderStatus} from "./_orderStatus"
 import {WearableCategory} from "./_wearableCategory"
 import {WearableBodyShape} from "./_wearableBodyShape"
+import {ItemType} from "./_itemType"
+import {Collection} from "./collection.model"
+import {Item} from "./item.model"
+import {Metadata} from "./metadata.model"
+import {EmoteCategory} from "./_emoteCategory"
+import {Network} from "./_network"
 
 @Entity_()
 export class NFT {
@@ -143,4 +149,46 @@ export class NFT {
 
     @Column_("varchar", {length: 10, array: true, nullable: true})
     searchWearableBodyShapes!: (WearableBodyShape)[] | undefined | null
+
+    @BigIntColumn_({nullable: true})
+    itemBlockchainId!: bigint | undefined | null
+
+    @BigIntColumn_({nullable: true})
+    issuedId!: bigint | undefined | null
+
+    @Column_("varchar", {length: 17, nullable: true})
+    itemType!: ItemType | undefined | null
+
+    @StringColumn_({nullable: true})
+    urn!: string | undefined | null
+
+    @Index_()
+    @ManyToOne_(() => Collection, {nullable: true})
+    collection!: Collection | undefined | null
+
+    @Index_()
+    @ManyToOne_(() => Item, {nullable: true})
+    item!: Item | undefined | null
+
+    @Index_()
+    @ManyToOne_(() => Metadata, {nullable: true})
+    metadata!: Metadata | undefined | null
+
+    @StringColumn_({nullable: true})
+    searchItemType!: string | undefined | null
+
+    @Column_("varchar", {length: 13, nullable: true})
+    searchEmoteCategory!: EmoteCategory | undefined | null
+
+    @BooleanColumn_({nullable: true})
+    searchEmoteLoop!: boolean | undefined | null
+
+    @StringColumn_({nullable: true})
+    searchEmoteRarity!: string | undefined | null
+
+    @Column_("varchar", {length: 10, array: true, nullable: true})
+    searchEmoteBodyShapes!: (WearableBodyShape | undefined | null)[] | undefined | null
+
+    @Column_("varchar", {length: 8, nullable: false})
+    network!: Network
 }

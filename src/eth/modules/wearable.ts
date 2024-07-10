@@ -5,6 +5,7 @@ import {
   WearableBodyShape,
   WearableCategory,
   WearableRarity,
+  Network as ModelNetwork,
 } from "../../model";
 import {
   Wearable,
@@ -54,7 +55,7 @@ import {
 import * as categories from "../data/wearables/categories";
 import { Wearable as WearableEntity } from "../../model";
 
-import { getURNNetwork } from "../../common/utils/network";
+import { getNetwork as getURNNetwork } from "../../common/utils/network";
 
 export function buildWearableFromNFT(nft: NFT): WearableEntity {
   // https://wearable-api.decentraland.org/v2/standards/erc721-metadata/collections/halloween_2019/wearables/funny_skull_mask/1
@@ -162,7 +163,7 @@ export function buildWearableFromNFT(nft: NFT): WearableEntity {
   ];
   for (let i = 0; i < allCollections.length; i++) {
     const wearable = findWearable(wearableId, allCollections[i]);
-  
+
     if (wearable.id === wearableId) {
       wearable.id = nft.id;
       wearable.collection = collectionNames[i];
@@ -199,30 +200,6 @@ export function getWearableURN(wearable: WearableEntity): string {
   );
 }
 
-export function isWearableHead(wearable: WearableEntity): boolean {
-  let category = wearable.category;
-  return (
-    category == categories.EYEBROWS ||
-    category == categories.EYES ||
-    category == categories.FACIAL_HAIR ||
-    category == categories.HAIR ||
-    category == categories.MOUTH
-  );
-}
-
-export function isWearableAccessory(wearable: WearableEntity): boolean {
-  let category = wearable.category;
-  return (
-    category == categories.EARRING ||
-    category == categories.EYEWEAR ||
-    category == categories.HAT ||
-    category == categories.HELMET ||
-    category == categories.MASK ||
-    category == categories.TIARA ||
-    category == categories.TOP_HEAD
-  );
-}
-
 function findWearable(id: string, collection: Wearable[]): WearableEntity {
   for (let i = 0; i < collection.length; i++) {
     const representation = collection[i];
@@ -235,6 +212,7 @@ function findWearable(id: string, collection: Wearable[]): WearableEntity {
       wearable.category = representation.category as WearableCategory;
       wearable.rarity = representation.rarity as WearableRarity;
       wearable.bodyShapes = representation.bodyShapes as WearableBodyShape[];
+      wearable.network = ModelNetwork.ethereum;
       return wearable;
     }
   }

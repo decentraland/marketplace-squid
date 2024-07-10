@@ -1,3 +1,8 @@
+enum Network {
+  ethereum
+  polygon
+}
+
 # ---------------------------------------------------------
 # Counts --------------------------------------------------
 # ---------------------------------------------------------
@@ -33,6 +38,7 @@ type Count @entity {
   secondarySalesTotal: Int!
   secondarySalesManaTotal: BigInt!
   royaltiesManaTotal: BigInt!
+  network: Network!
 }
 
 # ---------------------------------------------------------
@@ -61,6 +67,7 @@ type Order @entity {
   ## collections subgraph Order fields
   # marketplaceAddress: Bytes!
   item: Item
+  network: Network!
   # nftAddress: Bytes!
   # txHash: Bytes!
   # owner: Bytes!
@@ -89,6 +96,7 @@ type Bid @entity {
   createdAt: BigInt!
   updatedAt: BigInt!
 
+  network: Network!
 
   #bidAddress: Bytes!
   #nftAddress: Bytes!
@@ -96,8 +104,8 @@ type Bid @entity {
 
 type Wearable @entity {
   id: ID!
-  owner: Account!
-  representationId: String!
+  owner: Account
+  representationId: String
   collection: String!
   name: String!
   description: String!
@@ -105,6 +113,7 @@ type Wearable @entity {
   rarity: WearableRarity!
   bodyShapes: [WearableBodyShape!]
   nft: NFT @derivedFrom(field: "wearable")
+  network: Network!
 }
 
 type ENS @entity {
@@ -211,6 +220,7 @@ type NFT @entity {
   searchEmoteLoop: Boolean
   searchEmoteRarity: String
   searchEmoteBodyShapes: [WearableBodyShape]
+  network: Network!
   # searchEmoteBodyShapes: [WearableBodyShape!]
 }
 
@@ -267,6 +277,7 @@ type Account @entity {
   creatorsSupportedTotal: Int!
   uniqueCollectors: [String!]!
   uniqueCollectorsTotal: Int!
+  network: Network!
 }
 
 # ---------------------------------------------------------
@@ -328,11 +339,6 @@ enum WearableBodyShape {
 
 # We only track sales from Decentraland's smart contracts
 
-enum SaleType {
-  bid
-  order
-}
-
 type Sale @entity {
   id: ID!
   type: SaleType!
@@ -352,16 +358,17 @@ type Sale @entity {
 
   #buyer: Bytes!
   #seller: Bytes!
-  beneficiary: Bytes!
-  feesCollectorCut: BigInt!
-  feesCollector: Bytes!
-  royaltiesCut: BigInt!
-  royaltiesCollector: Bytes!
-  item: Item!
+  beneficiary: Bytes
+  feesCollectorCut: BigInt
+  feesCollector: Bytes
+  royaltiesCut: BigInt
+  royaltiesCollector: Bytes
+  item: Item
   #txHash: Bytes!
 
   # search
-  searchItemId: BigInt!
+  searchItemId: BigInt
+  network: Network!
   #searchContractAddress: String!
 }
 
@@ -373,6 +380,7 @@ type AnalyticsDayData @entity {
   volume: BigInt!
   creatorsEarnings: BigInt!
   daoEarnings: BigInt!
+  network: Network!
 }
 
 #### Collections Graph
@@ -399,6 +407,10 @@ type Collection @entity {
   # Searcheable fields
   searchIsStoreMinter: Boolean!
   searchText: String!
+
+  # new fields
+  baseURI: String!
+  chainId: BigInt!
 }
 
 type Item @entity {
@@ -415,7 +427,7 @@ type Item @entity {
   price: BigInt!
   beneficiary: String!
   contentHash: String
-  URI: String!
+  uri: String!
   image: String
   minters: [String!]!
   managers: [String!]!
@@ -471,7 +483,7 @@ type Metadata @entity {
   emote: Emote
 }
 
-enum ItemType @entity {
+enum ItemType {
   undefined
   wearable_v1
   wearable_v2
@@ -492,7 +504,7 @@ type Emote @entity {
   hasGeometry: Boolean
 }
 
-enum EmoteCategory @entity {
+enum EmoteCategory {
   dance
   stunt
   greetings
@@ -511,7 +523,7 @@ type Rarity @entity {
   currency: Currency!
 }
 
-enum Currency @entity {
+enum Currency {
   MANA
   USD
 }
@@ -545,7 +557,7 @@ type Curation @entity {
   timestamp: BigInt!
 }
 
-enum SaleType @entity {
+enum SaleType {
   bid
   order
   mint
@@ -577,4 +589,5 @@ type AccountsDayData @entity {
   uniqueAndMythicItemsTotal: Int!
   creatorsSupported: [String!]!
   creatorsSupportedTotal: Int!
+  network: Network!
 }

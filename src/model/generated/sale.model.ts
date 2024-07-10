@@ -1,6 +1,8 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, BigIntColumn as BigIntColumn_, ManyToOne as ManyToOne_, Index as Index_, BytesColumn as BytesColumn_} from "@subsquid/typeorm-store"
 import {SaleType} from "./_saleType"
 import {NFT} from "./nft.model"
+import {Item} from "./item.model"
+import {Network} from "./_network"
 
 @Entity_()
 export class Sale {
@@ -41,4 +43,29 @@ export class Sale {
 
     @StringColumn_({nullable: false})
     searchCategory!: string
+
+    @BytesColumn_({nullable: true})
+    beneficiary!: Uint8Array | undefined | null
+
+    @BigIntColumn_({nullable: true})
+    feesCollectorCut!: bigint | undefined | null
+
+    @BytesColumn_({nullable: true})
+    feesCollector!: Uint8Array | undefined | null
+
+    @BigIntColumn_({nullable: true})
+    royaltiesCut!: bigint | undefined | null
+
+    @BytesColumn_({nullable: true})
+    royaltiesCollector!: Uint8Array | undefined | null
+
+    @Index_()
+    @ManyToOne_(() => Item, {nullable: true})
+    item!: Item | undefined | null
+
+    @BigIntColumn_({nullable: true})
+    searchItemId!: bigint | undefined | null
+
+    @Column_("varchar", {length: 8, nullable: false})
+    network!: Network
 }

@@ -1,12 +1,18 @@
+import { BlockData } from "@subsquid/evm-processor";
 import { Network } from "@dcl/schemas";
 import { UpdateEventArgs } from "../../abi/LANDRegistry";
 import { getNFTId } from "../../common/utils/nft";
-import { Category, Data, NFT, Parcel } from "../../model";
+import {
+  Category,
+  Data,
+  NFT,
+  Parcel,
+  Network as ModelNetwork,
+} from "../../model";
 import { getAddresses } from "../../common/utils/addresses";
 import { DataType, buildData } from "../../common/utils";
 import { Coordinate } from "../../types";
 import { getParcelText } from "../LANDs/utils";
-import { BlockData } from "@subsquid/evm-processor";
 
 export function handleUpdate(
   event: UpdateEventArgs,
@@ -20,7 +26,7 @@ export function handleUpdate(
   const parcelId = assetId.toString();
   const addresses = getAddresses(Network.ETHEREUM);
 
-  const id = getNFTId(Category.parcel, addresses.LANDRegistry, parcelId);
+  const id = getNFTId(addresses.LANDRegistry, parcelId, Category.parcel);
 
   let parcel = parcels.get(id);
   if (!parcel) {
@@ -48,6 +54,7 @@ export function handleUpdate(
     if (!nft) {
       console.log(`id not found ${id} for NFT`);
       nft = new NFT({ id });
+      nft.network = ModelNetwork.ethereum;
       nfts.set(id, nft);
     }
     nft.name = parcelData.name;

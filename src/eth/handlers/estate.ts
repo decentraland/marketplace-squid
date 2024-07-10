@@ -8,8 +8,16 @@ import {
 } from "../../abi/EstateRegistry";
 import { DataType, buildData, getNFTId } from "../../common/utils";
 import { getAddresses } from "../../common/utils/addresses";
-import { Account, Category, Data, Estate, NFT, Parcel } from "../../model";
-import { createOrLoadAccount } from "../../common/utils/account";
+import {
+  Account,
+  Category,
+  Data,
+  Estate,
+  NFT,
+  Parcel,
+  Network as ModelNetwork,
+} from "../../model";
+import { createOrLoadAccount } from "../../common/modules/account";
 import { Coordinate } from "../../types";
 import { getAdjacentToRoad, getDistanceToPlaza } from "../LANDs/utils";
 
@@ -31,15 +39,15 @@ export function handleCreateEstate(
   const addresses = getAddresses(Network.ETHEREUM);
 
   const id = getNFTId(
-    Category.estate,
     addresses.EstateRegistry,
-    _estateId.toString()
+    _estateId.toString(),
+    Category.estate
   );
 
   const estate = new Estate({ id });
 
   estate.tokenId = _estateId;
-  const owner = accounts.get(_owner);
+  const owner = accounts.get(`${_owner}-${ModelNetwork.ethereum}`);
   if (owner) {
     estate.owner = owner; // @TODO: Check if all the estates have owners later on
   }
@@ -87,8 +95,8 @@ export function handleAddLand(
   const landId = _landId.toString();
 
   const addresses = getAddresses(Network.ETHEREUM);
-  const id = getNFTId(Category.estate, addresses.EstateRegistry, estateId);
-  const parcelId = getNFTId(Category.parcel, addresses.LANDRegistry, landId);
+  const id = getNFTId(addresses.EstateRegistry, estateId, Category.estate);
+  const parcelId = getNFTId(addresses.LANDRegistry, landId, Category.parcel);
 
   const estate = estates.get(id);
 
@@ -119,17 +127,17 @@ export function handleAddLand(
     parcel.tokenId = event._landId;
   }
 
-  parcel.owner = addresses.EstateRegistry;
+  const estateRegistryAccount = createOrLoadAccount(
+    accounts,
+    addresses.EstateRegistry
+  );
+
+  parcel.owner = estateRegistryAccount;
   parcel.estate = estates.get(id);
 
-  //   let parcelNFT = new NFT({parcelId});
   const parcelNFT = nfts.get(parcelId);
   if (parcelNFT) {
     parcelNFT.searchParcelEstateId = id;
-    const estateRegistryAccount = createOrLoadAccount(
-      accounts,
-      addresses.EstateRegistry
-    );
     parcelNFT.owner = estateRegistryAccount;
   }
 
@@ -168,7 +176,7 @@ export function handleRemoveLand(
   const addresses = getAddresses(Network.ETHEREUM);
 
   const id = getNFTId(Category.estate, addresses.EstateRegistry, estateId);
-  const parcelId = getNFTId(Category.parcel, addresses.LANDRegistry, landId);
+  const parcelId = getNFTId(addresses.LANDRegistry, landId, Category.parcel);
 
   let estate = estates.get(id);
 
@@ -198,7 +206,7 @@ export function handleRemoveLand(
     parcel.tokenId = _landId;
   }
 
-  const owner = accounts.get(_destinatary);
+  const owner = accounts.get(`${_destinatary}-${ModelNetwork.ethereum}`);
   if (owner) {
     parcel.owner = owner;
   }
@@ -206,6 +214,7 @@ export function handleRemoveLand(
 
   const parcelNFT = nfts.get(parcelId) || new NFT({ id: parcelId });
   if (parcelNFT && owner) {
+    parcelNFT.network = ModelNetwork.ethereum;
     parcelNFT.searchParcelEstateId = null;
     parcelNFT.owner = owner;
     nfts.set(parcelId, parcelNFT);
@@ -244,7 +253,7 @@ export function handleUpdate(
   const data = _data.toString();
   const addresses = getAddresses(Network.ETHEREUM);
 
-  const id = getNFTId(Category.estate, addresses.EstateRegistry, estateId);
+  const id = getNFTId(addresses.EstateRegistry, estateId, Category.estate);
 
   const estate = estates.get(id) || new Estate({ id });
   estate.rawData = data;
@@ -261,6 +270,7 @@ export function handleUpdate(
         }`
       );
       nft = new NFT({ id });
+      nft.network = ModelNetwork.ethereum;
     }
     nft.name = estateData.name;
     nft.searchText = estateData.name?.toLowerCase();

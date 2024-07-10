@@ -11,6 +11,7 @@ import {
   Order,
   Parcel,
   Wearable,
+  Network as ModelNetwork,
 } from "../model";
 import { Context } from "./processor";
 import { getAddresses } from "../common/utils/addresses";
@@ -41,9 +42,18 @@ export const getStoredData = async (
     bidIds,
   } = ids;
 
+  const accountIdsToLookFor = [...accountIds].map(
+    (id) => `${id}-${ModelNetwork.ethereum}`
+  );
+  // console.log("accountIdsToLookFor: ", accountIdsToLookFor);
+
   const accounts = await ctx.store
-    .findBy(Account, { id: In([...accountIds]) })
+    .findBy(Account, {
+      id: In(accountIdsToLookFor),
+      network: ModelNetwork.ethereum,
+    })
     .then((q) => new Map(q.map((i) => [i.id, i])));
+  // console.log("accounts: ", accounts);
 
   const parcels = await ctx.store
     .findBy(Parcel, { tokenId: In([...landTokenIds]) })
@@ -81,6 +91,7 @@ export const getStoredData = async (
       },
       where: {
         id: In(nftIds),
+        network: ModelNetwork.ethereum,
       },
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));
@@ -88,6 +99,7 @@ export const getStoredData = async (
   const orders = await ctx.store
     .findBy(Order, {
       nft: In([...Array.from(nftIds.values())]),
+      network: ModelNetwork.ethereum,
       // id: In([...Array.from(nfts.values()).map((nft) => nft.activeOrder)]), // @TODO, revisit this
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));
@@ -111,6 +123,7 @@ export const getStoredData = async (
   const wearables = await ctx.store
     .findBy(Wearable, {
       id: In([...Array.from(wearablesIds.values())]),
+      network: ModelNetwork.ethereum,
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));
 
@@ -123,12 +136,13 @@ export const getStoredData = async (
   const analytics = await ctx.store
     .findBy(AnalyticsDayData, {
       id: In([...Array.from(analyticsIds.values())]),
+      network: ModelNetwork.ethereum,
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));
 
   const counts = await ctx.store
     .findBy(Count, {
-      id: In([DEFAULT_ID]),
+      network: ModelNetwork.ethereum,
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));
 
@@ -139,19 +153,20 @@ export const getStoredData = async (
       },
       where: {
         id: In([...Array.from(bidIds.values())]),
+        network: ModelNetwork.ethereum,
       },
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));
 
   return {
-    accounts,
     parcels,
     estates,
+    ens,
+    datas,
+    accounts,
     nfts,
     orders,
-    datas,
     wearables,
-    ens,
     analytics,
     counts,
     bids,
