@@ -13,6 +13,7 @@ RUN npm ci
 ADD tsconfig.json .
 ADD src src
 ADD db db
+ADD assets assets
 RUN npm run build
 
 FROM node-with-gyp AS deps
@@ -28,6 +29,7 @@ COPY --from=deps /squid/package-lock.json .
 COPY --from=deps /squid/node_modules node_modules
 COPY --from=builder /squid/lib lib
 COPY --from=builder /squid/db db
+COPY --from=builder /squid/assets assets
 # remove if no schema.graphql is in the root
 COPY --from=builder /squid/schema.graphql schema.graphql
 COPY --from=builder /squid/squid.yaml squid.yaml
