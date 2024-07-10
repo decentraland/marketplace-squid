@@ -38,7 +38,7 @@ RUN npm i -g @subsquid/cli@latest && mv $(which sqd) /usr/local/bin/sqd
 ENV PROMETHEUS_PORT 3000
 ENV GQL_PORT 5000
 
-RUN apk update && apk add --no-cache tini postgresql-client
+RUN apk update && apk add --no-cache tini postgresql-client curl
 
 RUN touch /squid/.env
 
