@@ -1,0 +1,77 @@
+import { Network } from "@dcl/schemas";
+import { getAddresses } from "../../common/utils/addresses";
+import { RaritiesSetEventArgs } from "../abi/CollectionManager";
+import * as RarityABI from "../abi/Rarity";
+import * as RaritiesWithOracleABI from "../abi/RaritiesWithOracle";
+import { Currency, Rarity } from "../../model";
+import { Block, Context } from "../processor";
+
+export async function handleRaritiesSet(
+  ctx: Context,
+  block: Block,
+  event: RaritiesSetEventArgs,
+  rarities: Map<string, Rarity>
+): Promise<void> {
+  const addresses = getAddresses(Network.MATIC);
+  const rarityAddress = addresses.Rarity;
+  console.log("rarityAddress: ", rarityAddress);
+  const raritiesWithOracleAddress = addresses.RaritiesWithOracle;
+  console.log("raritiesWithOracleAddress: ", raritiesWithOracleAddress);
+  //   let raritiesWithOracleAddress = getRaritiesWithOracleAddress();
+  //   let rarityAddress = getRarityAddress();
+  const newRaritiesAddress = event._newRarities;
+  console.log("newRaritiesAddress: ", newRaritiesAddress);
+
+  if (newRaritiesAddress === raritiesWithOracleAddress) {
+    let raritiesWithOracle = new RaritiesWithOracleABI.Contract(
+      ctx,
+      block,
+      raritiesWithOracleAddress
+    );
+    let raritiesCount = await raritiesWithOracle.raritiesCount();
+    console.log("raritiesCount: ", raritiesCount);
+
+    for (let i = 0; i < raritiesCount; i++) {
+      const blockchainRarity = await raritiesWithOracle.rarities(BigInt(i));
+      const name = blockchainRarity.name;
+      let rarity = rarities.get(name);
+
+      if (!rarity) {
+        rarity = new Rarity({ id: name });
+      }
+
+      rarity.name = name;
+      rarity.price = blockchainRarity.price;
+      rarity.maxSupply = blockchainRarity.maxSupply;
+      rarity.currency = Currency.USD;
+      console.log("rarity1: ", rarity);
+      rarities.set(rarity.name, rarity);
+      //   rarity.save();
+    }
+  } else if (newRaritiesAddress === rarityAddress) {
+    const rarityContract = new RarityABI.Contract(ctx, block, rarityAddress);
+    // let rarityContract = RarityABI.bind(rarityAddress);
+    const raritiesCount = await rarityContract.raritiesCount();
+    console.log("raritiesCount: ", raritiesCount);
+
+    for (let i = 0; i < raritiesCount; i++) {
+      const blockchainRarity = await rarityContract.rarities(BigInt(i));
+      const name = blockchainRarity.name;
+      let rarity = rarities.get(name);
+
+      if (!rarity) {
+        rarity = new Rarity({ id: name });
+      }
+
+      rarity.name = blockchainRarity.name;
+      rarity.price = blockchainRarity.price;
+      rarity.maxSupply = blockchainRarity.maxSupply;
+      rarity.currency = Currency.MANA;
+      console.log("rarity2: ", rarity);
+      rarities.set(rarity.name, rarity);
+      //   rarity.save();
+    }
+  } else {
+    console.log("Unsupported rarity contract address {}", [newRaritiesAddress]);
+  }
+}

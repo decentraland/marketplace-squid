@@ -56,7 +56,7 @@ function getNetwork(network: Network): string {
   const chainId =
     network === Network.ETHEREUM
       ? process.env.ETHEREUM_CHAIN_ID
-      : process.env.MATIC_CHAIN_ID;
+      : process.env.POLYGON_CHAIN_ID;
   const chainName =
     network === Network.ETHEREUM
       ? chainId === ChainId.ETHEREUM_MAINNET.toString()
@@ -161,7 +161,8 @@ export function setItemWearableSearchFields(
   if (metadata && metadata.wearable) {
     const wearable = wearables.get(metadata.wearable.id);
     if (wearable) {
-      item.searchText = `${wearable.name} ${wearable.description}`;
+      item.searchText =
+        `${wearable.name} ${wearable.description}`.toLowerCase();
       item.searchIsWearableHead = isWearableHead(wearable.category);
       item.searchIsWearableAccessory = isWearableAccessory(wearable.category);
       item.searchWearableCategory = wearable.category;

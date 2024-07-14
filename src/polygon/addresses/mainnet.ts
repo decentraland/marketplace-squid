@@ -10,7 +10,8 @@ export const MarketplaceV2 = "0x480a0f4e360E8964e68858Dd231c2922f1df45Ef";
 export const OldCommittee = "0x71d9350Ef44E1e451F00e447C0DfF2d1FB75510a";
 export const Committee = "0xaeec95a8aa671a6d3fec56594827d7804964fa70";
 
-export const CollectionStore = '0x214ffC0f0103735728dc66b61A22e4F163e275ae'
+export const CollectionStore = "0x214ffc0f0103735728dc66b61a22e4f163e275ae";
 export const RaritiesWithOracle = "0xa9158e22f89bb3f69c5600338895cb5fb81e5090";
 
 export const Rarity = "0x17113b44fdd661a156cc01b5031e3acf72c32eb3";
+export const CollectionManager = "0x9d32aac179153a991e832550d9f96441ea27763a";
