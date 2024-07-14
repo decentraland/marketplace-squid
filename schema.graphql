@@ -153,7 +153,7 @@ type Data @entity {
 type NFT @entity {
   id: ID!
   tokenId: BigInt!
-  contractAddress: Bytes!
+  contractAddress: String!
   category: Category!
   owner: Account!
   tokenURI: String
@@ -351,7 +351,7 @@ type Sale @entity {
 
   # search
   searchTokenId: BigInt!
-  searchContractAddress: Bytes!
+  searchContractAddress: String!
   searchCategory: String!
 
   ## collections subgraph fields

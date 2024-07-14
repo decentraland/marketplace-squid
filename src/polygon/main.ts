@@ -10,6 +10,7 @@ import * as CommitteeABI from "./abi/Committee";
 import * as RaritiesABI from "./abi/Rarity";
 import * as ERC721BidABI from "./abi/ERC721Bid";
 import * as CollectionStoreABI from "./abi/CollectionStore";
+import * as CollectionManagerABI from "./abi/CollectionManager";
 import { getAddresses } from "../common/utils/addresses";
 import {
   handleAddItem,
@@ -55,6 +56,7 @@ import {
   handleOrderSuccessful,
 } from "./handlers/marketplace";
 import { getNFTId } from "../common/utils";
+import { handleRaritiesSet } from "./handlers/collectionManager";
 
 const schemaName = process.env.DB_SCHEMA;
 const addresses = getAddresses(Network.MATIC);
@@ -509,6 +511,11 @@ processor.run(
             setStoreFeeOwner(event._newFeeOwner);
             break;
           }
+          case CollectionManagerABI.events.RaritiesSet.topic: {
+            const event = CollectionManagerABI.events.RaritiesSet.decode(log);
+            await handleRaritiesSet(ctx, block.header, event, rarities);
+            break;
+          }
         }
       }
     }
@@ -786,6 +793,7 @@ processor.run(
     }
     await ctx.store.upsert([...nfts.values()]); // save NFTs back with orders
     await ctx.store.upsert([...bids.values()]); // bids needs to be upserted after nfts
+    await ctx.store.upsert([...rarities.values()]); // upsert rarities
 
     // insert all new entities with no dependencies
     await ctx.store.insert([...sales.values()]);

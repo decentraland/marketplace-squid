@@ -10,14 +10,15 @@ import {
 import { Store } from "@subsquid/typeorm-store";
 import { ChainId, Network } from "@dcl/schemas";
 import * as CollectionFactoryABI from "./abi/CollectionFactory";
+import * as RaritiesWithOracleABI from "./abi/RaritiesWithOracle";
 import * as CollectionFactoryV3ABI from "./abi/CollectionFactoryV3";
 import * as MarketplaceABI from "./abi/Marketplace";
 import * as BidABI from "./abi/ERC721Bid";
-import * as BidV2ABI from "./abi/ERC721BidV2";
 import * as MarketplaceV2ABI from "./abi/MarketplaceV2";
 import * as CommitteeABI from "./abi/Committee";
 import * as CollectionV2ABI from "./abi/CollectionV2";
 import * as RaritiesABI from "./abi/Rarity";
+import * as CollectionManagerABI from "./abi/CollectionManager";
 import { getBlockRange } from "../config";
 import { getAddresses } from "../common/utils/addresses";
 import { loadCollections } from "./utils/loaders";
@@ -122,10 +123,17 @@ export const processor = new EvmBatchProcessor()
   })
   .addLog({
     transaction: true,
-    address: [addresses.Rarity],
+    address: [
+      addresses.Rarity,
+      addresses.RaritiesWithOracle,
+      addresses.CollectionManager,
+    ],
     topic0: [
       RaritiesABI.events.AddRarity.topic,
       RaritiesABI.events.UpdatePrice.topic,
+      RaritiesWithOracleABI.events.AddRarity.topic,
+      RaritiesWithOracleABI.events.UpdatePrice.topic,
+      CollectionManagerABI.events.RaritiesSet.topic,
     ],
   });
 

@@ -626,7 +626,6 @@ export function handleIssue(
 
     // item.save();
     handleMintNFT(
-      ctx,
       event,
       block,
       transaction,

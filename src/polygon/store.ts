@@ -110,6 +110,7 @@ export const getStoredData = async (
     .find(Item, {
       relations: {
         collection: true,
+        metadata: true,
       },
       where: [
         {

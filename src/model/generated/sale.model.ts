@@ -38,8 +38,8 @@ export class Sale {
     @BigIntColumn_({nullable: false})
     searchTokenId!: bigint
 
-    @BytesColumn_({nullable: false})
-    searchContractAddress!: Uint8Array
+    @StringColumn_({nullable: false})
+    searchContractAddress!: string
 
     @StringColumn_({nullable: false})
     searchCategory!: string

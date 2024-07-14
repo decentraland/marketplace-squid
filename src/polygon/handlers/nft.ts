@@ -36,7 +36,6 @@ import { StoreContractData } from "../state";
  * @param item
  */
 export function handleMintNFT(
-  ctx: Context,
   event: IssueEventArgs,
   block: Block,
   transaction: Transaction,
@@ -64,7 +63,7 @@ export function handleMintNFT(
     item.itemType === ItemType.emote_v1 ? "emote" : "wearable"
   ) as Category;
   nft.tokenId = event._tokenId;
-  nft.contractAddress = Buffer.from(collectionAddress.slice(2), "hex");
+  nft.contractAddress = collectionAddress;
   nft.itemBlockchainId = event._itemId;
   nft.itemType = item.itemType;
   nft.issuedId = event._issuedId;
