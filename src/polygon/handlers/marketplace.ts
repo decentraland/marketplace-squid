@@ -64,9 +64,6 @@ export function handleOrderCreated(
     order.marketplaceAddress = contractAddress;
     order.status = OrderStatus.open;
     order.category = category ? (category as Category) : Category.wearable;
-    if (!order.category) {
-      console.log("order.category: ", order.category);
-    }
     order.nft = nft;
     order.network = isEthereum ? NetworkModel.ethereum : NetworkModel.polygon;
     if (!isEthereum) {

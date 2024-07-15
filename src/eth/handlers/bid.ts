@@ -128,7 +128,7 @@ export async function handleBidAccepted(
       counts
     );
   } else {
-    console.log("NFT not found for bid in accepted: ", id);
+    console.log("ERROR: NFT not found for bid in accepted: ", id);
   }
 }
 

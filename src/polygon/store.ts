@@ -18,7 +18,6 @@ import {
 } from "../model";
 import { Context } from "./processor";
 import { PolygonInMemoryState, PolygonStoredData } from "./types";
-import { DEFAULT_ID } from "../common/modules/count";
 
 export const getStoredData = async (
   ctx: Context,
@@ -153,6 +152,10 @@ export const getStoredData = async (
 
   const metadatas = await ctx.store
     .find(Metadata, {
+      relations: {
+        emote: true,
+        wearable: true,
+      },
       where: {
         id: In([...metadataIds]),
       },
