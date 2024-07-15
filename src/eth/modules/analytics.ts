@@ -34,7 +34,7 @@ export function trackSale(
 ): void {
   // ignore zero price sales
   if (price === BigInt(0)) {
-    console.log("ignoring zero price sale");
+    console.log("INFO: ignoring zero price sale");
     return;
   }
 
@@ -58,7 +58,7 @@ export function trackSale(
     sale.searchContractAddress = nft.contractAddress;
     sale.searchCategory = nft.category;
   } else {
-    console.log("NFT not found for sale", nftId);
+    console.log("ERROR: NFT not found for sale", nftId);
   }
   sale.timestamp = timestamp;
   sale.txHash = txHash;

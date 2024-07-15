@@ -12,7 +12,6 @@ export function buildCount(
 
   if (!count) {
     console.log("count not found, creating new one");
-    console.log("id: ", id);
     count = new Count({ id });
     count.orderTotal = 0;
     count.orderParcel = 0;

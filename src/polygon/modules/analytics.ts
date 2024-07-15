@@ -75,8 +75,6 @@ export function trackSale(
     item = nft.item; // set the item coming out from the NFT
   }
   if (!item || !nft) {
-    console.log("item: ", item);
-    console.log("nft: ", nft);
     console.log(`ERROR: NFT or Item not found for sale ${nftId} ${itemId}`);
     return;
   }

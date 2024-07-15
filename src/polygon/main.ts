@@ -1,6 +1,13 @@
+import { In, Not } from "typeorm";
 import { TypeormDatabase } from "@subsquid/typeorm-store";
 import { Network } from "@dcl/schemas";
-import { Order, Rarity, Transfer, Network as ModelNetwork } from "../model";
+import {
+  Order,
+  Rarity,
+  Transfer,
+  Network as ModelNetwork,
+  Collection,
+} from "../model";
 import * as CollectionFactoryABI from "./abi/CollectionFactory";
 import * as CollectionFactoryV3ABI from "./abi/CollectionFactoryV3";
 import * as CollectionV2ABI from "./abi/CollectionV2";
@@ -57,10 +64,12 @@ import {
 } from "./handlers/marketplace";
 import { getNFTId } from "../common/utils";
 import { handleRaritiesSet } from "./handlers/collectionManager";
+import { loadCollections } from "./utils/loaders";
 
 const schemaName = process.env.DB_SCHEMA;
 const addresses = getAddresses(Network.MATIC);
 let bytesRead = 0; // amount of bytes received
+const preloadedCollections = loadCollections().addresses;
 const collectionsCreatedByFactory = new Set<string>();
 
 processor.run(
@@ -81,6 +90,15 @@ processor.run(
       .find(Rarity)
       .then((q) => new Map(q.map((i) => [i.id, i])));
 
+    const collectionIdsNotIncludedInPreloaded = await ctx.store
+      .find(Collection, {
+        where: {
+          id: Not(In(preloadedCollections)),
+        },
+      })
+      .then((q) => new Set(q.map((c) => c.id)));
+
+    const collectionIdsCreatedInBatch = new Set<string>();
     const inMemoryData = getBatchInMemoryState();
     const {
       sales,
@@ -101,7 +119,11 @@ processor.run(
       committeeEvents,
     } = inMemoryData;
 
-    ctx.log.info(`blocks, ${ctx.blocks.length}`);
+    ctx.log.info(
+      `blocks, amount: ${ctx.blocks.length}, from: ${
+        ctx.blocks[0].header.height
+      } to: ${ctx.blocks[ctx.blocks.length - 1].header.height}`
+    );
     for (let block of ctx.blocks) {
       for (let log of block.logs) {
         const topic = log.topics[0];
@@ -124,7 +146,8 @@ processor.run(
                 ? CollectionFactoryABI.events.ProxyCreated.decode(log)
                 : CollectionFactoryV3ABI.events.ProxyCreated.decode(log);
 
-            collectionsCreatedByFactory.add(event._address.toLowerCase());
+            // collectionsCreatedByFactory.add(event._address.toLowerCase());
+            collectionIdsCreatedInBatch.add(event._address); // add the Id to the list of collections to be processed
 
             const collectionContract = new CollectionV2ABI.Contract(
               ctx,
@@ -359,7 +382,9 @@ processor.run(
                 .map((c) => c.toLowerCase())
                 .includes(log.address)
             ) {
-              console.log("Committee event found not from committee contract");
+              console.log(
+                "ERROR: Committee event found not from committee contract"
+              );
               break;
             }
             const event = CommitteeABI.events.MemberSet.decode(log);
@@ -382,7 +407,13 @@ processor.run(
           case CollectionV2ABI.events.OwnershipTransferred.topic:
           case CollectionV2ABI.events.Transfer.topic: {
             // @TODO check addresses
-            if (!collectionsCreatedByFactory.has(log.address)) {
+            if (
+              ![
+                ...preloadedCollections, // collections already pre-calculated
+                ...collectionIdsNotIncludedInPreloaded, // collections not included in the preloaded list but yes in the db (newest ones)
+                ...collectionIdsCreatedInBatch, // collections created in the current batch, will later by saved in the db
+              ].includes(log.address)
+            ) {
               // ctx.log.warn(
               //   `CollectionV2 event found not from collection contract, address: ${log.address}, topic: ${topic}, block: ${block.header.height}`
               // );
@@ -487,7 +518,7 @@ processor.run(
                 ),
               });
             } else {
-              console.log("Error: Event not decoded correctly");
+              console.log("ERROR: Event not decoded correctly");
             }
             break;
           }

@@ -125,6 +125,7 @@ export function setNFTEmoteSearchFields(
   emotes: Map<string, Emote>
 ): NFT {
   if (!nft.metadata) {
+    console.log("ERROR: Metadata not found for NFT:", nft.id);
     return nft;
   }
   const metadata = metadatas.get(nft.metadata.id);
@@ -140,10 +141,10 @@ export function setNFTEmoteSearchFields(
       }
       nft.searchItemType = nft.itemType;
     } else {
-      console.log("ERROR: Emote not found for NFT {}", [nft.id]);
+      console.log("ERROR: Emote not found for NFT: ", nft.id);
     }
   } else {
-    console.log("ERROR: Metadata not found for NFT {}", [nft.id]);
+    console.log("ERROR: Metadata not found for NFT:", nft.id);
   }
 
   return nft;

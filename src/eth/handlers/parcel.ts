@@ -36,10 +36,6 @@ export function handleUpdate(
   }
   parcel.rawData = data;
   const parcelData = buildData(id, data, DataType.PARCEL);
-  if (id === "estate-0x959e104e1a4db6317fa58f8295f586e1a978c297-10") {
-    console.log("parcelData: ", parcelData);
-    console.log("parcelId: ", parcelId);
-  }
   if (parcelData) {
     parcel.data = parcelData;
     datas.set(parcelData.id, parcelData);

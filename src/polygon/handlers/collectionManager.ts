@@ -14,13 +14,8 @@ export async function handleRaritiesSet(
 ): Promise<void> {
   const addresses = getAddresses(Network.MATIC);
   const rarityAddress = addresses.Rarity;
-  console.log("rarityAddress: ", rarityAddress);
   const raritiesWithOracleAddress = addresses.RaritiesWithOracle;
-  console.log("raritiesWithOracleAddress: ", raritiesWithOracleAddress);
-  //   let raritiesWithOracleAddress = getRaritiesWithOracleAddress();
-  //   let rarityAddress = getRarityAddress();
   const newRaritiesAddress = event._newRarities;
-  console.log("newRaritiesAddress: ", newRaritiesAddress);
 
   if (newRaritiesAddress === raritiesWithOracleAddress) {
     let raritiesWithOracle = new RaritiesWithOracleABI.Contract(
@@ -29,7 +24,6 @@ export async function handleRaritiesSet(
       raritiesWithOracleAddress
     );
     let raritiesCount = await raritiesWithOracle.raritiesCount();
-    console.log("raritiesCount: ", raritiesCount);
 
     for (let i = 0; i < raritiesCount; i++) {
       const blockchainRarity = await raritiesWithOracle.rarities(BigInt(i));
@@ -50,9 +44,7 @@ export async function handleRaritiesSet(
     }
   } else if (newRaritiesAddress === rarityAddress) {
     const rarityContract = new RarityABI.Contract(ctx, block, rarityAddress);
-    // let rarityContract = RarityABI.bind(rarityAddress);
     const raritiesCount = await rarityContract.raritiesCount();
-    console.log("raritiesCount: ", raritiesCount);
 
     for (let i = 0; i < raritiesCount; i++) {
       const blockchainRarity = await rarityContract.rarities(BigInt(i));

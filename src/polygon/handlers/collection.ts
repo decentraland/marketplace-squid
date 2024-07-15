@@ -115,7 +115,7 @@ export function handleSetGlobalMinter(
 
   if (!collection) {
     console.log(
-      `Error: Collection not found in handleSetGlobalMinter: ${collectionAddress}`
+      `ERROR: Collection not found in handleSetGlobalMinter: ${collectionAddress}`
     );
     return;
   }
@@ -147,7 +147,7 @@ export function handleSetGlobalMinter(
             item.firstListedAt = BigInt(block.timestamp / 1000);
           }
         } else {
-          console.log(`Item not found: ${itemId}`);
+          console.log(`ERROR: Item not found: ${itemId}`);
         }
       }
     }
@@ -180,7 +180,7 @@ export function handleSetGlobalMinter(
           // set flag only if store is item minter, otherwise unset it
           item.searchIsStoreMinter = isStoreItemMinter;
         } else {
-          console.log(`Item not found: ${itemId}`);
+          console.log(`ERROR: Item not found: ${itemId}`);
         }
       }
     }
@@ -199,7 +199,7 @@ export function handleSetGlobalManager(
 
   if (!collection) {
     console.log(
-      `Error: Collection not found in handleSetGlobalManager: ${collectionAddress}`
+      `ERROR: Collection not found in handleSetGlobalManager: ${collectionAddress}`
     );
     return;
   }
@@ -237,7 +237,7 @@ export function handleSetItemMinter(
 
   const item = items.get(id);
   if (!item) {
-    console.log(`Error: Item not found in handleSetItemMinter: ${id}`);
+    console.log(`ERROR: Item not found in handleSetItemMinter: ${id}`);
     return;
   }
 
@@ -261,7 +261,7 @@ export function handleSetItemMinter(
     const collection = collections.get(item.collection.id);
     if (!collection) {
       console.log(
-        `Error: Collection not found in handleSetItemMinter: ${item.collection.id}`
+        `ERROR: Collection not found in handleSetItemMinter: ${item.collection.id}`
       );
     }
     if (
@@ -285,7 +285,7 @@ export function handleSetItemManager(
 
   let item = items.get(id);
   if (!item) {
-    console.log(`Error: Item not found in handleSetItemManager: ${id}`);
+    console.log(`ERROR: Item not found in handleSetItemManager: ${id}`);
     return;
   }
 
@@ -334,7 +334,7 @@ export async function handleAddItem(
     // Skip it, collection will be set up once the proxy event is created
     // The ProxyCreated event is emitted right after the collection's event
     console.log(
-      `Error: Collection not found in handleAddItem: ${collectionAddress}`
+      `ERROR: Collection not found in handleAddItem: ${collectionAddress}`
     );
     return;
   }
@@ -357,18 +357,18 @@ export async function handleAddItem(
   const rarity = rarities.get(contractItem.rarity);
   //   console.log("rarity inside Add Item: ", rarity);
   if (!rarity) {
-    console.log(`Error: Rarity not found: ${contractItem.rarity}`);
+    console.log(`ERROR: Rarity not found: ${contractItem.rarity}`);
     // return;
   }
 
   let creationFee = BigInt(0);
 
   if (!rarity) {
-    console.log("Undefined rarity {} for collection {} and item {}", [
-      contractItem.rarity,
-      collectionAddress,
-      itemId.toString(),
-    ]);
+    console.log(
+      `ERROR: Undefined rarity ${
+        contractItem.rarity
+      } for collection ${collectionAddress} and item ${itemId.toString()}`
+    );
   } else {
     creationFee = rarity.price;
 
@@ -707,7 +707,7 @@ export function handleSetApproved(
 
   if (!collection) {
     console.log(
-      `Error: Collection not found in handleSetApproved: ${collectionAddress}`
+      `ERROR: Collection not found in handleSetApproved: ${collectionAddress}`
     );
     return;
   }
@@ -805,7 +805,7 @@ export function handleSetEditable(
     collection.isEditable = event._newValue;
   } else {
     console.log(
-      `Error: Collection not found in handleSetEditable: ${collectionAddress}`
+      `ERROR: Collection not found in handleSetEditable: ${collectionAddress}`
     );
   }
 }
@@ -820,7 +820,7 @@ export function handleCompleteCollection(
     collection.isCompleted = true;
   } else {
     console.log(
-      `Error: Collection not found in handleCompleteCollection: ${collectionAddress}`
+      `ERROR: Collection not found in handleCompleteCollection: ${collectionAddress}`
     );
   }
 }
@@ -852,7 +852,7 @@ export function handleTransferCreatorship(
     }
   } else {
     console.log(
-      `Error: Collection not found in handleTransferCreatorship: ${collectionAddress}`
+      `ERROR: Collection not found in handleTransferCreatorship: ${collectionAddress}`
     );
   }
 }
@@ -868,7 +868,7 @@ export function handleTransferOwnership(
     collection.owner = event.newOwner;
   } else {
     console.log(
-      `Error: Collection not found in handleTransferOwnership: ${collectionAddress}`
+      `ERROR: Collection not found in handleTransferOwnership: ${collectionAddress}`
     );
   }
 }
