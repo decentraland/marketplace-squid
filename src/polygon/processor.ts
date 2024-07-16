@@ -28,7 +28,7 @@ const chainId = process.env.POLYGON_CHAIN_ID || ChainId.MATIC_MAINNET;
 
 const GATEWAY = `https://v2.archive.subsquid.io/network/polygon-${
   chainId == ChainId.MATIC_MAINNET ? "mainnet" : "amoy-testnet"
-}`; // see https://docs.subsquid.io/evm-indexing/supported-networks/
+}`;
 const RPC_ENDPOINT = process.env.RPC_ENDPOINT_POLYGON;
 
 const collections = loadCollections();
