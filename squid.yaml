@@ -1,17 +1,13 @@
 manifestVersion: subsquid.io/v0.1
 name: multichain-dcl-squid
 version: 1
-description: 'A squid that indexes DCL contracts'
-build: 
+description: "A squid that indexes DCL contracts"
+build:
 deploy:
   addons:
-    postgres: 
+    postgres:
   processor:
     - name: eth-processor
-      cmd: [ "sqd", "process:prod:eth" ]
+      cmd: ["sqd", "process:prod:eth"]
     - name: polygon-processor
-      cmd: [ "sqd", "process:prod:polygon" ]
-  api:
-    cmd: [ "sqd", "serve:prod" ]
-  # api:
-  #   cmd: [ "sqd", "api:prod" ]
+      cmd: ["sqd", "process:prod:polygon"]
