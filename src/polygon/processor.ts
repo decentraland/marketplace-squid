@@ -123,18 +123,18 @@ export const processor = new EvmBatchProcessor()
   })
   .addLog({
     transaction: true,
-    address: [
-      addresses.Rarity,
-      addresses.RaritiesWithOracle,
-      addresses.CollectionManager,
-    ],
+    address: [addresses.Rarity, addresses.RaritiesWithOracle],
     topic0: [
       RaritiesABI.events.AddRarity.topic,
       RaritiesABI.events.UpdatePrice.topic,
       RaritiesWithOracleABI.events.AddRarity.topic,
       RaritiesWithOracleABI.events.UpdatePrice.topic,
-      CollectionManagerABI.events.RaritiesSet.topic,
     ],
+  })
+  .addLog({
+    transaction: true,
+    address: [addresses.CollectionManager],
+    topic0: [CollectionManagerABI.events.RaritiesSet.topic],
   });
 
 export type Fields = EvmBatchProcessorFields<typeof processor>;

@@ -25,13 +25,14 @@ export function buildItemMetadata(
 
   if (!metadata) {
     metadata = new Metadata({ id });
+    metadatas.set(id, metadata);
   }
 
   const data = item.rawMetadata.split(":");
   if (data.length >= 2) {
     const type = data[1];
 
-    if (type == itemTypes.WEARABLE_TYPE_SHORT) {
+    if (type === itemTypes.WEARABLE_TYPE_SHORT) {
       const wearable = buildWearableItem(item, wearables);
       if (wearable) {
         metadata.itemType = ItemType.wearable_v2;
@@ -40,7 +41,7 @@ export function buildItemMetadata(
       } else {
         metadata.itemType = ItemType.undefined;
       }
-    } else if (type == itemTypes.SMART_WEARABLE_TYPE_SHORT) {
+    } else if (type === itemTypes.SMART_WEARABLE_TYPE_SHORT) {
       const wearable = buildWearableItem(item, wearables);
       if (wearable) {
         metadata.itemType = ItemType.smart_wearable_v1;
@@ -49,7 +50,7 @@ export function buildItemMetadata(
       } else {
         metadata.itemType = ItemType.undefined;
       }
-    } else if (type == itemTypes.EMOTE_TYPE_SHORT) {
+    } else if (type === itemTypes.EMOTE_TYPE_SHORT) {
       const emote = buildEmoteItem(item, emotes);
       if (emote) {
         metadata.itemType = ItemType.emote_v1;
@@ -65,8 +66,6 @@ export function buildItemMetadata(
     metadata.itemType = ItemType.undefined;
   }
 
-  //   metadata.save();
-
   return metadata;
 }
 
@@ -77,13 +76,13 @@ export function setItemSearchFields(
   emotes: Map<string, Emote>
 ): void {
   if (
-    item.itemType == itemTypes.WEARABLE_V2 ||
-    item.itemType == itemTypes.WEARABLE_V1 ||
-    item.itemType == itemTypes.SMART_WEARABLE_V1
+    item.itemType === itemTypes.WEARABLE_V2 ||
+    item.itemType === itemTypes.WEARABLE_V1 ||
+    item.itemType === itemTypes.SMART_WEARABLE_V1
   ) {
     setItemWearableSearchFields(item, metadatas, wearables);
   }
-  if (item.itemType == itemTypes.EMOTE_V1) {
+  if (item.itemType === itemTypes.EMOTE_V1) {
     setItemEmoteSearchFields(item, metadatas, emotes);
   }
 }
