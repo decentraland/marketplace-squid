@@ -15,6 +15,7 @@ import * as MarketplaceABI from "./abi/Marketplace";
 import * as MarketplaceV2ABI from "./abi/MarketplaceV2";
 import * as CommitteeABI from "./abi/Committee";
 import * as RaritiesABI from "./abi/Rarity";
+import * as RaritiesWithOracleABI from "./abi/RaritiesWithOracle";
 import * as ERC721BidABI from "./abi/ERC721Bid";
 import * as CollectionStoreABI from "./abi/CollectionStore";
 import * as CollectionManagerABI from "./abi/CollectionManager";
@@ -441,6 +442,10 @@ processor.run(
                 break;
               case CollectionV2ABI.events.UpdateItemData.topic:
                 event = CollectionV2ABI.events.UpdateItemData.decode(log);
+                itemIds.set(log.address, [
+                  ...(itemIds.get(log.address) || []),
+                  event._itemId,
+                ]);
                 break;
               case CollectionV2ABI.events.Issue.topic: {
                 event = CollectionV2ABI.events.Issue.decode(log);
@@ -522,11 +527,13 @@ processor.run(
             }
             break;
           }
+          case RaritiesWithOracleABI.events.AddRarity.topic:
           case RaritiesABI.events.AddRarity.topic: {
             const event = RaritiesABI.events.AddRarity.decode(log);
             handleAddRarity(rarities, event);
             break;
           }
+          case RaritiesWithOracleABI.events.UpdatePrice.topic:
           case RaritiesABI.events.UpdatePrice.topic: {
             const event = RaritiesABI.events.UpdatePrice.decode(log);
             handleUpdatePrice(rarities, event);
