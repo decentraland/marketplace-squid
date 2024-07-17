@@ -54,30 +54,11 @@ export type PolygonInMemoryState = {
     string,
     { event: erc721abi.TransferEventArgs_2; block: BlockData }[]
   >;
-  markteplaceEvents: {
-    topic: string;
-    event:
-      | marketplaceAbi.OrderCreatedEventArgs
-      | marketplaceAbi.OrderSuccessfulEventArgs
-      | marketplaceAbi.OrderCancelledEventArgs
-      | erc721BidAbi.BidCreatedEventArgs
-      | erc721BidAbi.BidCancelledEventArgs
-      | erc721BidAbi.BidAcceptedEventArgs
-      | erc721abi.TransferEventArgs_2;
-    block: BlockData;
-    log: Log & { transactionHash: string };
-    // marketplaceOwnerCutPerMillion: bigint | null;
-    marketplaceContractData: MarketplaceContractData;
-    marketplaceV2ContractData: MarketplaceV2ContractData;
-    // bidOwnerCutPerMillion: bigint | null;
-    // bidV1ContractData: BidContractData;
-    bidV2ContractData: BidV2ContractData;
-  }[];
   collectionFactoryEvents: {
     event: CollectionFactoryV3ABI.ProxyCreatedEventArgs;
     block: BlockData;
   }[];
-  collectionEvents: {
+  events: {
     topic: string;
     event:
       | CollectionV2.SetGlobalMinterEventArgs
@@ -93,18 +74,24 @@ export type PolygonInMemoryState = {
       | CollectionV2.CompleteEventArgs
       | CollectionV2.CreatorshipTransferredEventArgs
       | CollectionV2.OwnershipTransferredEventArgs
-      | CollectionV2.TransferEventArgs;
+      | CollectionV2.TransferEventArgs
+      | marketplaceAbi.OrderCreatedEventArgs
+      | marketplaceAbi.OrderSuccessfulEventArgs
+      | marketplaceAbi.OrderCancelledEventArgs
+      | erc721BidAbi.BidCreatedEventArgs
+      | erc721BidAbi.BidCancelledEventArgs
+      | erc721BidAbi.BidAcceptedEventArgs
+      | erc721abi.TransferEventArgs_2;
     block: BlockData;
     log: Log & { transactionHash: string };
     transaction?: Transaction & { input: string };
     rarities?: Map<string, Rarity>;
-    storeContractData: StoreContractData;
+    storeContractData?: StoreContractData;
+    marketplaceContractData?: MarketplaceContractData;
+    marketplaceV2ContractData?: MarketplaceV2ContractData;
+    bidV2ContractData?: BidV2ContractData;
   }[];
   committeeEvents: CommitteeABI.MemberSetEventArgs[];
-  // rarityEvents: (
-  //   | RarityABI.AddRarityEventArgs
-  //   | RarityABI.UpdatePriceEventArgs
-  // )[];
 };
 
 export type PolygonStoredData = {

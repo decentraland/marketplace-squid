@@ -16,6 +16,7 @@ export async function handleRaritiesSet(
   const rarityAddress = addresses.Rarity;
   const raritiesWithOracleAddress = addresses.RaritiesWithOracle;
   const newRaritiesAddress = event._newRarities;
+  console.log("newRaritiesAddress: ", newRaritiesAddress);
 
   if (newRaritiesAddress === raritiesWithOracleAddress) {
     let raritiesWithOracle = new RaritiesWithOracleABI.Contract(

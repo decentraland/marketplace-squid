@@ -13,8 +13,7 @@ export function handleAddRarity(
     rarity = new Rarity({ id: name });
   } else if (rarity.currency !== currency) {
     console.log(
-      "ERROR: Ignoring because it was not added with the current Rarity Contract",
-      []
+      "ERROR: Ignoring because it was not added with the current Rarity Contract"
     );
     return;
   }
@@ -35,14 +34,13 @@ export function handleUpdatePrice(
   const rarity = rarities.get(name);
 
   if (!rarity) {
-    console.log("ERROR: Rarity with name {} not found", [name]);
+    console.log(`ERROR: Rarity with name ${name} not found`);
     return;
   }
 
   if (rarity.currency !== currency) {
     console.log(
-      "Ignoring because it was not added with the current Rarity Contract",
-      []
+      "ERROR: Ignoring because it was not added with the current Rarity Contract"
     );
     return;
   }

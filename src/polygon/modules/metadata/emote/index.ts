@@ -42,9 +42,13 @@ export function buildEmoteItem(
     emote.name = data[2];
     emote.description = data[3];
     emote.rarity = item.rarity as WearableRarity;
-    emote.category = (
-      isValidEmoteCategory(data[4]) ? data[4] : DANCE
-    ) as EmoteCategory; // We're using DANCE as fallback to support the emotes that were created with the old categories.
+    const isValidCategory = isValidEmoteCategory(data[4]);
+    if (!isValidCategory) {
+      console.log(
+        `ERROR: Invalid Emote Category ${data[4]} for item ${id} and data ${data} with rawMetadata ${item.rawMetadata}`
+      );
+    }
+    emote.category = (isValidCategory ? data[4] : DANCE) as EmoteCategory; // We're using DANCE as fallback to support the emotes that were created with the old categories.
     emote.bodyShapes = data[5].split(",") as WearableBodyShape[]; // Could be more than one
     emote.loop =
       data.length >= 7 && isValidLoopValue(data[6]) && data[6] == "1"
@@ -74,7 +78,7 @@ function isValidEmoteCategory(category: string): boolean {
     return true;
   }
 
-  console.log("ERROR: Invalid Emote Category {}", [category]);
+  console.log(`ERROR: Invalid Emote Category ${category}`);
 
   return false;
 }
