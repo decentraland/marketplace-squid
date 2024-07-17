@@ -2,24 +2,24 @@ import { Currency, Rarity } from "../../model";
 import { AddRarityEventArgs, UpdatePriceEventArgs } from "../abi/Rarity";
 import * as utils from "../modules/rarity";
 
-const CURRENCY = Currency.MANA;
-
 export function handleAddRarity(
   rarities: Map<string, Rarity>,
-  event: AddRarityEventArgs
+  event: AddRarityEventArgs,
+  currency: Currency
 ): void {
   utils.handleAddRarity(
     rarities,
     event._rarity.name,
     event._rarity.price,
     event._rarity.maxSupply,
-    CURRENCY
+    currency
   );
 }
 
 export function handleUpdatePrice(
   rarities: Map<string, Rarity>,
-  event: UpdatePriceEventArgs
+  event: UpdatePriceEventArgs,
+  currency: Currency
 ): void {
-  utils.handleUpdatePrice(rarities, event._name, event._price, CURRENCY);
+  utils.handleUpdatePrice(rarities, event._name, event._price, currency);
 }

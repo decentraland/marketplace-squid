@@ -25,9 +25,8 @@ export const getBatchInMemoryState: () => PolygonInMemoryState = () => ({
   itemIds: new Map(),
   // events
   transferEvents: new Map(),
-  markteplaceEvents: [],
   collectionFactoryEvents: [],
-  collectionEvents: [],
+  events: [],
   committeeEvents: [],
   rarityEvents: [],
 });

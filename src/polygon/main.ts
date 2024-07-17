@@ -7,6 +7,7 @@ import {
   Transfer,
   Network as ModelNetwork,
   Collection,
+  Currency,
 } from "../model";
 import * as CollectionFactoryABI from "./abi/CollectionFactory";
 import * as CollectionFactoryV3ABI from "./abi/CollectionFactoryV3";
@@ -114,8 +115,7 @@ processor.run(
       bidIds,
       analyticsIds,
       // events
-      collectionEvents,
-      markteplaceEvents,
+      events,
       collectionFactoryEvents,
       committeeEvents,
     } = inMemoryData;
@@ -188,7 +188,7 @@ processor.run(
               event.assetId,
             ]);
 
-            markteplaceEvents.push({
+            events.push({
               topic,
               event,
               block,
@@ -226,7 +226,7 @@ processor.run(
             accountIds.add(event.buyer); // load buyers acount to update metrics
             const timestamp = BigInt(block.header.timestamp / 1000);
             analyticsIds.add((BigInt(timestamp) / BigInt(86400)).toString());
-            markteplaceEvents.push({
+            events.push({
               topic,
               event,
               block,
@@ -258,7 +258,7 @@ processor.run(
               ...(tokenIds.get(event.nftAddress) || []),
               event.assetId,
             ]);
-            markteplaceEvents.push({
+            events.push({
               topic,
               event,
               block,
@@ -283,7 +283,7 @@ processor.run(
               event._tokenId,
             ]);
 
-            markteplaceEvents.push({
+            events.push({
               topic: ERC721BidABI.events.BidCreated.topic,
               event,
               block,
@@ -314,7 +314,7 @@ processor.run(
               ...(tokenIds.get(event._tokenAddress) || []),
               event._tokenId,
             ]);
-            markteplaceEvents.push({
+            events.push({
               topic: ERC721BidABI.events.BidAccepted.topic,
               event,
               block,
@@ -343,7 +343,7 @@ processor.run(
               ...(tokenIds.get(event._tokenAddress) || []),
               event._tokenId,
             ]);
-            markteplaceEvents.push({
+            events.push({
               topic: ERC721BidABI.events.BidCancelled.topic,
               event,
               block,
@@ -509,7 +509,7 @@ processor.run(
                 Array.from(rarities).map(([k, v]) => [k, { ...v }])
               );
               collectionIds.add(log.address.toLowerCase()); // @TODO check lowercase if needed
-              collectionEvents.push({
+              events.push({
                 topic,
                 event,
                 block,
@@ -527,16 +527,42 @@ processor.run(
             }
             break;
           }
-          case RaritiesWithOracleABI.events.AddRarity.topic:
           case RaritiesABI.events.AddRarity.topic: {
             const event = RaritiesABI.events.AddRarity.decode(log);
-            handleAddRarity(rarities, event);
+            console.log("debug RaritiesABI.events.AddRarity: ", event);
+            console.log("before rarities: ", rarities);
+            handleAddRarity(rarities, event, Currency.MANA);
+            console.log("after rarities: ", rarities);
             break;
           }
-          case RaritiesWithOracleABI.events.UpdatePrice.topic:
+          case RaritiesWithOracleABI.events.AddRarity.topic: {
+            const event = RaritiesWithOracleABI.events.AddRarity.decode(log);
+            console.log(
+              "debug RaritiesWithOracleABI.events.AddRarity: ",
+              event
+            );
+            console.log("before rarities: ", rarities);
+            handleAddRarity(rarities, event, Currency.USD);
+            console.log("after rarities: ", rarities);
+            break;
+          }
           case RaritiesABI.events.UpdatePrice.topic: {
             const event = RaritiesABI.events.UpdatePrice.decode(log);
-            handleUpdatePrice(rarities, event);
+            console.log("RaritiesABI bug: event: ", event);
+            console.log("before rarities: ", rarities);
+            handleUpdatePrice(rarities, event, Currency.MANA);
+            console.log("after rarities: ", rarities);
+            break;
+          }
+          case RaritiesWithOracleABI.events.UpdatePrice.topic: {
+            const event = RaritiesWithOracleABI.events.UpdatePrice.decode(log);
+            console.log(
+              "debug RaritiesWithOracleABI.events.UpdatePrice: ",
+              event
+            );
+            console.log("before rarities: ", rarities);
+            handleUpdatePrice(rarities, event, Currency.USD);
+            console.log("after rarities: ", rarities);
             break;
           }
           case CollectionStoreABI.events.SetFee.topic: {
@@ -551,6 +577,10 @@ processor.run(
           }
           case CollectionManagerABI.events.RaritiesSet.topic: {
             const event = CollectionManagerABI.events.RaritiesSet.decode(log);
+            console.log(
+              "debug CollectionManagerABI.events.RaritiesSet: ",
+              event
+            );
             await handleRaritiesSet(ctx, block.header, event, rarities);
             break;
           }
@@ -583,9 +613,7 @@ processor.run(
     }
     console.timeEnd("handleCollectionCreation");
 
-    console.log(
-      `About to processes ${collectionEvents.length} collectionEvents`
-    );
+    console.log(`About to processes ${events.length} events`);
 
     console.time("handleCollectionEvents");
     // Collection Events
@@ -597,7 +625,10 @@ processor.run(
       transaction,
       rarities,
       storeContractData,
-    } of collectionEvents) {
+      bidV2ContractData,
+      marketplaceContractData,
+      marketplaceV2ContractData,
+    } of events) {
       switch (topic) {
         case CollectionV2ABI.events.SetGlobalMinter.topic:
           handleSetGlobalMinter(
@@ -660,6 +691,10 @@ processor.run(
           );
           break;
         case CollectionV2ABI.events.Issue.topic:
+          if (!storeContractData) {
+            console.log("ERROR: storeContractData not found");
+            break;
+          }
           handleIssue(
             ctx,
             log.address,
@@ -706,7 +741,6 @@ processor.run(
             storedData
           );
           break;
-
         case CollectionV2ABI.events.Transfer.topic:
           handleTransfer(
             log.address,
@@ -715,6 +749,85 @@ processor.run(
             storedData
           );
           break;
+
+        case MarketplaceABI.events.OrderCreated.topic: {
+          handleOrderCreated(
+            Network.MATIC,
+            event as MarketplaceABI.OrderCreatedEventArgs,
+            block,
+            log.address,
+            log.transactionHash,
+            orders,
+            nfts,
+            counts
+          );
+          break;
+        }
+        case MarketplaceABI.events.OrderSuccessful.topic: {
+          if (!marketplaceContractData || !marketplaceV2ContractData) {
+            console.log(
+              "ERROR: marketplaceContractData or marketplaceV2ContractData not found"
+            );
+            break;
+          }
+          handleOrderSuccessful(
+            ctx,
+            Network.MATIC,
+            event as MarketplaceABI.OrderSuccessfulEventArgs,
+            block,
+            log.transactionHash,
+            marketplaceContractData,
+            marketplaceV2ContractData,
+            storedData,
+            inMemoryData
+          );
+          break;
+        }
+        case MarketplaceABI.events.OrderCancelled.topic: {
+          handleOrderCancelled(
+            Network.MATIC,
+            event as MarketplaceABI.OrderCancelledEventArgs,
+            block,
+            nfts,
+            orders
+          );
+          break;
+        }
+        case ERC721BidABI.events.BidCreated.topic: {
+          handleBidCreated(
+            event as ERC721BidABI.BidCreatedEventArgs,
+            block,
+            log.address,
+            nfts,
+            bids,
+            counts
+          );
+          break;
+        }
+        case ERC721BidABI.events.BidAccepted.topic: {
+          if (!bidV2ContractData) {
+            console.log("ERROR: bidV2ContractData not found");
+            break;
+          }
+          handleBidAccepted(
+            event as ERC721BidABI.BidAcceptedEventArgs,
+            block,
+            log.transactionHash,
+            bidV2ContractData,
+            storedData,
+            inMemoryData
+          );
+          break;
+        }
+        case ERC721BidABI.events.BidCancelled.topic: {
+          handleBidCancelled(
+            event as ERC721BidABI.BidCancelledEventArgs,
+            block,
+            bids,
+            nfts
+          );
+          break;
+        }
       }
     }
     console.timeEnd("handleCollectionEvents");
@@ -723,76 +836,6 @@ processor.run(
     for (const event of committeeEvents) {
       handleMemeberSet(accounts, event);
     }
-
-    console.time("handleMarketplaceEvents");
-    for (const {
-      block,
-      event,
-      topic,
-      log,
-      marketplaceContractData,
-      marketplaceV2ContractData,
-      bidV2ContractData,
-    } of markteplaceEvents) {
-      if (topic === MarketplaceABI.events.OrderCreated.topic) {
-        handleOrderCreated(
-          Network.MATIC,
-          event as MarketplaceABI.OrderCreatedEventArgs,
-          block,
-          log.address,
-          log.transactionHash,
-          orders,
-          nfts,
-          counts
-        );
-      } else if (topic === MarketplaceABI.events.OrderSuccessful.topic) {
-        handleOrderSuccessful(
-          ctx,
-          Network.MATIC,
-          event as MarketplaceABI.OrderSuccessfulEventArgs,
-          block,
-          log.transactionHash,
-          marketplaceContractData,
-          marketplaceV2ContractData,
-          storedData,
-          inMemoryData
-        );
-      } else if (topic === MarketplaceABI.events.OrderCancelled.topic) {
-        handleOrderCancelled(
-          Network.MATIC,
-          event as MarketplaceABI.OrderCancelledEventArgs,
-          block,
-          nfts,
-          orders
-        );
-      } else if (topic === ERC721BidABI.events.BidCreated.topic) {
-        handleBidCreated(
-          event as ERC721BidABI.BidCreatedEventArgs,
-          block,
-          log.address,
-          nfts,
-          bids,
-          counts
-        );
-      } else if (topic === ERC721BidABI.events.BidAccepted.topic) {
-        handleBidAccepted(
-          event as ERC721BidABI.BidAcceptedEventArgs,
-          block,
-          log.transactionHash,
-          bidV2ContractData,
-          storedData,
-          inMemoryData
-        );
-      } else if (topic === ERC721BidABI.events.BidCancelled.topic && event) {
-        handleBidCancelled(
-          event as ERC721BidABI.BidCancelledEventArgs,
-          block,
-          bids,
-          nfts
-        );
-      }
-    }
-    console.timeEnd("handleMarketplaceEvents");
 
     console.time("about to upsert");
 
