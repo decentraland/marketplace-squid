@@ -72,7 +72,7 @@
     },
     "serve": {
       "description": "Start the GraphQL API server",
-      "cmd": ["squid-graphql-server"]
+      "cmd": ["squid-graphql-server", "--dialect", "thegraph"]
     },
     "serve:prod": {
       "description": "Start the GraphQL API server with caching and limits",
@@ -85,7 +85,9 @@
         "--dumb-cache-size",
         "100",
         "--dumb-cache-max-age",
-        "1000"
+        "1000",
+        "--dialect",
+        "thegraph"
       ]
     },
     "check-updates": {
@@ -109,7 +111,12 @@
     },
     "retrieve": {
       "description": "Retrieve factories collections in Polygon",
-      "cmd": ["npx", "--yes", "ts-node", "./src/polygon/tools/collectionsRetriever"]
+      "cmd": [
+        "npx",
+        "--yes",
+        "ts-node",
+        "./src/polygon/tools/collectionsRetriever"
+      ]
     }
   }
 }
