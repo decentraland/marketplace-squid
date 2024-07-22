@@ -5,11 +5,10 @@ import { getAddresses } from "../common/utils/addresses";
 import { Contract as MarketplaceContract } from "./abi/Marketplace";
 import { Contract as MarketplaceV2Contract } from "./abi/MarketplaceV2";
 import { Contract as CollectionStoreContract } from "./abi/CollectionStore";
-import { Contract as ERC721BidContract } from "./abi/ERC721Bid";
 import { Contract as ERC721BidV2Contract } from "./abi/ERC721BidV2";
 import { Block, Context } from "./processor";
-import { BlockData } from "@subsquid/evm-processor";
-import { startBlockByNetwork } from "./addresses/startBlocks";
+
+const chainId = +(process.env.POLYGON_CHAIN_ID || ChainId.MATIC_MAINNET);
 
 export const getBatchInMemoryState: () => PolygonInMemoryState = () => ({
   curations: new Map(),
@@ -98,13 +97,19 @@ export const getStoreContractData = async (ctx: Context, block: Block) => {
   return storeContractData;
 };
 
+const START_BLOCK_MARKETPLACEV1: Record<number, number> = {
+  [ChainId.MATIC_AMOY]: 14517370,
+  [ChainId.MATIC_MAINNET]: 15202000,
+};
+
 export const getMarketplaceContractData = async (
   ctx: Context,
   block: Block
 ) => {
   if (
-    marketplaceContractData.ownerCutPerMillion === undefined ||
-    marketplaceContractData.owner === undefined
+    chainId === ChainId.MATIC_MAINNET && // there's no contract for AMOY
+    (marketplaceContractData.ownerCutPerMillion === undefined ||
+      marketplaceContractData.owner === undefined)
   ) {
     console.log("Fetching Marketplace v1 contract data for first time");
     const addresses = getAddresses(Network.MATIC);
@@ -114,17 +119,22 @@ export const getMarketplaceContractData = async (
   }
   return marketplaceContractData;
 };
-const START_BLOCK_MARKETPLACEV2 = 22514900;
+
+const START_BLOCK_MARKETPLACEV2: Record<number, number> = {
+  [ChainId.MATIC_AMOY]: 5706656,
+  [ChainId.MATIC_MAINNET]: 22514900,
+};
 
 export const getMarketplaceV2ContractData = async (
   ctx: Context,
   block: Block
 ) => {
+  const contractStartingBlock = START_BLOCK_MARKETPLACEV2[chainId];
   if (
     (marketplaceV2ContractData.feesCollectorCutPerMillion === undefined ||
       marketplaceV2ContractData.feesCollector === undefined ||
       marketplaceV2ContractData.royaltiesCutPerMillion === undefined) &&
-    block.height >= START_BLOCK_MARKETPLACEV2
+    block.height >= contractStartingBlock
   ) {
     console.log("Fetching marketplace v2 contract data for first time");
     const addresses = getAddresses(Network.MATIC);
@@ -138,14 +148,18 @@ export const getMarketplaceV2ContractData = async (
   return marketplaceV2ContractData;
 };
 
-const START_BLOCK_BIDV2 = 22913743;
+const START_BLOCK_BIDV2: Record<number, number> = {
+  [ChainId.MATIC_AMOY]: 5706662,
+  [ChainId.MATIC_MAINNET]: 22913743,
+};
 
 export const getBidV2ContractData = async (ctx: Context, block: Block) => {
+  const contractStartingBlock = START_BLOCK_BIDV2[chainId];
   if (
     (bidV2ContractData.feesCollectorCutPerMillion === undefined ||
       bidV2ContractData.feesCollector === undefined ||
       bidV2ContractData.royaltiesCutPerMillion === undefined) &&
-    block.height >= START_BLOCK_BIDV2
+    block.height >= contractStartingBlock
   ) {
     console.log("Fetching bid v2 contract data for first time");
     const addresses = getAddresses(Network.MATIC);
