@@ -11,11 +11,12 @@ export function getOrCreateAnalyticsDayData(
 ): AnalyticsDayData {
   const timestamp = blockTimestamp;
   const dayID = timestamp / BigInt(86400); // unix timestamp for start of day / 86400 giving a unique day index
+  const id = `${dayID.toString()}-${network}`;
   const dayStartTimestamp = dayID * BigInt(86400);
-  let analyticsDayData = analytics.get(dayID.toString());
+  let analyticsDayData = analytics.get(id);
   if (!analyticsDayData) {
     analyticsDayData = new AnalyticsDayData({
-      id: `${dayID.toString()}-${network}`,
+      id,
     });
     analyticsDayData.date = +dayStartTimestamp.toString(); // unix timestamp for start of day
     analyticsDayData.sales = 0;

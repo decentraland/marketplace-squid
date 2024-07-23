@@ -8,7 +8,7 @@ export function getCatalystBase(chainId: ChainId): string {
     return "https://peer.decentraland.org";
   } else if (
     chainId === ChainId.ETHEREUM_SEPOLIA ||
-    chainId === ChainId.MATIC_MUMBAI
+    chainId === ChainId.MATIC_AMOY
   ) {
     return "https://peer.decentraland.zone";
   }
