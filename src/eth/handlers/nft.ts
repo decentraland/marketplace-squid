@@ -386,13 +386,11 @@ export function handleTransferWearableV1(
   tokenURIs: Map<string, string>
 ): void {
   const { tokenId, from, to } = event;
-  console.log("event: ", event);
   if (!tokenId.toString()) {
     return;
   }
 
   // let collection = Collection.load(collectionAddress);
-  console.log("collectionAddress: ", collectionAddress);
   const collection = collections.get(collectionAddress);
 
   // const tokenURI = await getTokenURI(ctx, block, collectionAddress, tokenId);
@@ -417,10 +415,8 @@ export function handleTransferWearableV1(
   const id = getNFTId(collectionAddress, tokenId.toString());
 
   const nft = nfts.get(id) || new NFT({ id, network: ModelNetwork.ETHEREUM });
-  console.log("nfts.get(id): ", nfts.get(id));
   nft.collection = collection;
   nft.category = Category.wearable;
-  console.log("tokenId: ", tokenId);
   nft.tokenId = tokenId;
   const toAccount = accounts.get(`${to}-${ModelNetwork.ETHEREUM}`);
   if (toAccount) {
@@ -468,7 +464,7 @@ export function handleTransferWearableV1(
     // item.save();
 
     // store mint
-    const mint = new Mint({ id });
+    const mint = new Mint({ id, network: ModelNetwork.ETHEREUM });
     mint.nft = nft;
     mint.item = item;
 
