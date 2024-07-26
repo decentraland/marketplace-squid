@@ -45,7 +45,7 @@ export function buildWearableItem(
     wearable.rarity = item.rarity as WearableRarity;
     wearable.category = data[4] as WearableCategory;
     wearable.bodyShapes = data[5].split(",") as WearableBodyShape[]; // Could be more than one
-    wearable.network = ModelNetwork.polygon;
+    wearable.network = ModelNetwork.POLYGON;
     return wearable;
   }
 

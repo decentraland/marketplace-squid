@@ -7,6 +7,8 @@ export const events = {
     "Transfer(address,address,uint256,address,bytes)": event("0xd5c97f2e041b2046be3b4337472f05720760a198f4d7d84980b7155eec7cca6f", {"from": indexed(p.address), "to": indexed(p.address), "tokenId": indexed(p.uint256), "operator": p.address, "userData": p.bytes}),
     "Transfer(address,address,uint256)": event("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef", {"from": indexed(p.address), "to": indexed(p.address), "tokenId": indexed(p.uint256)}),
     // "Transfer(address,address,uint256)": event("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef", {"from": indexed(p.address), "to": indexed(p.address), "tokenId": p.uint256}),
+    OwnershipTransferred: event("0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0", {"previousOwner": indexed(p.address), "newOwner": indexed(p.address)}),
+    AddWearable: event("0xd66ffba7549a71baea1f584e21468a80de63cd42daffe0e665e23f22d655200d", {"_wearableIdKey": indexed(p.bytes32), "_wearableId": p.string, "_maxIssuance": p.uint256}),
 }
 
 export const functions = {
@@ -29,8 +31,10 @@ export class Contract extends ContractBase {
 /// Event types
 export type TransferEventArgs_0 = EParams<typeof events["Transfer(address,address,uint256,address,bytes,bytes)"]>
 export type TransferEventArgs_1 = EParams<typeof events["Transfer(address,address,uint256,address,bytes)"]>
-// export type TransferEventArgs_2 = EParams<typeof events["Transfer(address,address,uint256)"]>
 export type TransferEventArgs_2 = EParams<typeof events["Transfer(address,address,uint256)"]>
+// export type TransferEventArgs_2 = EParams<typeof events["Transfer(address,address,uint256)"]>
+export type OwnershipTransferredEventArgs = EParams<typeof events.OwnershipTransferred>
+export type AddWearableEventArgs = EParams<typeof events.AddWearable>
 
 /// Function types
 export type OwnerOfParams = FunctionArguments<typeof functions.ownerOf>

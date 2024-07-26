@@ -42,7 +42,7 @@ export function handleBidCreated(
   const nft = nfts.get(nftId);
 
   if (nft) {
-    bid.network = NetworkModel.polygon;
+    bid.network = NetworkModel.POLYGON;
     bid.bidAddress = contractAddress;
     bid.status = OrderStatus.open;
     bid.category = Category.wearable; // hardcoded since ethereum has this and polygon doesn't

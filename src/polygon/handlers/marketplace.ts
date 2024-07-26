@@ -65,7 +65,7 @@ export function handleOrderCreated(
     order.status = OrderStatus.open;
     order.category = category ? (category as Category) : Category.wearable;
     order.nft = nft;
-    order.network = isEthereum ? NetworkModel.ethereum : NetworkModel.polygon;
+    order.network = isEthereum ? NetworkModel.ETHEREUM : NetworkModel.POLYGON;
     if (!isEthereum) {
       order.item = nft.item;
     }
@@ -91,7 +91,7 @@ export function handleOrderCreated(
     nft.updatedAt = timestamp;
     updateNFTOrderProperties(nft, order);
 
-    buildCountFromOrder(order, counts, NetworkModel.polygon);
+    buildCountFromOrder(order, counts, NetworkModel.POLYGON);
     orders.set(orderId, order);
   } else {
     console.log(`ERROR: NFT not found for order created ${nftId}`);
@@ -146,7 +146,7 @@ export function handleOrderSuccessful(
     return;
   }
 
-  const buyerAccount = accounts.get(`${buyer}-${NetworkModel.polygon}`);
+  const buyerAccount = accounts.get(`${buyer}-${NetworkModel.POLYGON}`);
   if (buyerAccount) {
     nft.owner = buyerAccount;
   } else {
@@ -157,22 +157,13 @@ export function handleOrderSuccessful(
   updateNFTOrderProperties(nft!, order!);
 
   const addresses = getAddresses(Network.MATIC);
-
   const isMarketplaceV1 = addresses.Marketplace === order.marketplaceAddress;
-  // console.log('addresses.Marketplace: ', addresses.Marketplace);
-  // console.log('order.marketplaceAddress: ', order.marketplaceAddress);
-  // console.log('isMarketplaceV1: ', isMarketplaceV1);
 
   let feesCollectorCut: bigint;
   let feesCollector: string;
   let royaltiesCut: bigint;
 
   if (isMarketplaceV1) {
-    // const marketplaceContract = new MarketplaceContract(
-    //   ctx,
-    //   block.header,
-    //   order.marketplaceAddress
-    // );
     if (
       marketplaceContractData.ownerCutPerMillion === undefined ||
       marketplaceContractData.owner === undefined
@@ -183,9 +174,6 @@ export function handleOrderSuccessful(
     feesCollectorCut = marketplaceContractData.ownerCutPerMillion;
     feesCollector = marketplaceContractData.owner;
     royaltiesCut = BigInt(0);
-    // console.log('feesCollectorCut: ', feesCollectorCut);
-    // console.log('royaltiesCut: ', royaltiesCut);
-    // console.log('feesCollector: ', feesCollector);
   } else {
     if (
       marketplaceV2ContractData.feesCollector === undefined ||
@@ -200,22 +188,12 @@ export function handleOrderSuccessful(
     feesCollectorCut = marketplaceV2ContractData.feesCollectorCutPerMillion;
     feesCollector = marketplaceV2ContractData.feesCollector;
     royaltiesCut = marketplaceV2ContractData.royaltiesCutPerMillion;
-
-    // const marketplaceContract = new MarketplaceV2Contract(
-    //   ctx,
-    //   block.header,
-    //   order.marketplaceAddress
-    // );
-    // feesCollectorCut = await marketplaceContract.feesCollectorCutPerMillion();
-    // feesCollector = await marketplaceContract.feesCollector();
-    // royaltiesCut = await marketplaceContract.royaltiesCutPerMillion();
   }
 
   if (nft.item) {
     trackSale(
       storedData,
       inMemoryData,
-      // network,
       SaleType.order,
       buyer,
       seller,
@@ -223,7 +201,6 @@ export function handleOrderSuccessful(
       nft.item.id,
       nft.id,
       order.price,
-      // ownerCutPerMillionValue,
       feesCollectorCut,
       feesCollector,
       royaltiesCut,
@@ -253,7 +230,6 @@ export function handleOrderCancelled(
   const order = orders.get(id);
 
   if (nft && order) {
-    // order.category = category as Category;
     order.status = OrderStatus.cancelled;
     order.blockNumber = BigInt(block.header.height);
     const timestamp = BigInt(block.header.timestamp / 1000);

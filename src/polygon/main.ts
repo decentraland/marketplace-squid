@@ -496,7 +496,7 @@ processor.run(
                     block: block.header.height,
                     from: event.from,
                     to: event.to,
-                    network: ModelNetwork.polygon,
+                    network: ModelNetwork.POLYGON,
                     timestamp: BigInt(timestamp),
                     txHash: log.transactionHash,
                   })
@@ -529,40 +529,22 @@ processor.run(
           }
           case RaritiesABI.events.AddRarity.topic: {
             const event = RaritiesABI.events.AddRarity.decode(log);
-            console.log("debug RaritiesABI.events.AddRarity: ", event);
-            console.log("before rarities: ", rarities);
             handleAddRarity(rarities, event, Currency.MANA);
-            console.log("after rarities: ", rarities);
             break;
           }
           case RaritiesWithOracleABI.events.AddRarity.topic: {
             const event = RaritiesWithOracleABI.events.AddRarity.decode(log);
-            console.log(
-              "debug RaritiesWithOracleABI.events.AddRarity: ",
-              event
-            );
-            console.log("before rarities: ", rarities);
             handleAddRarity(rarities, event, Currency.USD);
-            console.log("after rarities: ", rarities);
             break;
           }
           case RaritiesABI.events.UpdatePrice.topic: {
             const event = RaritiesABI.events.UpdatePrice.decode(log);
-            console.log("RaritiesABI bug: event: ", event);
-            console.log("before rarities: ", rarities);
             handleUpdatePrice(rarities, event, Currency.MANA);
-            console.log("after rarities: ", rarities);
             break;
           }
           case RaritiesWithOracleABI.events.UpdatePrice.topic: {
             const event = RaritiesWithOracleABI.events.UpdatePrice.decode(log);
-            console.log(
-              "debug RaritiesWithOracleABI.events.UpdatePrice: ",
-              event
-            );
-            console.log("before rarities: ", rarities);
             handleUpdatePrice(rarities, event, Currency.USD);
-            console.log("after rarities: ", rarities);
             break;
           }
           case CollectionStoreABI.events.SetFee.topic: {
@@ -577,10 +559,6 @@ processor.run(
           }
           case CollectionManagerABI.events.RaritiesSet.topic: {
             const event = CollectionManagerABI.events.RaritiesSet.decode(log);
-            console.log(
-              "debug CollectionManagerABI.events.RaritiesSet: ",
-              event
-            );
             await handleRaritiesSet(ctx, block.header, event, rarities);
             break;
           }

@@ -56,6 +56,8 @@ export const processor = new EvmBatchProcessor()
         .topic,
       erc721Abi.events["Transfer(address,address,uint256,address,bytes)"].topic,
       erc721Abi.events["Transfer(address,address,uint256)"].topic,
+      erc721Abi.events.OwnershipTransferred.topic,
+      erc721Abi.events.AddWearable.topic,
       landRegistryAbi.events.Update.topic,
       estateRegistryAbi.events.CreateEstate.topic,
       estateRegistryAbi.events.AddLand.topic,

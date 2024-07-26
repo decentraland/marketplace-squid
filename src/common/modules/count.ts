@@ -5,13 +5,13 @@ export const DEFAULT_ID = "all";
 
 export function buildCount(
   counts: Map<string, Count>,
-  network: Network = Network.ethereum
+  network: Network = Network.ETHEREUM
 ): Count {
   const id = `${DEFAULT_ID}-${network}`;
   let count = counts.get(id);
 
   if (!count) {
-    console.log("count not found, creating new one");
+    console.log("INFO: count not found, creating new one");
     count = new Count({ id });
     count.orderTotal = 0;
     count.orderParcel = 0;
@@ -48,7 +48,7 @@ export function buildCount(
 export function buildCountFromNFT(
   nft: NFT,
   counts: Map<string, Count>,
-  network: Network = Network.ethereum
+  network: Network = Network.ETHEREUM
 ): Count {
   const category = nft.category;
   const count = buildCount(counts, network);
@@ -71,7 +71,7 @@ export function buildCountFromNFT(
 export function buildCountFromOrder(
   order: Order,
   counts: Map<string, Count>,
-  network: Network = Network.ethereum
+  network: Network = Network.ETHEREUM
 ) {
   const category = order.category;
   const count = buildCount(counts, network);
@@ -95,7 +95,6 @@ export function buildCountFromSale(
 ): Count {
   const count = buildCount(counts);
   count.salesTotal += 1;
-  // console.log('count.salesTotal: ', count.salesTotal);
   count.salesManaTotal = count.salesManaTotal + price;
   count.daoEarningsManaTotal =
     count.daoEarningsManaTotal + (feesCollectorCut * price) / ONE_MILLION;
@@ -105,15 +104,18 @@ export function buildCountFromSale(
 // Polygon's counts
 
 export function buildCountFromCollection(counts: Map<string, Count>): Count {
-  const count = buildCount(counts, Network.polygon);
+  const count = buildCount(counts, Network.POLYGON);
 
   count.collectionTotal += 1;
 
   return count;
 }
 
-export function buildCountFromItem(counts: Map<string, Count>): Count {
-  const count = buildCount(counts, Network.polygon);
+export function buildCountFromItem(
+  counts: Map<string, Count>,
+  network = Network.POLYGON
+): Count {
+  const count = buildCount(counts, network);
 
   count.itemTotal += 1;
 
@@ -124,7 +126,7 @@ export function buildCountFromPrimarySale(
   counts: Map<string, Count>,
   price: bigint
 ): Count {
-  const count = buildCount(counts, Network.polygon);
+  const count = buildCount(counts, Network.POLYGON);
   count.primarySalesTotal += 1;
   count.primarySalesManaTotal = count.primarySalesManaTotal + price;
   return count;
@@ -134,14 +136,14 @@ export function buildCountFromSecondarySale(
   counts: Map<string, Count>,
   price: bigint
 ): Count {
-  const count = buildCount(counts, Network.polygon);
+  const count = buildCount(counts, Network.POLYGON);
   count.secondarySalesTotal += 1;
   count.secondarySalesManaTotal = count.secondarySalesManaTotal + price;
   return count;
 }
 
 export function buildCountFromBid(counts: Map<string, Count>): Count {
-  let count = buildCount(counts, Network.polygon);
+  let count = buildCount(counts, Network.POLYGON);
 
   count.bidTotal += 1;
 

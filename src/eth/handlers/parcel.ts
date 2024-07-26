@@ -30,7 +30,7 @@ export function handleUpdate(
 
   let parcel = parcels.get(id);
   if (!parcel) {
-    console.log(`id not found ${id} for Parcel on handleUpdate`);
+    console.log(`ERROR: id not found ${id} for Parcel on handleUpdate`);
     parcel = new Parcel({ id });
     parcels.set(id, parcel);
   }
@@ -48,9 +48,8 @@ export function handleUpdate(
 
     let nft = nfts.get(id);
     if (!nft) {
-      console.log(`id not found ${id} for NFT`);
-      nft = new NFT({ id });
-      nft.network = ModelNetwork.ethereum;
+      console.log(`ERROR: id not found ${id} for NFT`);
+      nft = new NFT({ id, network: ModelNetwork.ETHEREUM });
       nfts.set(id, nft);
     }
     nft.name = parcelData.name;
@@ -60,6 +59,6 @@ export function handleUpdate(
     }
     nft.updatedAt = BigInt(block.header.timestamp / 1000);
   } else {
-    console.log(`parcelData not found for parcel ${id}`);
+    console.log(`ERROR: parcelData not found for parcel ${id}`);
   }
 }

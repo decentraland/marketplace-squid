@@ -14,13 +14,13 @@ export function buildData(
   const dataEntity = new Data({ id: assetId });
 
   if (csv.charAt(0) != "0") {
-    console.log("debug: Invalid data")
+    console.log("ERROR: Invalid data")
     return null;
   }
 
   const data = parseCSV(csv);
   if (data.length === 0 || data[0] != "0") {
-    console.log("debug: Invalid data2")
+    console.log("ERROR: Invalid data2")
     return null;
   }
 

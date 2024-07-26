@@ -1,5 +1,6 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, OneToMany as OneToMany_, StringColumn as StringColumn_, BooleanColumn as BooleanColumn_, IntColumn as IntColumn_, BigIntColumn as BigIntColumn_} from "@subsquid/typeorm-store"
 import {Item} from "./item.model"
+import {Network} from "./_network"
 
 @Entity_()
 export class Collection {
@@ -69,4 +70,7 @@ export class Collection {
 
     @BigIntColumn_({nullable: false})
     chainId!: bigint
+
+    @Column_("varchar", {length: 8, nullable: false})
+    network!: Network
 }

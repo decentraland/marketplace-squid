@@ -1,6 +1,6 @@
 enum Network {
-  ethereum
-  polygon
+  ETHEREUM
+  POLYGON
 }
 
 # ---------------------------------------------------------
@@ -152,8 +152,8 @@ type Data @entity {
 
 type NFT @entity {
   id: ID!
-  tokenId: BigInt!
-  contractAddress: String!
+  tokenId: BigInt! @index
+  contractAddress: String! @index
   category: Category!
   owner: Account!
   tokenURI: String
@@ -411,6 +411,8 @@ type Collection @entity {
   # new fields
   baseURI: String!
   chainId: BigInt!
+
+  network: Network!
 }
 
 type Item @entity {
@@ -474,6 +476,8 @@ type Item @entity {
   ## Unique collectors
   uniqueCollectors: [String!]!
   uniqueCollectorsTotal: Int!
+
+  network: Network!
 }
 
 type Metadata @entity {
@@ -481,6 +485,7 @@ type Metadata @entity {
   itemType: ItemType!
   wearable: Wearable
   emote: Emote
+  network: Network!
 }
 
 enum ItemType {

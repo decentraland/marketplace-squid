@@ -5,7 +5,6 @@ import * as erc721abi from "../abi/ERC721";
 import * as marketplaceAbi from "../abi/Marketplace";
 import * as erc721BidAbi from "../abi/ERC721Bid";
 import * as CommitteeABI from "./abi/Committee";
-import * as RarityABI from "./abi/Rarity";
 import {
   Account,
   AccountsDayData,
@@ -35,13 +34,10 @@ import {
 } from "./state";
 
 export type PolygonInMemoryState = {
-  // collections: Map<string, Collection>;
-  // items: Map<string, Item>;
   sales: Map<string, Sale>;
   curations: Map<string, Curation>;
   mints: Map<string, Mint>;
   transfers: Map<string, Transfer>;
-  // rarities: Map<string, Rarity>;
   // ids
   collectionIds: Set<string>;
   tokenIds: Map<string, bigint[]>;

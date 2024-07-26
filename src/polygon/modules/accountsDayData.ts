@@ -76,7 +76,7 @@ export function getOrCreateAccountsDayData(
     accountsDayData.uniqueAndMythicItems = [];
     accountsDayData.uniqueAndMythicItemsTotal = 0;
 
-    accountsDayData.network = Network.polygon; //@TODO see if we remove this since it's not used in ETH
+    accountsDayData.network = Network.POLYGON; //@TODO see if we remove this since it's not used in ETH
   }
 
   return accountsDayData;

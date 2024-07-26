@@ -84,7 +84,7 @@ export const getStoreContractData = async (ctx: Context, block: Block) => {
     storeContractData.fee === undefined ||
     storeContractData.feeOwner === undefined
   ) {
-    console.log("Fetching store contract data for first time");
+    console.log("INFO: Fetching store contract data for first time");
     const addresses = getAddresses(Network.MATIC);
     const storeContract = new CollectionStoreContract(
       ctx,
@@ -111,7 +111,7 @@ export const getMarketplaceContractData = async (
     (marketplaceContractData.ownerCutPerMillion === undefined ||
       marketplaceContractData.owner === undefined)
   ) {
-    console.log("Fetching Marketplace v1 contract data for first time");
+    console.log("INFO: Fetching Marketplace v1 contract data for first time");
     const addresses = getAddresses(Network.MATIC);
     const c = new MarketplaceContract(ctx, block, addresses.Marketplace);
     marketplaceContractData.ownerCutPerMillion = await c.ownerCutPerMillion();
@@ -136,7 +136,7 @@ export const getMarketplaceV2ContractData = async (
       marketplaceV2ContractData.royaltiesCutPerMillion === undefined) &&
     block.height >= contractStartingBlock
   ) {
-    console.log("Fetching marketplace v2 contract data for first time");
+    console.log("INFO: Fetching marketplace v2 contract data for first time");
     const addresses = getAddresses(Network.MATIC);
     const c = new MarketplaceV2Contract(ctx, block, addresses.MarketplaceV2);
     marketplaceV2ContractData.feesCollectorCutPerMillion =
@@ -161,7 +161,7 @@ export const getBidV2ContractData = async (ctx: Context, block: Block) => {
       bidV2ContractData.royaltiesCutPerMillion === undefined) &&
     block.height >= contractStartingBlock
   ) {
-    console.log("Fetching bid v2 contract data for first time");
+    console.log("INFO: Fetching bid v2 contract data for first time");
     const addresses = getAddresses(Network.MATIC);
     const c = new ERC721BidV2Contract(ctx, block, addresses.BidV2);
     bidV2ContractData.feesCollectorCutPerMillion =

@@ -7,7 +7,7 @@ export let ORDER_SALE_TYPE = "order";
 export function getOrCreateAnalyticsDayData(
   blockTimestamp: bigint,
   analytics: Map<string, AnalyticsDayData>,
-  network: ModelNetwork = ModelNetwork.ethereum
+  network: ModelNetwork = ModelNetwork.ETHEREUM
 ): AnalyticsDayData {
   const timestamp = blockTimestamp;
   const dayID = timestamp / BigInt(86400); // unix timestamp for start of day / 86400 giving a unique day index
