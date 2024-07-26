@@ -550,6 +550,8 @@ type Mint @entity {
   searchTokenId: BigInt!
   searchIssuedId: BigInt
   searchIsStoreMinter: Boolean!
+
+  network: Network!
 }
 
 type Curation @entity {

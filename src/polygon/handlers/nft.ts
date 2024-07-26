@@ -109,7 +109,7 @@ export function handleMintNFT(
   const addresses = getAddresses(Network.MATIC);
   const isStoreMinter = minterAddress === addresses.CollectionStore;
 
-  const mint = new Mint({ id: nftId });
+  const mint = new Mint({ id: nftId, network: NetworkModel.POLYGON });
   mint.nft = nft;
   mint.item = item;
   mint.beneficiary = nft.owner.id;

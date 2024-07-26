@@ -1,6 +1,7 @@
 import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_, StringColumn as StringColumn_, BigIntColumn as BigIntColumn_, BooleanColumn as BooleanColumn_} from "@subsquid/typeorm-store"
 import {Item} from "./item.model"
 import {NFT} from "./nft.model"
+import {Network} from "./_network"
 
 @Entity_()
 export class Mint {
@@ -48,4 +49,7 @@ export class Mint {
 
     @BooleanColumn_({nullable: false})
     searchIsStoreMinter!: boolean
+
+    @Column_("varchar", {length: 8, nullable: false})
+    network!: Network
 }
