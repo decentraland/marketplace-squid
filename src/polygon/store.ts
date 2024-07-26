@@ -35,12 +35,12 @@ export const getStoredData = async (
     ids;
 
   const accountIdsToLookFor = [...accountIds].map(
-    (id) => `${id}-${ModelNetwork.polygon}`
+    (id) => `${id}-${ModelNetwork.POLYGON}`
   );
   const accounts = await ctx.store
     .findBy(Account, {
       id: In(accountIdsToLookFor),
-      network: ModelNetwork.polygon,
+      network: ModelNetwork.POLYGON,
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));
 
@@ -63,7 +63,7 @@ export const getStoredData = async (
       },
       where: {
         id: In(nftIds),
-        network: ModelNetwork.polygon,
+        network: ModelNetwork.POLYGON,
       },
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));
@@ -71,7 +71,7 @@ export const getStoredData = async (
   const orders = await ctx.store
     .findBy(Order, {
       nft: In([...Array.from(nftIds.values())]),
-      network: ModelNetwork.polygon,
+      network: ModelNetwork.POLYGON,
       // id: In([...Array.from(nfts.values()).map((nft) => nft.activeOrder)]), // @TODO, revisit this
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));
@@ -79,7 +79,7 @@ export const getStoredData = async (
   const analytics = await ctx.store
     .findBy(AnalyticsDayData, {
       id: In([...Array.from(analyticsIds.values())]),
-      network: ModelNetwork.polygon,
+      network: ModelNetwork.POLYGON,
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));
 
@@ -98,7 +98,7 @@ export const getStoredData = async (
   const counts = await ctx.store
     .find(Count, {
       where: {
-        network: ModelNetwork.polygon,
+        network: ModelNetwork.POLYGON,
       },
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));
@@ -112,6 +112,7 @@ export const getStoredData = async (
         metadata: true,
       },
       where: [
+        { network: ModelNetwork.POLYGON },
         {
           collection: In([...collectionIds]),
         },
@@ -129,7 +130,7 @@ export const getStoredData = async (
     .find(Wearable, {
       where: {
         id: In([...itemIds]),
-        network: ModelNetwork.polygon,
+        network: ModelNetwork.POLYGON,
       },
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));
@@ -157,6 +158,7 @@ export const getStoredData = async (
         wearable: true,
       },
       where: {
+        network: ModelNetwork.POLYGON,
         id: In([...metadataIds]),
       },
     })
@@ -165,6 +167,7 @@ export const getStoredData = async (
   const collections = await ctx.store
     .find(Collection, {
       where: {
+        network: ModelNetwork.POLYGON,
         id: In([...collectionIds]),
       },
     })
@@ -177,7 +180,7 @@ export const getStoredData = async (
       },
       where: {
         id: In([...Array.from(bidIds.values())]),
-        network: ModelNetwork.polygon,
+        network: ModelNetwork.POLYGON,
       },
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));

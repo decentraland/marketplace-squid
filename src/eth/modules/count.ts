@@ -4,11 +4,11 @@ import { Category, Count, NFT, Network, Order } from "../../model";
 export const DEFAULT_ID = "all";
 
 export function buildCount(counts: Map<string, Count>): Count {
-  const id = `${DEFAULT_ID}-${Network.ethereum}`;
+  const id = `${DEFAULT_ID}-${Network.ETHEREUM}`;
   let count = counts.get(id);
 
   if (!count) {
-    console.log("count not found, creating new one");
+    console.log("INFO: count not found, creating new one");
     count = new Count({ id });
     count.orderTotal = 0;
     count.orderParcel = 0;
@@ -36,7 +36,7 @@ export function buildCount(counts: Map<string, Count>): Count {
     count.secondarySalesManaTotal = BigInt(0);
     count.royaltiesManaTotal = BigInt(0);
 
-    count.network = Network.ethereum;
+    count.network = Network.ETHEREUM;
   }
 
   return count as Count;

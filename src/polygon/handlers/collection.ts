@@ -85,6 +85,7 @@ export const handleCollectionCreation = async (
       searchText: name.toLowerCase(),
       baseURI,
       chainId,
+      network: ModelNetwork.POLYGON,
     })
   );
   const metric = buildCountFromCollection(counts);
@@ -93,7 +94,7 @@ export const handleCollectionCreation = async (
   const creatorAccount = createOrLoadAccount(
     storedData.accounts,
     creator,
-    ModelNetwork.polygon
+    ModelNetwork.POLYGON
   );
   creatorAccount.collections += 1;
 };
@@ -353,12 +354,9 @@ export async function handleAddItem(
   const itemId = event._itemId.toString();
 
   const id = getItemId(collectionAddress, itemId.toString());
-  //   let rarity = Rarity.load(contractItem.rarity);
   const rarity = rarities.get(contractItem.rarity);
-  //   console.log("rarity inside Add Item: ", rarity);
   if (!rarity) {
     console.log(`ERROR: Rarity not found: ${contractItem.rarity}`);
-    // return;
   }
 
   let creationFee = BigInt(0);
@@ -386,6 +384,7 @@ export async function handleAddItem(
   }
 
   const item = new Item({ id });
+  item.network = ModelNetwork.POLYGON;
   item.creator = collection.creator;
   item.blockchainId = event._itemId;
   item.collection = collection;
@@ -455,7 +454,7 @@ export async function handleAddItem(
   const analyticsDayData = getOrCreateAnalyticsDayData(
     timestamp,
     analytics,
-    ModelNetwork.polygon
+    ModelNetwork.POLYGON
   );
   analyticsDayData.daoEarnings = analyticsDayData.daoEarnings + creationFee;
   //   console.log("analyticsDayData.id: ", analyticsDayData.id);
@@ -558,7 +557,7 @@ export function handleRescueItem(
       let account = createOrLoadAccount(
         accounts,
         curator,
-        ModelNetwork.polygon
+        ModelNetwork.POLYGON
       );
 
       curation.curator = account;
@@ -765,7 +764,7 @@ export function handleSetApproved(
       const curatorAccount = createOrLoadAccount(
         accounts,
         curator,
-        ModelNetwork.polygon
+        ModelNetwork.POLYGON
       );
 
       curation.curator = curatorAccount;
@@ -835,15 +834,12 @@ export function handleTransferCreatorship(
   const newCreator = event._newCreator;
   if (collection) {
     collection.creator = newCreator;
-    // collection.items
-    // console.log("collection.items: ", collection.items);
     let itemCount = collection.itemsCount;
     for (let i = 0; i < itemCount; i++) {
       let itemId = getItemId(collection.id, i.toString());
       const item = items.get(itemId);
       if (item) {
         item.creator = newCreator;
-        // item.save();
       } else {
         console.log(
           `ERROR: Item not found in handleTransferCreatorship: ${itemId}`

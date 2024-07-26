@@ -12,6 +12,9 @@ import {
   Parcel,
   Wearable,
   Network as ModelNetwork,
+  Item,
+  Collection,
+  Metadata,
 } from "../model";
 import { Context } from "./processor";
 import { getAddresses } from "../common/utils/addresses";
@@ -30,6 +33,8 @@ export const getStoredData = async (
     | "tokenIds"
     | "analyticsIds"
     | "bidIds"
+    | "collectionIds"
+    | "itemIds"
   >
 ) => {
   const {
@@ -40,17 +45,19 @@ export const getStoredData = async (
     tokenIds,
     analyticsIds,
     bidIds,
+    collectionIds,
+    itemIds,
   } = ids;
 
   const accountIdsToLookFor = [...accountIds].map(
-    (id) => `${id}-${ModelNetwork.ethereum}`
+    (id) => `${id}-${ModelNetwork.ETHEREUM}`
   );
   // console.log("accountIdsToLookFor: ", accountIdsToLookFor);
 
   const accounts = await ctx.store
     .findBy(Account, {
       id: In(accountIdsToLookFor),
-      network: ModelNetwork.ethereum,
+      network: ModelNetwork.ETHEREUM,
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));
   // console.log("accounts: ", accounts);
@@ -78,6 +85,11 @@ export const getStoredData = async (
         tokenId.map((id) => `wearable-${contractAddress}-${id}`)
       )
       .flat(),
+    ...Array.from(tokenIds.entries()) // for the NFTs created by the handleTransferWearableV1 that won't have the prefix added
+      .map(([contractAddress, tokenId]) =>
+        tokenId.map((id) => `${contractAddress}-${id}`)
+      )
+      .flat(),
     ...Array.from(ensTokenIds.values()).map(
       (tokenId) => `ens-${addresses.DCLRegistrar}-${tokenId}`
     ),
@@ -88,10 +100,12 @@ export const getStoredData = async (
       relations: {
         owner: true,
         activeOrder: true,
+        metadata: true,
+        item: true,
       },
       where: {
         id: In(nftIds),
-        network: ModelNetwork.ethereum,
+        network: ModelNetwork.ETHEREUM,
       },
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));
@@ -99,7 +113,7 @@ export const getStoredData = async (
   const orders = await ctx.store
     .findBy(Order, {
       nft: In([...Array.from(nftIds.values())]),
-      network: ModelNetwork.ethereum,
+      network: ModelNetwork.ETHEREUM,
       // id: In([...Array.from(nfts.values()).map((nft) => nft.activeOrder)]), // @TODO, revisit this
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));
@@ -123,7 +137,7 @@ export const getStoredData = async (
   const wearables = await ctx.store
     .findBy(Wearable, {
       id: In([...Array.from(wearablesIds.values())]),
-      network: ModelNetwork.ethereum,
+      network: ModelNetwork.ETHEREUM,
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));
 
@@ -136,13 +150,13 @@ export const getStoredData = async (
   const analytics = await ctx.store
     .findBy(AnalyticsDayData, {
       id: In([...Array.from(analyticsIds.values())]),
-      network: ModelNetwork.ethereum,
+      network: ModelNetwork.ETHEREUM,
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));
 
   const counts = await ctx.store
     .findBy(Count, {
-      network: ModelNetwork.ethereum,
+      network: ModelNetwork.ETHEREUM,
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));
 
@@ -153,8 +167,59 @@ export const getStoredData = async (
       },
       where: {
         id: In([...Array.from(bidIds.values())]),
-        network: ModelNetwork.ethereum,
+        network: ModelNetwork.ETHEREUM,
       },
+    })
+    .then((q) => new Map(q.map((i) => [i.id, i])));
+
+  const collections = await ctx.store
+    .find(Collection, {
+      where: {
+        network: ModelNetwork.POLYGON,
+        id: In([...collectionIds]),
+      },
+    })
+    .then((q) => new Map(q.map((i) => [i.id, i])));
+
+  const metadataIds = [
+    ...Array.from(itemIds.entries())
+      .map(([contractAddress, tokenId]) =>
+        tokenId.map((id) => `${contractAddress}-${id}`)
+      )
+      .flat(),
+  ];
+
+  const metadatas = await ctx.store
+    .find(Metadata, {
+      relations: {
+        emote: true,
+        wearable: true,
+      },
+      where: {
+        network: ModelNetwork.POLYGON,
+        id: In([...metadataIds]),
+      },
+    })
+    .then((q) => new Map(q.map((i) => [i.id, i])));
+
+  const items = await ctx.store
+    .find(Item, {
+      relations: {
+        collection: true,
+        metadata: true,
+      },
+      where: [
+        { network: ModelNetwork.ETHEREUM },
+        {
+          collection: In([...collectionIds]),
+        },
+        {
+          id: In([...itemIds]),
+        },
+        // {
+        //   id: In([...nftItemIds]),
+        // },
+      ],
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));
 
@@ -170,5 +235,8 @@ export const getStoredData = async (
     analytics,
     counts,
     bids,
+    items,
+    collections,
+    metadatas,
   };
 };

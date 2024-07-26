@@ -6,7 +6,7 @@ export function handleMemeberSet(
   accounts: Map<string, Account>,
   event: MemberSetEventArgs
 ): void {
-  const account = createOrLoadAccount(accounts, event._member, Network.polygon);
+  const account = createOrLoadAccount(accounts, event._member, Network.POLYGON);
 
   account.isCommitteeMember = event._value;
 }

@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, BigIntColumn as BigIntColumn_, StringColumn as StringColumn_, ManyToOne as ManyToOne_, Index as Index_, OneToMany as OneToMany_, OneToOne as OneToOne_, JoinColumn as JoinColumn_, IntColumn as IntColumn_, BooleanColumn as BooleanColumn_} from "@subsquid/typeorm-store"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, BigIntColumn as BigIntColumn_, Index as Index_, StringColumn as StringColumn_, ManyToOne as ManyToOne_, OneToMany as OneToMany_, OneToOne as OneToOne_, JoinColumn as JoinColumn_, IntColumn as IntColumn_, BooleanColumn as BooleanColumn_} from "@subsquid/typeorm-store"
 import {Category} from "./_category"
 import {Account} from "./account.model"
 import {Order} from "./order.model"
@@ -26,9 +26,11 @@ export class NFT {
     @PrimaryColumn_()
     id!: string
 
+    @Index_()
     @BigIntColumn_({nullable: false})
     tokenId!: bigint
 
+    @Index_()
     @StringColumn_({nullable: false})
     contractAddress!: string
 

@@ -11,6 +11,9 @@ import { startBlockByNetwork } from "./data/contracts/start-blocks";
 
 export const getBatchInMemoryState: () => EthereumInMemoryState = () => ({
   transfers: new Map(),
+  collectionIds: new Set(),
+  mints: new Map(),
+  itemIds: new Map(),
   tokenIds: new Map(),
   landTokenIds: new Set(),
   estateTokenIds: new Set(),

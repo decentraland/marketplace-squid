@@ -60,7 +60,7 @@ export function trackSale(
   // count sale
   // let count = buildCountFromSale(price);
 
-  const count = buildCount(counts, Network.polygon);
+  const count = buildCount(counts, Network.POLYGON);
 
   count.salesTotal += 1;
   count.salesManaTotal = count.salesManaTotal + price;
@@ -80,7 +80,7 @@ export function trackSale(
   }
 
   // save sale
-  const saleId = `${BigInt(count.salesTotal).toString()}-${Network.polygon}`;
+  const saleId = `${BigInt(count.salesTotal).toString()}-${Network.POLYGON}`;
   const sale = new Sale({ id: saleId });
   sale.type = type;
   sale.buyer = buyer;
@@ -95,7 +95,7 @@ export function trackSale(
   sale.searchTokenId = nft.tokenId;
   sale.searchContractAddress = nft.contractAddress;
   sale.searchCategory = nft.category;
-  sale.network = Network.polygon;
+  sale.network = Network.POLYGON;
 
   // update Fees
   // console.log("feesCollector: ", feesCollector);
@@ -125,7 +125,7 @@ export function trackSale(
       const royaltiesCollectorAccount = createOrLoadAccount(
         accounts,
         royaltiesCollectorAddress,
-        Network.polygon
+        Network.POLYGON
       );
       royaltiesCollectorAccount.earned =
         royaltiesCollectorAccount.earned + sale.royaltiesCut;
@@ -154,7 +154,7 @@ export function trackSale(
   sales.set(saleId, sale);
 
   // update buyer account
-  const buyerAccount = createOrLoadAccount(accounts, buyer, Network.polygon);
+  const buyerAccount = createOrLoadAccount(accounts, buyer, Network.POLYGON);
   buyerAccount.purchases += 1;
   buyerAccount.spent = buyerAccount.spent + price;
 
@@ -175,7 +175,7 @@ export function trackSale(
   // buyerAccount.save();
 
   // update seller account
-  const sellerAccount = createOrLoadAccount(accounts, seller, Network.polygon);
+  const sellerAccount = createOrLoadAccount(accounts, seller, Network.POLYGON);
   sellerAccount.sales += 1;
   sellerAccount.earned = sellerAccount.earned + (price - totalFees);
   sellerAccount.uniqueCollectors = updateUniqueCollectorsSet(
@@ -195,7 +195,7 @@ export function trackSale(
   // sellerAccount.save();
 
   // update fees collector account
-  const feesCollectorAccount = createOrLoadAccount(accounts, feesCollector, Network.polygon);
+  const feesCollectorAccount = createOrLoadAccount(accounts, feesCollector, Network.POLYGON);
   feesCollectorAccount.earned =
     feesCollectorAccount.earned + sale.feesCollectorCut;
   feesCollectorAccount.royalties =
@@ -230,7 +230,7 @@ export function trackSale(
     const creatorAccount = createOrLoadAccount(
       accounts,
       item.creator,
-      Network.polygon
+      Network.POLYGON
     );
     creatorAccount.primarySales += 1;
     creatorAccount.primarySalesEarned =
@@ -276,7 +276,7 @@ export function updateAnalyticsDayData(
   const analyticsDayData = getOrCreateAnalyticsDayData(
     sale.timestamp,
     analytics,
-    Network.polygon
+    Network.POLYGON
   );
   // console.log("sale.feesCollectorCut: ", sale.feesCollectorCut);
   // console.log("sale.royaltiesCut: ", sale.royaltiesCut);

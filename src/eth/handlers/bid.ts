@@ -44,7 +44,7 @@ export function handleBidCreated(
   const nft = nfts.get(nftId);
 
   if (nft) {
-    bid.network = NetworkModel.ethereum;
+    bid.network = NetworkModel.ETHEREUM;
     bid.bidAddress = contractAddress;
     bid.status = OrderStatus.open;
     bid.category = category ? (category as Category) : Category.wearable;

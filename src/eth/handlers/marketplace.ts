@@ -43,17 +43,22 @@ export function handleOrderCreated(
   const { assetId, nftAddress, id, seller, priceInWei, expiresAt } = event;
 
   const category = getCategory(Network.ETHEREUM, nftAddress);
-  const nftId = getNFTId(nftAddress, assetId.toString(), category);
+  const nftId = getNFTId(
+    nftAddress,
+    assetId.toString(),
+    category !== Category.wearable ? category : undefined
+  );
   const nft = nfts.get(nftId);
   if (nft) {
     const orderId = id;
 
     const order = new Order({ id: orderId });
-    order.network = ModelNetwork.ethereum;
+    order.network = ModelNetwork.ETHEREUM;
     order.marketplaceAddress = contractAddress;
     order.status = OrderStatus.open;
     order.category = category as Category;
     order.nft = nft;
+    order.item = nft.item;
     order.nftAddress = nftAddress;
     order.tokenId = assetId;
     order.txHash = txHash;
@@ -119,7 +124,7 @@ export async function handleOrderSuccessful(
     return;
   }
 
-  const buyerAccount = accounts.get(`${buyer}-${ModelNetwork.ethereum}`);
+  const buyerAccount = accounts.get(`${buyer}-${ModelNetwork.ETHEREUM}`);
   if (buyerAccount) {
     nft.owner = buyerAccount;
   } else {

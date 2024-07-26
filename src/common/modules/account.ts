@@ -4,7 +4,7 @@ export const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 
 export function createAccount(
   id: string,
-  network: Network = Network.ethereum
+  network: Network = Network.ETHEREUM
 ): Account {
   return new Account({
     id: `${id}-${network}`,
@@ -32,7 +32,7 @@ export function createAccount(
 export function createOrLoadAccount(
   accounts: Map<string, Account>,
   id: string,
-  network: Network = Network.ethereum
+  network: Network = Network.ETHEREUM
 ): Account {
   const accountId = `${id}-${network}`;
   let account = accounts.get(accountId);

@@ -1,5 +1,13 @@
 import * as itemTypes from "./itemTypes";
-import { Emote, Item, ItemType, Metadata, NFT, Wearable } from "../../../model";
+import {
+  Emote,
+  Item,
+  ItemType,
+  Metadata,
+  NFT,
+  Network,
+  Wearable,
+} from "../../../model";
 import {
   buildWearableItem,
   setItemWearableSearchFields,
@@ -25,6 +33,7 @@ export function buildItemMetadata(
 
   if (!metadata) {
     metadata = new Metadata({ id });
+    metadata.network = Network.POLYGON;
     metadatas.set(id, metadata);
   }
 
@@ -73,7 +82,7 @@ export function setItemSearchFields(
   item: Item,
   metadatas: Map<string, Metadata>,
   wearables: Map<string, Wearable>,
-  emotes: Map<string, Emote>
+  emotes?: Map<string, Emote>
 ): void {
   if (
     item.itemType === itemTypes.WEARABLE_V2 ||
@@ -82,7 +91,7 @@ export function setItemSearchFields(
   ) {
     setItemWearableSearchFields(item, metadatas, wearables);
   }
-  if (item.itemType === itemTypes.EMOTE_V1) {
+  if (item.itemType === itemTypes.EMOTE_V1 && emotes) {
     setItemEmoteSearchFields(item, metadatas, emotes);
   }
 }
@@ -91,7 +100,7 @@ export function setNFTSearchFields(
   nft: NFT,
   metadatas: Map<string, Metadata>,
   wearables: Map<string, Wearable>,
-  emotes: Map<string, Emote>
+  emotes?: Map<string, Emote>
 ): NFT {
   if (
     nft.itemType == itemTypes.WEARABLE_V2 ||
@@ -101,7 +110,7 @@ export function setNFTSearchFields(
     return setNFTWearableSearchFields(nft, metadatas, wearables);
   }
 
-  if (nft.itemType == itemTypes.EMOTE_V1) {
+  if (nft.itemType == itemTypes.EMOTE_V1 && !!emotes) {
     return setNFTEmoteSearchFields(nft, metadatas, emotes);
   }
 

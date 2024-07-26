@@ -47,7 +47,7 @@ export function handleCreateEstate(
   const estate = new Estate({ id });
 
   estate.tokenId = _estateId;
-  const owner = accounts.get(`${_owner}-${ModelNetwork.ethereum}`);
+  const owner = accounts.get(`${_owner}-${ModelNetwork.ETHEREUM}`);
   if (owner) {
     estate.owner = owner; // @TODO: Check if all the estates have owners later on
   }
@@ -61,7 +61,7 @@ export function handleCreateEstate(
     estate.data = estateData;
     datas.set(estateData.id, estateData);
 
-    const nft = nfts.get(id) || new NFT({ id });
+    const nft = nfts.get(id) || new NFT({ id, network: ModelNetwork.ETHEREUM });
     nft.name = estateData.name;
     nft.searchText = estateData.name?.toLowerCase();
 
@@ -104,7 +104,9 @@ export function handleAddLand(
     // @TODO: fix this ugly check
     estate.size += 1;
   } else {
-    console.log(`estate not found to increase size in handleAddLand!: ${id}`);
+    console.log(
+      `ERROR: estate not found to increase size in handleAddLand!: ${id}`
+    );
     // @todo WARN
   }
 
@@ -206,15 +208,17 @@ export function handleRemoveLand(
     parcel.tokenId = _landId;
   }
 
-  const owner = accounts.get(`${_destinatary}-${ModelNetwork.ethereum}`);
+  const owner = accounts.get(`${_destinatary}-${ModelNetwork.ETHEREUM}`);
   if (owner) {
     parcel.owner = owner;
   }
   parcel.estate = null;
 
-  const parcelNFT = nfts.get(parcelId) || new NFT({ id: parcelId });
+  const parcelNFT =
+    nfts.get(parcelId) ||
+    new NFT({ id: parcelId, network: ModelNetwork.ETHEREUM });
   if (parcelNFT && owner) {
-    parcelNFT.network = ModelNetwork.ethereum;
+    parcelNFT.network = ModelNetwork.ETHEREUM;
     parcelNFT.searchParcelEstateId = null;
     parcelNFT.owner = owner;
     nfts.set(parcelId, parcelNFT);
@@ -265,12 +269,11 @@ export function handleUpdate(
     let nft = nfts.get(id);
     if (!nft) {
       console.log(
-        `id not found ${id} for NFT in the event: ${event._assetId.toString()}, ${
+        `ERROR: id not found ${id} for NFT in the event: ${event._assetId.toString()}, ${
           event._data
         }`
       );
-      nft = new NFT({ id });
-      nft.network = ModelNetwork.ethereum;
+      nft = new NFT({ id, network: ModelNetwork.ETHEREUM });
     }
     nft.name = estateData.name;
     nft.searchText = estateData.name?.toLowerCase();
@@ -278,7 +281,7 @@ export function handleUpdate(
 
     nfts.set(id, nft);
   } else {
-    console.log(`estateData not found for estate ${id}`);
+    console.log(`ERROR: estateData not found for estate ${id}`);
   }
 
   estates.set(id, estate);

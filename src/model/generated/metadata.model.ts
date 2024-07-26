@@ -2,6 +2,7 @@ import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, M
 import {ItemType} from "./_itemType"
 import {Wearable} from "./wearable.model"
 import {Emote} from "./emote.model"
+import {Network} from "./_network"
 
 @Entity_()
 export class Metadata {
@@ -22,4 +23,7 @@ export class Metadata {
     @Index_()
     @ManyToOne_(() => Emote, {nullable: true})
     emote!: Emote | undefined | null
+
+    @Column_("varchar", {length: 8, nullable: false})
+    network!: Network
 }

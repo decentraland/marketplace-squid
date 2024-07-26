@@ -16,7 +16,6 @@ export async function handleRaritiesSet(
   const rarityAddress = addresses.Rarity;
   const raritiesWithOracleAddress = addresses.RaritiesWithOracle;
   const newRaritiesAddress = event._newRarities;
-  console.log("newRaritiesAddress: ", newRaritiesAddress);
 
   if (newRaritiesAddress === raritiesWithOracleAddress) {
     let raritiesWithOracle = new RaritiesWithOracleABI.Contract(
@@ -39,7 +38,6 @@ export async function handleRaritiesSet(
       rarity.price = blockchainRarity.price;
       rarity.maxSupply = blockchainRarity.maxSupply;
       rarity.currency = Currency.USD;
-      console.log("rarity1: ", rarity);
       rarities.set(rarity.name, rarity);
       //   rarity.save();
     }
@@ -60,11 +58,12 @@ export async function handleRaritiesSet(
       rarity.price = blockchainRarity.price;
       rarity.maxSupply = blockchainRarity.maxSupply;
       rarity.currency = Currency.MANA;
-      console.log("rarity2: ", rarity);
       rarities.set(rarity.name, rarity);
       //   rarity.save();
     }
   } else {
-    console.log("Unsupported rarity contract address {}", [newRaritiesAddress]);
+    console.log(
+      `INFO: Unsupported rarity contract address ${newRaritiesAddress}`
+    );
   }
 }

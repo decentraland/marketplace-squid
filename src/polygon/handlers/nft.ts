@@ -72,7 +72,7 @@ export function handleMintNFT(
   const owner = createOrLoadAccount(
     accounts,
     event._beneficiary,
-    NetworkModel.polygon
+    NetworkModel.POLYGON
   );
   if (owner) {
     nft.owner = owner;
@@ -96,12 +96,12 @@ export function handleMintNFT(
 
   setNFTSearchFields(nft, metadatas, wearables, emotes);
 
-  createOrLoadAccount(accounts, event._beneficiary, NetworkModel.polygon);
+  createOrLoadAccount(accounts, event._beneficiary, NetworkModel.POLYGON);
 
-  const metric = buildCountFromNFT(nft, counts, NetworkModel.polygon);
+  const metric = buildCountFromNFT(nft, counts, NetworkModel.POLYGON);
   counts.set(metric.id, metric);
 
-  nft.network = NetworkModel.polygon;
+  nft.network = NetworkModel.POLYGON;
   nfts.set(nftId, nft);
 
   // store mint data
@@ -177,7 +177,7 @@ export function handleTransferNFT(
   const ownerAccount = createOrLoadAccount(
     storedData.accounts,
     event.to,
-    NetworkModel.polygon
+    NetworkModel.POLYGON
   );
 
   const timestamp = BigInt(block.timestamp / 1000);

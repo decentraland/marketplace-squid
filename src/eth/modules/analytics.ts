@@ -46,7 +46,7 @@ export function trackSale(
   const nft = nfts.get(nftId);
 
   // save sale
-  const saleId = `${BigInt(count.salesTotal).toString()}-${Network.ethereum}`;
+  const saleId = `${BigInt(count.salesTotal).toString()}-${Network.ETHEREUM}`;
   const sale = new Sale({ id: saleId });
   sale.type = type as SaleType;
   sale.buyer = buyer;
@@ -62,7 +62,7 @@ export function trackSale(
   }
   sale.timestamp = timestamp;
   sale.txHash = txHash;
-  sale.network = Network.ethereum;
+  sale.network = Network.ETHEREUM;
   sales.set(saleId, sale);
 
   // update buyer account

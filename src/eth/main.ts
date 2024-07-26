@@ -9,7 +9,7 @@ import * as erc721Bid from "../abi/ERC721Bid";
 import * as dclControllerV2abi from "../abi/DCLControllerV2";
 import { Order, Sale, Transfer, Network as ModelNetwork } from "../model";
 import { processor } from "./processor";
-import { getNFTId } from "../common/utils";
+import { getNFTId, getTokenURI } from "../common/utils";
 import { tokenURIMutilcall } from "../common/utils/multicall";
 import { getAddresses } from "../common/utils/addresses";
 import {
@@ -47,8 +47,15 @@ import {
   handleBidCancelled,
   handleBidCreated,
 } from "./handlers/bid";
-import { handleTransfer } from "./handlers/nft";
+import {
+  handleAddItemV1,
+  handleTransfer,
+  handleTransferWearableV1,
+} from "./handlers/nft";
 import { getBidId } from "../common/handlers/bid";
+import { handleInitializeWearablesV1 } from "./handlers/collection";
+import { getItemId } from "../polygon/modules/item";
+import { getWearableIdFromTokenURI } from "./modules/wearable";
 
 const landCoordinates: Map<bigint, Coordinate> = new Map();
 const tokenURIs: Map<string, string> = new Map();
@@ -71,6 +78,9 @@ processor.run(
     console.log("bytesRead: ", bytesRead);
     const addresses = getAddresses(Network.ETHEREUM);
     const {
+      mints,
+      collectionIds,
+      itemIds,
       accountIds,
       estateEvents,
       estateTokenIds,
@@ -126,6 +136,19 @@ processor.run(
                   ...(tokenIds.get(contractAddress) || []),
                   event.tokenId,
                 ]);
+                // @TODO: check how to improve this
+                const tokenURI = await getTokenURI(
+                  ctx,
+                  block.header,
+                  log.address,
+                  event.tokenId
+                );
+                const representationId = getWearableIdFromTokenURI(tokenURI);
+                const itemId = getItemId(log.address, representationId);
+                itemIds.set(log.address, [
+                  ...(itemIds.get(log.address) || []),
+                  itemId,
+                ]);
 
                 break;
             }
@@ -145,11 +168,30 @@ processor.run(
                 from: event.from,
                 to: event.to,
                 // network: Network.ETHEREUM.toString(),
-                network: ModelNetwork.ethereum,
+                network: ModelNetwork.ETHEREUM,
                 timestamp: BigInt(timestamp),
                 txHash: log.transactionHash,
               })
             );
+            break;
+          }
+          case erc721abi.events.OwnershipTransferred.topic: {
+            markteplaceEvents.push({
+              topic,
+              event: erc721abi.events.OwnershipTransferred.decode(log),
+              block,
+              log,
+            });
+            break;
+          }
+          case erc721abi.events.AddWearable.topic: {
+            collectionIds.add(log.address.toLowerCase());
+            markteplaceEvents.push({
+              topic,
+              event: erc721abi.events.AddWearable.decode(log),
+              block,
+              log,
+            });
             break;
           }
           case estateRegistryABI.events.CreateEstate.topic: {
@@ -398,6 +440,9 @@ processor.run(
       analytics,
       counts,
       bids,
+      collections,
+      items,
+      metadatas,
     } = await getStoredData(ctx, {
       accountIds,
       landTokenIds,
@@ -406,6 +451,8 @@ processor.run(
       tokenIds,
       analyticsIds,
       bidIds,
+      collectionIds,
+      itemIds,
     });
 
     const sales = new Map<string, Sale>();
@@ -550,28 +597,56 @@ processor.run(
             "Transfer(address,address,uint256,address,bytes,bytes)"
           ].topic
       ) {
-        handleTransfer(
-          block,
+        if ([...Object.values(addresses.collections)].includes(log.address)) {
+          console.log("INFO: transfer from NFT V1 detected");
+          handleTransferWearableV1(
+            block.header,
+            log.address,
+            event as erc721abi.TransferEventArgs_2,
+            collections,
+            items,
+            accounts,
+            metadatas,
+            wearables,
+            counts,
+            mints,
+            nfts,
+            newTokenURIs
+          );
+        } else {
+          handleTransfer(
+            block,
+            log.address,
+            event as erc721abi.TransferEventArgs_2,
+            accounts,
+            counts,
+            nfts,
+            parcels,
+            estates,
+            wearables,
+            orders,
+            ens,
+            newTokenURIs,
+            landCoordinates
+          );
+        }
+      } else if (topic === erc721abi.events.OwnershipTransferred.topic) {
+        handleInitializeWearablesV1(counts);
+      } else if (topic === erc721abi.events.AddWearable.topic) {
+        await handleAddItemV1(
+          ctx,
           log.address,
-          event as erc721abi.TransferEventArgs_2,
-          accounts,
+          event as erc721abi.AddWearableEventArgs,
+          block,
+          collections,
+          items,
           counts,
-          nfts,
-          parcels,
-          estates,
           wearables,
-          orders,
-          ens,
-          newTokenURIs,
-          landCoordinates
+          metadatas
         );
       }
     }
 
-    // console.log(`Processing ${estateEvents.length} estate events`);
-    // console.log(`Processing ${markteplaceEvents.length} order events`);
-    // console.log(`Processing ${parcelEvents.length} parcel events`);
-    // console.log(`Processing ${ensEvents.length} ens events`);
     for (const { block, event, topic } of estateEvents) {
       if (
         topic === estateRegistryABI.events.CreateEstate.topic &&
@@ -639,6 +714,9 @@ processor.run(
         ens,
         analytics,
         counts,
+        collections,
+        metadatas,
+        items,
       ];
 
       for (const entity of maps) {
@@ -669,6 +747,7 @@ processor.run(
       await ctx.store.upsert([...nfts.values()]); // save NFTs back with orders
       await ctx.store.upsert([...bids.values()]);
       await ctx.store.insert([...transfers.values()]);
+      await ctx.store.insert([...mints.values()]);
 
       // log some stats
       ctx.log.info(

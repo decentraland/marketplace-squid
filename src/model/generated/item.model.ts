@@ -6,6 +6,7 @@ import {NFT} from "./nft.model"
 import {WearableCategory} from "./_wearableCategory"
 import {WearableBodyShape} from "./_wearableBodyShape"
 import {EmoteCategory} from "./_emoteCategory"
+import {Network} from "./_network"
 
 @Entity_()
 export class Item {
@@ -158,4 +159,7 @@ export class Item {
 
     @IntColumn_({nullable: false})
     uniqueCollectorsTotal!: number
+
+    @Column_("varchar", {length: 8, nullable: false})
+    network!: Network
 }

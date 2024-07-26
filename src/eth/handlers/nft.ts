@@ -1,5 +1,7 @@
 import { BlockData } from "@subsquid/evm-processor";
-import { TransferEventArgs_2 } from "../../abi/ERC721";
+import * as CollectionV2ABI from "../../polygon/abi/CollectionV2";
+import * as ERC721Abi from "../../abi/ERC721";
+import { AddWearableEventArgs, TransferEventArgs_2 } from "../../abi/ERC721";
 import {
   Account,
   Category,
@@ -11,6 +13,11 @@ import {
   Parcel,
   Wearable,
   Network as ModelNetwork,
+  Collection,
+  Item,
+  Metadata,
+  ItemType,
+  Mint,
 } from "../../model";
 import { Network } from "@dcl/schemas";
 import { bigint } from "../../model/generated/marshal";
@@ -23,23 +30,29 @@ import {
   getParcelImage,
   getParcelText,
   isInBounds,
-} from "../../eth/LANDs/utils";
+} from "../LANDs/utils";
 import { Coordinate } from "../../types";
 import {
   buildWearableFromNFT,
+  buildWearableV1Metadata,
+  getIssuedIdFromTokenURI,
+  getWearableIdFromTokenURI,
   getWearableImage,
-} from "../../eth/modules/wearable";
-import { buildENSFromNFT } from "../../eth/modules/ens";
-import { buildCountFromNFT } from "../../eth/modules/count";
+  getWearableV1Representation,
+} from "../modules/wearable";
+import { buildENSFromNFT } from "../modules/ens";
+import { buildCount, buildCountFromNFT } from "../modules/count";
 import { getAddresses } from "../../common/utils/addresses";
 import { getCategory } from "../../common/utils/category";
 import {
   cancelActiveOrder,
   clearNFTOrderProperties,
   getNFTId,
+  getTokenURI,
   isMint,
 } from "../../common/utils";
 import {
+  ZERO_ADDRESS,
   createAccount,
   createOrLoadAccount,
 } from "../../common/modules/account";
@@ -47,6 +60,17 @@ import {
   isWearableAccessory,
   isWearableHead,
 } from "../../common/modules/metadata/wearable";
+import { Block, Context } from "../processor";
+import {
+  getURNForCollectionV1,
+  getURNForWearableV1,
+} from "../../polygon/modules/metadata/wearable";
+import { getItemId, getItemImage } from "../../polygon/modules/item";
+import {
+  setItemSearchFields,
+  setNFTSearchFields,
+} from "../../polygon/modules/metadata";
+import { buildCountFromItem } from "../../common/modules/count";
 
 export function handleTransfer(
   block: BlockData,
@@ -77,14 +101,14 @@ export function handleTransfer(
 
   if (!nft) {
     nft = new NFT({ id });
-    nft.network = ModelNetwork.ethereum;
+    nft.network = ModelNetwork.ETHEREUM;
     nfts.set(id, nft);
   }
 
-  let toAccount = accounts.get(`${to}-${ModelNetwork.ethereum}`);
+  let toAccount = accounts.get(`${to}-${ModelNetwork.ETHEREUM}`);
   if (!toAccount) {
     toAccount = createAccount(to);
-    accounts.set(`${to}-${ModelNetwork.ethereum}`, toAccount);
+    accounts.set(`${to}-${ModelNetwork.ETHEREUM}`, toAccount);
   }
 
   const timestamp = BigInt(block.header.timestamp / 1000);
@@ -186,6 +210,7 @@ export function handleTransfer(
     let wearable: Wearable | undefined = undefined;
     if (isMint(from)) {
       wearable = buildWearableFromNFT(nft);
+      wearable.network = ModelNetwork.ETHEREUM;
       if (!!wearable.id) {
         nft.wearable = wearable;
         nft.name = wearable.name;
@@ -201,7 +226,7 @@ export function handleTransfer(
       const existingWearable = wearables.get(id);
       if (existingWearable) {
         wearable = new Wearable({ id: nft.id });
-        wearable.network = ModelNetwork.ethereum;
+        wearable.network = ModelNetwork.ETHEREUM;
         wearable = existingWearable;
         wearable.owner = nft.owner;
       } else {
@@ -230,4 +255,250 @@ export function handleTransfer(
   createOrLoadAccount(accounts, to);
 
   return { nft, account: toAccount };
+}
+
+export async function handleAddItemV1(
+  ctx: Context,
+  collectionAddress: string,
+  event: AddWearableEventArgs,
+  block: BlockData,
+  collections: Map<string, Collection>,
+  items: Map<string, Item>,
+  counts: Map<string, Count>,
+  wearables: Map<string, Wearable>,
+  metadatas: Map<string, Metadata>
+): Promise<void> {
+  const { _maxIssuance, _wearableId, _wearableIdKey } = event;
+  let collection = collections.get(collectionAddress);
+
+  const collectionContract = new CollectionV2ABI.Contract(
+    ctx,
+    block.header,
+    collectionAddress
+  );
+
+  const owner = await collectionContract.owner();
+  const timestamp = BigInt(block.header.timestamp / 1000);
+
+  // Create Collection
+  if (!collection) {
+    // Bind contract
+    collection = new Collection({ id: collectionAddress });
+    collection.network = ModelNetwork.ETHEREUM;
+
+    // Set base collection data
+    const [name, symbol, baseURI] = await Promise.all([
+      collectionContract.name(),
+      collectionContract.symbol(),
+      collectionContract.baseURI(),
+    ]);
+    collection.name = name;
+    collection.symbol = symbol;
+    collection.owner = owner;
+    collection.creator = owner;
+    collection.isCompleted = true;
+    collection.minters = [];
+    collection.managers = [];
+    collection.itemsCount = 0;
+    collection.urn = getURNForCollectionV1(collection, Network.ETHEREUM);
+    collection.createdAt = timestamp; // Not going to be used
+    collection.updatedAt = timestamp; // Not going to be used
+    collection.reviewedAt = timestamp; // Not going to be used
+    collection.searchIsStoreMinter = false;
+    collection.searchText = collection.name.toLowerCase();
+    collection.isApproved = true;
+
+    collection.baseURI = baseURI;
+    collection.chainId = BigInt(process.env.ETHEREUM_CHAIN_ID || 1);
+
+    collections.set(collectionAddress, collection);
+  }
+
+  // Count item
+  collection.itemsCount += 1;
+
+  const id = getItemId(collectionAddress, _wearableId);
+  const representation = getWearableV1Representation(_wearableId);
+
+  const item = new Item({ id });
+  item.network = ModelNetwork.ETHEREUM;
+  item.creator = owner;
+  item.blockchainId = BigInt(collection.itemsCount);
+  item.collection = collection;
+  item.creationFee = BigInt(0);
+  item.rarity = representation!.rarity;
+  item.available = _maxIssuance;
+  item.totalSupply = BigInt(0);
+  item.maxSupply = item.available;
+  item.price = BigInt(0); // Not used for collections v1
+  item.beneficiary = ZERO_ADDRESS; // Not used for collections v1
+  item.rawMetadata = ""; // Not used for collections v1
+  item.searchIsCollectionApproved = true; // Not used for collections v1
+  item.minters = []; // Not used for collections v1
+  item.managers = []; // Not used for collections v1
+  item.uri = (await collectionContract.baseURI()) + _wearableId;
+  item.urn = getURNForWearableV1(
+    collection,
+    representation!.id,
+    Network.ETHEREUM
+  );
+  item.image = getItemImage(item);
+  item.createdAt = timestamp; // Not used for collections v1
+  item.updatedAt = timestamp; // Not used for collections v1
+  item.reviewedAt = timestamp; // Not used for collections v1
+  item.searchIsStoreMinter = false; // Not used for collections v1
+  item.soldAt = null;
+  item.sales = 0;
+  item.volume = BigInt(0);
+  item.uniqueCollectors = [];
+  item.uniqueCollectorsTotal = 0;
+
+  const metadata = buildWearableV1Metadata(
+    item,
+    representation!,
+    wearables,
+    metadatas
+  );
+  item.metadata = metadata;
+  item.itemType = metadata.itemType;
+
+  setItemSearchFields(item, metadatas, wearables);
+
+  items.set(item.id, item);
+  // item.save();
+
+  let metric = buildCountFromItem(counts, ModelNetwork.ETHEREUM);
+  // metric.save()
+}
+
+export function handleTransferWearableV1(
+  block: Block,
+  collectionAddress: string,
+  event: ERC721Abi.TransferEventArgs_2,
+  collections: Map<string, Collection>,
+  items: Map<string, Item>,
+  accounts: Map<string, Account>,
+  metadatas: Map<string, Metadata>,
+  wearables: Map<string, Wearable>,
+  counts: Map<string, Count>,
+  mints: Map<string, Mint>,
+  nfts: Map<string, NFT>,
+  tokenURIs: Map<string, string>
+): void {
+  const { tokenId, from, to } = event;
+  console.log("event: ", event);
+  if (!tokenId.toString()) {
+    return;
+  }
+
+  // let collection = Collection.load(collectionAddress);
+  console.log("collectionAddress: ", collectionAddress);
+  const collection = collections.get(collectionAddress);
+
+  // const tokenURI = await getTokenURI(ctx, block, collectionAddress, tokenId);
+  const tokenURI = tokenURIs.get(`${collectionAddress}-${tokenId}`);
+  if (!tokenURI) {
+    console.log(
+      `ERROR: No tokenURI found for NFT ${tokenId} and collection ${collectionAddress}`
+    );
+    return;
+  }
+  const representationId = getWearableIdFromTokenURI(tokenURI);
+
+  const itemId = getItemId(collectionAddress, representationId);
+  // let item = Item.load(itemId);
+  const item = items.get(itemId);
+
+  if (!item) {
+    console.log(`ERROR: No item associated for NFT ${representationId}`);
+    return;
+  }
+
+  const id = getNFTId(collectionAddress, tokenId.toString());
+
+  const nft = nfts.get(id) || new NFT({ id, network: ModelNetwork.ETHEREUM });
+  console.log("nfts.get(id): ", nfts.get(id));
+  nft.collection = collection;
+  nft.category = Category.wearable;
+  console.log("tokenId: ", tokenId);
+  nft.tokenId = tokenId;
+  const toAccount = accounts.get(`${to}-${ModelNetwork.ETHEREUM}`);
+  if (toAccount) {
+    nft.owner = toAccount;
+  } else {
+    console.log("ERROR: Buyer account not found for order successful");
+  }
+  nft.contractAddress = collectionAddress;
+  const timestamp = BigInt(block.timestamp / 1000);
+  // nft.createdAt = timestamp;
+  nft.updatedAt = timestamp;
+  nft.soldAt = null;
+  nft.transferredAt = timestamp;
+  nft.itemType = ItemType.wearable_v1;
+  if (!nft.tokenURI && tokenURI) {
+    nft.tokenURI = tokenURI;
+  }
+  // nft.tokenURI = tokenURI;
+  nft.item = item;
+
+  nft.urn = item.urn;
+
+  nft.sales = 0;
+  nft.volume = BigInt(0);
+
+  if (isMint(from)) {
+    nft.itemBlockchainId = item.blockchainId;
+    nft.issuedId = BigInt(getIssuedIdFromTokenURI(tokenURI));
+    nft.metadata = item.metadata;
+    nft.itemType = item.itemType;
+    nft.image = item.image;
+    nft.createdAt = timestamp;
+
+    setNFTSearchFields(nft, metadatas, wearables);
+
+    const count = buildCount(counts);
+    count.nftTotal += 1;
+    counts.set(count.id, count);
+    // nftMetric.save();
+
+    item.available = item.available - BigInt(1);
+    item.totalSupply = item.totalSupply + BigInt(1);
+
+    items.set(item.id, item);
+    // item.save();
+
+    // store mint
+    const mint = new Mint({ id });
+    mint.nft = nft;
+    mint.item = item;
+
+    mint.beneficiary = nft.owner.id;
+    mint.creator = ZERO_ADDRESS; // v1 collections don't have a creator
+    mint.minter = from;
+    mint.timestamp = timestamp;
+    mint.searchContractAddress = nft.contractAddress;
+    mint.searchTokenId = nft.tokenId;
+    mint.searchItemId = item.blockchainId;
+    mint.searchIssuedId = nft.issuedId;
+    mint.searchIsStoreMinter = false;
+    mints.set(mint.id, mint);
+    // mint.save();
+  } else {
+    const oldNFT = nfts.get(id);
+    if (!oldNFT) {
+      console.log(`ERROR: NFT not found ${id}`);
+      return;
+    }
+    const activeOrder = oldNFT.activeOrder;
+    if (activeOrder) {
+      if (cancelActiveOrder(activeOrder, timestamp)) {
+        clearNFTOrderProperties(nft);
+      }
+    }
+  }
+
+  createOrLoadAccount(accounts, to, ModelNetwork.ETHEREUM);
+
+  nfts.set(nft.id, nft);
+  // nft.save();
 }

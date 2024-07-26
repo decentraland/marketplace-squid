@@ -31,10 +31,10 @@ export function handleNameRegistered(
 
   const ens = new ENS({ id });
   ens.tokenId = BigInt(tokenId);
-  let owner = accounts.get(`${_caller}-${ModelNetwork.ethereum}`);
+  let owner = accounts.get(`${_caller}-${ModelNetwork.ETHEREUM}`);
   if (!owner) {
     owner = createAccount(_caller);
-    accounts.set(`${_caller}-${ModelNetwork.ethereum}`, owner);
+    accounts.set(`${_caller}-${ModelNetwork.ETHEREUM}`, owner);
   }
   ens.owner = owner;
   ens.caller = _caller;
@@ -46,7 +46,7 @@ export function handleNameRegistered(
 
   const nft = nfts.get(id) || new NFT({ id });
   nft.name = ens.subdomain;
-  nft.network = ModelNetwork.ethereum;
+  nft.network = ModelNetwork.ETHEREUM;
   nft.searchText = ens.subdomain.toLowerCase();
   nfts.set(id, nft);
 
