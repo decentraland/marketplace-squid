@@ -319,6 +319,12 @@ export async function handleAddItemV1(
 
   const id = getItemId(collectionAddress, _wearableId);
   const representation = getWearableV1Representation(_wearableId);
+  if (!representation) {
+    console.log(
+      `ERROR: No representation found for wearable ${_wearableId} in collection ${collectionAddress}`
+    );
+    return;
+  }
 
   const item = new Item({ id });
   item.network = ModelNetwork.ETHEREUM;
@@ -326,7 +332,7 @@ export async function handleAddItemV1(
   item.blockchainId = BigInt(collection.itemsCount);
   item.collection = collection;
   item.creationFee = BigInt(0);
-  item.rarity = representation!.rarity;
+  item.rarity = representation.rarity;
   item.available = _maxIssuance;
   item.totalSupply = BigInt(0);
   item.maxSupply = item.available;
@@ -339,7 +345,7 @@ export async function handleAddItemV1(
   item.uri = (await collectionContract.baseURI()) + _wearableId;
   item.urn = getURNForWearableV1(
     collection,
-    representation!.id,
+    representation.id,
     Network.ETHEREUM
   );
   item.image = getItemImage(item);
@@ -418,12 +424,15 @@ export function handleTransferWearableV1(
   nft.collection = collection;
   nft.category = Category.wearable;
   nft.tokenId = tokenId;
-  const toAccount = accounts.get(`${to}-${ModelNetwork.ETHEREUM}`);
-  if (toAccount) {
-    nft.owner = toAccount;
-  } else {
-    console.log("ERROR: Buyer account not found for order successful");
+  let toAccount = accounts.get(`${to}-${ModelNetwork.ETHEREUM}`);
+  if (!toAccount) {
+    console.log(
+      `ERROR: Buyer ${to} account not found for handleTransferWearableV1`
+    );
+    toAccount = createAccount(to);
+    accounts.set(`${to}-${ModelNetwork.ETHEREUM}`, toAccount);
   }
+  nft.owner = toAccount;
   nft.contractAddress = collectionAddress;
   const timestamp = BigInt(block.timestamp / 1000);
   // nft.createdAt = timestamp;

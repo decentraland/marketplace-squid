@@ -238,11 +238,11 @@ export function getWearableIdFromTokenURI(tokenURI: string): string {
 export function getWearableV1Representation(
   wearableId: string
 ): WearableEntity | null {
-  if (wearableId == "") {
+  if (!wearableId) {
     return null;
   }
 
-  let allCollections: Wearable[][] = [
+  const allCollections: Wearable[][] = [
     binance_us_collection,
     china_flying,
     community_contest,
@@ -289,7 +289,7 @@ export function getWearableV1Representation(
   ];
 
   for (let i = 0; i < allCollections.length; i++) {
-    let wearable = findWearable(wearableId, allCollections[i]);
+    const wearable = findWearable(wearableId, allCollections[i]);
     if (wearable != null && wearable.id == wearableId) {
       return wearable;
     }
