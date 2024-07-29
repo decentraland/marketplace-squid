@@ -102,7 +102,11 @@ export async function handleOrderSuccessful(
 ): Promise<void> {
   const { assetId, buyer, id, nftAddress, seller, totalPrice } = event;
   const category = getCategory(Network.ETHEREUM, nftAddress);
-  const nftId = getNFTId(nftAddress, assetId.toString(), category);
+  const nftId = getNFTId(
+    nftAddress,
+    assetId.toString(),
+    category !== Category.wearable ? category : undefined
+  );
   const orderId = id;
   const order = orders.get(orderId);
   if (!order) {
@@ -160,7 +164,11 @@ export function handleOrderCancelled(
 ): void {
   const { assetId, id, nftAddress, seller } = event;
   const category = getCategory(Network.ETHEREUM, nftAddress);
-  const nftId = getNFTId(nftAddress, assetId.toString(), category);
+  const nftId = getNFTId(
+    nftAddress,
+    assetId.toString(),
+    category !== Category.wearable ? category : undefined
+  );
   const orderId = id;
 
   const nft = nfts.get(nftId);

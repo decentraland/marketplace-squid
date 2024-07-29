@@ -426,9 +426,9 @@ export function handleTransferWearableV1(
   nft.tokenId = tokenId;
   let toAccount = accounts.get(`${to}-${ModelNetwork.ETHEREUM}`);
   if (!toAccount) {
-    console.log(
-      `ERROR: Buyer ${to} account not found for handleTransferWearableV1`
-    );
+    // console.log(
+    //   `INFO: Buyer ${to} account not found for handleTransferWearableV1`
+    // );
     toAccount = createAccount(to);
     accounts.set(`${to}-${ModelNetwork.ETHEREUM}`, toAccount);
   }

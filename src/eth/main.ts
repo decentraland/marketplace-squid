@@ -9,7 +9,7 @@ import * as erc721Bid from "../abi/ERC721Bid";
 import * as dclControllerV2abi from "../abi/DCLControllerV2";
 import { Order, Sale, Transfer, Network as ModelNetwork } from "../model";
 import { processor } from "./processor";
-import { getNFTId, getTokenURI } from "../common/utils";
+import { getNFTId, getTokenURI, isMint } from "../common/utils";
 import { tokenURIMutilcall } from "../common/utils/multicall";
 import { getAddresses } from "../common/utils/addresses";
 import {
@@ -137,18 +137,17 @@ processor.run(
                   event.tokenId,
                 ]);
                 // @TODO: check how to improve this
-                const tokenURI = await getTokenURI(
-                  ctx,
-                  block.header,
-                  log.address,
-                  event.tokenId
+                const tokenURI = tokenURIs.get(
+                  `${contractAddress}-${event.tokenId}`
                 );
-                const representationId = getWearableIdFromTokenURI(tokenURI);
-                const itemId = getItemId(log.address, representationId);
-                itemIds.set(log.address, [
-                  ...(itemIds.get(log.address) || []),
-                  itemId,
-                ]);
+                if (tokenURI) {
+                  const representationId = getWearableIdFromTokenURI(tokenURI);
+                  const itemId = getItemId(contractAddress, representationId);
+                  itemIds.set(contractAddress, [
+                    ...(itemIds.get(contractAddress) || []),
+                    itemId,
+                  ]);
+                }
 
                 break;
             }
@@ -428,6 +427,51 @@ processor.run(
       }
     }
 
+    if (tokenIds.size) {
+      console.time("multicall tokenURIs");
+    }
+
+    const tokenIdsWithoutTokenURIs = new Map<string, bigint[]>();
+    for (const [contractAddress, ids] of tokenIds.entries()) {
+      const newIds = new Set<bigint>();
+      for (const id of ids) {
+        const tokenURI = tokenURIs.get(`${contractAddress}-${id}`);
+        if (!tokenURI) {
+          newIds.add(id);
+        }
+      }
+      if (newIds.size > 0) {
+        tokenIdsWithoutTokenURIs.set(contractAddress, [...newIds.values()]);
+      }
+    }
+
+    const newTokenURIs =
+      tokenIdsWithoutTokenURIs.size > 0
+        ? await tokenURIMutilcall(
+            ctx,
+            ctx.blocks[ctx.blocks.length - 1].header, // use latest block of the batch to multicall fetch
+            tokenIdsWithoutTokenURIs
+          )
+        : new Map<string, string>();
+
+    if (tokenIds.size) {
+      console.timeEnd("multicall tokenURIs");
+    }
+
+    [...newTokenURIs.entries()].forEach(([contractAndTokenId, value]) => {
+      const tokenURI = value;
+      tokenURIs.set(contractAndTokenId, value);
+
+      const representationId = getWearableIdFromTokenURI(tokenURI);
+      const contractAddress = contractAndTokenId.split("-")[0];
+      const itemId = getItemId(contractAddress, representationId);
+
+      itemIds.set(contractAddress, [
+        ...(itemIds.get(contractAddress) || []),
+        itemId,
+      ]);
+    });
+
     const {
       accounts,
       datas,
@@ -465,24 +509,24 @@ processor.run(
     // );
 
     // delete tokenIds from tokenIds array if they have been created and are in the nfts map
-    Array.from(tokenIds.entries()).forEach(([contractAddress, ids]) => {
-      ids.forEach((tokenId) => {
-        const nftId = getNFTId(
-          contractAddress,
-          tokenId.toString(),
-          getCategory(Network.ETHEREUM, contractAddress)
-        );
-        if (nfts.has(nftId)) {
-          const ids = tokenIds.get(contractAddress);
-          if (ids) {
-            const index = ids.indexOf(tokenId);
-            if (index > -1) {
-              ids.splice(index, 1);
-            }
-          }
-        }
-      });
-    });
+    // Array.from(tokenIds.entries()).forEach(([contractAddress, ids]) => {
+    //   ids.forEach((tokenId) => {
+    //     const nftId = getNFTId(
+    //       contractAddress,
+    //       tokenId.toString(),
+    //       getCategory(Network.ETHEREUM, contractAddress)
+    //     );
+    //     if (nfts.has(nftId)) {
+    //       const ids = tokenIds.get(contractAddress);
+    //       if (ids) {
+    //         const index = ids.indexOf(tokenId);
+    //         if (index > -1) {
+    //           ids.splice(index, 1);
+    //         }
+    //       }
+    //     }
+    //   });
+    // });
     // console.log(
     //   `about to get ${[...tokenIds.values()].reduce(
     //     (acc, curr) => acc + curr.length,
@@ -490,25 +534,25 @@ processor.run(
     //   )} non created token URIs`
     // );
 
-    if (tokenIds.size) {
-      console.time("multicall tokenURIs");
-    }
-    const newTokenURIs =
-      tokenIds.size > 0
-        ? await tokenURIMutilcall(
-            ctx,
-            ctx.blocks[ctx.blocks.length - 1].header, // use latest block of the batch to multicall fetch
-            tokenIds
-          )
-        : new Map<string, string>();
+    // if (tokenIds.size) {
+    //   console.time("multicall tokenURIs");
+    // }
+    // const newTokenURIs =
+    //   tokenIds.size > 0
+    //     ? await tokenURIMutilcall(
+    //         ctx,
+    //         ctx.blocks[ctx.blocks.length - 1].header, // use latest block of the batch to multicall fetch
+    //         tokenIds
+    //       )
+    //     : new Map<string, string>();
 
-    if (tokenIds.size) {
-      console.timeEnd("multicall tokenURIs");
-    }
+    // if (tokenIds.size) {
+    //   console.timeEnd("multicall tokenURIs");
+    // }
 
-    [...newTokenURIs.entries()].forEach(([contractAndTokenId, value]) => {
-      tokenURIs.set(contractAndTokenId, value);
-    });
+    // [...newTokenURIs.entries()].forEach(([contractAndTokenId, value]) => {
+    //   tokenURIs.set(contractAndTokenId, value);
+    // });
 
     // decode land token ids into coordinates for later usage
     if (landTokenIds.size > 0) {
@@ -598,7 +642,6 @@ processor.run(
           ].topic
       ) {
         if ([...Object.values(addresses.collections)].includes(log.address)) {
-          console.log("INFO: transfer from NFT V1 detected");
           handleTransferWearableV1(
             block.header,
             log.address,
@@ -611,7 +654,7 @@ processor.run(
             counts,
             mints,
             nfts,
-            newTokenURIs
+            tokenURIs
           );
         } else {
           handleTransfer(
@@ -626,7 +669,7 @@ processor.run(
             wearables,
             orders,
             ens,
-            newTokenURIs,
+            tokenURIs,
             landCoordinates
           );
         }
