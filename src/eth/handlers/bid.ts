@@ -37,7 +37,11 @@ export function handleBidCreated(
   } = event;
   const category = getCategory(Network.ETHEREUM, _tokenAddress);
 
-  const nftId = getNFTId(_tokenAddress, _tokenId.toString(), category);
+  const nftId = getNFTId(
+    _tokenAddress,
+    _tokenId.toString(),
+    category !== Category.wearable ? category : undefined
+  );
   const id = getBidId(_tokenAddress, _tokenId.toString(), _bidder);
 
   const bid = new Bid({ id });
