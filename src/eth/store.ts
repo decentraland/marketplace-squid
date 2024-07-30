@@ -209,12 +209,13 @@ export const getStoredData = async (
         metadata: true,
       },
       where: [
-        { network: ModelNetwork.ETHEREUM },
         {
           collection: In([...collectionIds]),
+          network: ModelNetwork.ETHEREUM,
         },
         {
           id: In([...itemIds]),
+          network: ModelNetwork.ETHEREUM,
         },
         // {
         //   id: In([...nftItemIds]),
