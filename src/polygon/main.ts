@@ -81,13 +81,41 @@ processor.run(
     stateSchema: `polygon_processor_${schemaName}`,
   }),
   async (ctx) => {
-    console.time("blocks iteration");
     // update the amount of bytes read
     bytesRead += ctx.blocks.reduce(
       (acc, block) => acc + Buffer.byteLength(JSON.stringify(block), "utf8"),
       0
     );
 
+    const isThereImportantDataInBatch = ctx.blocks.some((block) =>
+      block.logs.some(
+        (log) =>
+          log.address === addresses.CollectionFactory ||
+          log.address === addresses.CollectionFactoryV3 ||
+          log.address === addresses.BidV2 ||
+          log.address === addresses.ERC721Bid ||
+          log.address === addresses.Marketplace ||
+          log.address === addresses.MarketplaceV2 ||
+          log.address === addresses.OldCommittee ||
+          log.address === addresses.Committee ||
+          log.address === addresses.CollectionStore ||
+          log.address === addresses.RaritiesWithOracle ||
+          log.address === addresses.Rarity ||
+          log.address === addresses.CollectionManager ||
+          preloadedCollections.includes(log.address) ||
+          collectionsCreatedByFactory.has(log.address)
+      )
+    );
+
+    console.log(
+      "INFO: Batch contains important data: ",
+      isThereImportantDataInBatch
+    );
+    if (!isThereImportantDataInBatch) {
+      return;
+    }
+
+    console.time("blocks iteration");
     const rarities = await ctx.store
       .find(Rarity)
       .then((q) => new Map(q.map((i) => [i.id, i])));
