@@ -105,6 +105,13 @@ export const getStoredData = async (
 
   const nftItemIds = Array.from(nfts.values()).map((nft) => nft.item?.id);
 
+  const itemIdsFlat = [
+    ...Array.from(itemIds.entries())
+      .map(([contractAddress, itemIds]) =>
+        itemIds.map((id) => `${contractAddress}-${id}`)
+      )
+      .flat(),
+  ];
   const items = await ctx.store
     .find(Item, {
       relations: {
@@ -112,15 +119,17 @@ export const getStoredData = async (
         metadata: true,
       },
       where: [
-        { network: ModelNetwork.POLYGON },
         {
           collection: In([...collectionIds]),
+          network: ModelNetwork.POLYGON,
         },
         {
-          id: In([...itemIds]),
+          id: In([...itemIdsFlat]),
+          network: ModelNetwork.POLYGON,
         },
         {
           id: In([...nftItemIds]),
+          network: ModelNetwork.POLYGON,
         },
       ],
     })
