@@ -612,8 +612,7 @@ export function handleIssue(
   inMemoryData: PolygonInMemoryState,
   storeContractData: StoreContractData
 ): void {
-  const { items, collections } = storedData;
-  //   let collectionAddress = event.address.toHexString();
+  const { items } = storedData;
   const itemId = event._itemId.toString();
   const id = getItemId(collectionAddress, itemId);
 
@@ -622,8 +621,6 @@ export function handleIssue(
   if (item) {
     item.available = item.available - BigInt(1);
     item.totalSupply = item.totalSupply + BigInt(1);
-
-    // item.save();
     handleMintNFT(
       event,
       block,
@@ -635,7 +632,7 @@ export function handleIssue(
       storeContractData
     );
   } else {
-    console.log(`Error: Item not found in handleIssue: ${id}`);
+    console.log(`ERROR: Item not found in handleIssue: ${id}`);
   }
 
   // Bind contract

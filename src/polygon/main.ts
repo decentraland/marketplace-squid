@@ -87,6 +87,19 @@ processor.run(
       0
     );
 
+    const rarities = await ctx.store
+      .find(Rarity)
+      .then((q) => new Map(q.map((i) => [i.id, i])));
+
+    const collectionIdsNotIncludedInPreloaded = await ctx.store
+      .find(Collection, {
+        where: {
+          id: Not(In(preloadedCollections)),
+          network: ModelNetwork.POLYGON,
+        },
+      })
+      .then((q) => new Set(q.map((c) => c.id)));
+
     const isThereImportantDataInBatch = ctx.blocks.some((block) =>
       block.logs.some(
         (log) =>
@@ -103,30 +116,20 @@ processor.run(
           log.address === addresses.Rarity ||
           log.address === addresses.CollectionManager ||
           preloadedCollections.includes(log.address) ||
-          collectionsCreatedByFactory.has(log.address)
+          collectionsCreatedByFactory.has(log.address) ||
+          collectionIdsNotIncludedInPreloaded.has(log.address)
       )
     );
 
-    console.log(
-      "INFO: Batch contains important data: ",
-      isThereImportantDataInBatch
-    );
     if (!isThereImportantDataInBatch) {
+      console.log(
+        "INFO: Batch contains important data: ",
+        isThereImportantDataInBatch
+      );
       return;
     }
 
     console.time("blocks iteration");
-    const rarities = await ctx.store
-      .find(Rarity)
-      .then((q) => new Map(q.map((i) => [i.id, i])));
-
-    const collectionIdsNotIncludedInPreloaded = await ctx.store
-      .find(Collection, {
-        where: {
-          id: Not(In(preloadedCollections)),
-        },
-      })
-      .then((q) => new Set(q.map((c) => c.id)));
 
     const collectionIdsCreatedInBatch = new Set<string>();
     const inMemoryData = getBatchInMemoryState();
@@ -443,9 +446,6 @@ processor.run(
                 ...collectionIdsCreatedInBatch, // collections created in the current batch, will later by saved in the db
               ].includes(log.address)
             ) {
-              // ctx.log.warn(
-              //   `CollectionV2 event found not from collection contract, address: ${log.address}, topic: ${topic}, block: ${block.header.height}`
-              // );
               break;
             }
             let event;
@@ -480,7 +480,9 @@ processor.run(
                 accountIds.add(event._beneficiary.toLowerCase());
                 const timestamp = BigInt(block.header.timestamp / 1000);
                 analyticsIds.add(
-                  (BigInt(timestamp) / BigInt(86400)).toString()
+                  `${(BigInt(timestamp) / BigInt(86400)).toString()}-${
+                    ModelNetwork.POLYGON
+                  }`
                 );
                 itemIds.set(log.address, [
                   ...(itemIds.get(log.address) || []),
