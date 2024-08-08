@@ -113,6 +113,8 @@ export function handleAddLand(
   const estateNFT = nfts.get(id);
   if (estateNFT && estate) {
     estateNFT.searchEstateSize = estate.size;
+  } else {
+    console.log(`ERROR: estateNFT not found for estate ${id} in handleAddLand`);
   }
 
   let parcel = parcels.get(parcelId);
@@ -177,7 +179,7 @@ export function handleRemoveLand(
 
   const addresses = getAddresses(Network.ETHEREUM);
 
-  const id = getNFTId(Category.estate, addresses.EstateRegistry, estateId);
+  const id = getNFTId(addresses.EstateRegistry, estateId, Category.estate);
   const parcelId = getNFTId(addresses.LANDRegistry, landId, Category.parcel);
 
   let estate = estates.get(id);
@@ -185,11 +187,20 @@ export function handleRemoveLand(
   if (estate && estate.size) {
     // @TODO check why && estate.size is needed, try to put at mandatory and start in -1
     estate.size -= 1;
+  } else {
+    console.log('ERROR: estate: ', estate);
+    console.log('ERROR: estate.size: ', estate?.size);
   }
 
   const estateNFT = nfts.get(id);
   if (estateNFT && estate) {
     estateNFT.searchEstateSize = estate.size;
+  } else {
+    console.log("estate: ", estate);
+    console.log("estateNFT: ", estateNFT);
+    console.log(
+      `ERROR: estateNFT not found for estate ${id} in handleRemoveLand`
+    );
   }
 
   let parcel = parcels.get(parcelId);
