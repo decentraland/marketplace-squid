@@ -220,11 +220,7 @@ export function handleOrderCancelled(
   orders: Map<string, Order>
 ): void {
   const { assetId, id, nftAddress, seller } = event;
-  const isEthereum = network === Network.ETHEREUM;
-  const category = isEthereum
-    ? getCategory(Network.ETHEREUM, nftAddress)
-    : undefined;
-  const nftId = getNFTId(nftAddress, assetId.toString(), category);
+  const nftId = getNFTId(nftAddress, assetId.toString());
 
   const nft = nfts.get(nftId);
   const order = orders.get(id);
@@ -237,7 +233,13 @@ export function handleOrderCancelled(
 
     nft.updatedAt = timestamp;
     updateNFTOrderProperties(nft, order);
-  } else {
-    console.log(`ERROR: NFT not found for order cancelled ${nftId}`);
+  } else if (!nft) {
+    console.log(
+      `ERROR: NFT not found for order cancelled orderId:${id}, nftId: ${nftId}`
+    );
+  } else if (!order) {
+    console.log(
+      `ERROR: Order not found for order cancelled orderId:${id}, nftId: ${nftId}`
+    );
   }
 }

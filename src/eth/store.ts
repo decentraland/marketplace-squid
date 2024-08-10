@@ -214,12 +214,9 @@ export const getStoredData = async (
           network: ModelNetwork.ETHEREUM,
         },
         {
-          id: In([...itemIds]),
+          id: In([...itemIds.values()].flat()),
           network: ModelNetwork.ETHEREUM,
         },
-        // {
-        //   id: In([...nftItemIds]),
-        // },
       ],
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));

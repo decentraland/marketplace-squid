@@ -414,7 +414,7 @@ export function handleTransferWearableV1(
   const item = items.get(itemId);
 
   if (!item) {
-    console.log(`ERROR: No item associated for NFT ${representationId}`);
+    console.log(`ERROR: No item id found ${itemId} associated for NFT ${representationId}`);
     return;
   }
 
