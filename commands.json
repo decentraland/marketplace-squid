@@ -1,6 +1,10 @@
 {
   "$schema": "https://cdn.subsquid.io/schemas/commands.json",
   "commands": {
+    "run:marketplace": {
+      "description": "run marketplace squid",
+      "cmd": ["sqd", "run", "."]
+    },
     "clean": {
       "description": "delete all build artifacts",
       "cmd": ["npx", "--yes", "rimraf", "lib"]
@@ -81,11 +85,11 @@
         "--dumb-cache",
         "in-memory",
         "--dumb-cache-ttl",
-        "1000",
+        "2000",
         "--dumb-cache-size",
         "100",
         "--dumb-cache-max-age",
-        "1000",
+        "2000",
         "--dialect",
         "thegraph"
       ]
