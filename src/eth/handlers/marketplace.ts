@@ -183,8 +183,14 @@ export function handleOrderCancelled(
 
     nft.updatedAt = timestamp;
     updateNFTOrderProperties(nft, order);
-  } else {
-    console.log(`ERROR: NFT not found for order cancelled ${nftId}`);
+  } else if (!nft) {
+    console.log(
+      `ERROR: NFT not found for order cancelled orderId: ${id}, nftId: ${nftId}`
+    );
+  } else if (!order) {
+    console.log(
+      `ERROR: Order not found for order cancelled orderId: ${id}, nftId: ${nftId}`
+    );
   }
 }
 
