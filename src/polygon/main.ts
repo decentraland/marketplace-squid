@@ -345,6 +345,8 @@ processor.run(
               ...(tokenIds.get(event._tokenAddress) || []),
               event._tokenId,
             ]);
+            const timestamp = BigInt(block.header.timestamp / 1000);
+            analyticsIds.add((BigInt(timestamp) / BigInt(86400)).toString());
             events.push({
               topic: ERC721BidABI.events.BidAccepted.topic,
               event,
