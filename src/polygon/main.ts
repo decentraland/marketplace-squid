@@ -451,6 +451,11 @@ processor.run(
               break;
             }
             let event;
+            const timestamp = BigInt(block.header.timestamp / 1000);
+            const analyticDayDataId = `${(
+              BigInt(timestamp) / BigInt(86400)
+            ).toString()}-${ModelNetwork.POLYGON}`;
+
             switch (topic) {
               case CollectionV2ABI.events.SetGlobalMinter.topic:
                 event = CollectionV2ABI.events.SetGlobalMinter.decode(log);
@@ -466,6 +471,7 @@ processor.run(
                 break;
               case CollectionV2ABI.events.AddItem.topic:
                 event = CollectionV2ABI.events.AddItem.decode(log);
+                analyticsIds.add(analyticDayDataId);
                 break;
               case CollectionV2ABI.events.RescueItem.topic:
                 event = CollectionV2ABI.events.RescueItem.decode(log);
@@ -480,12 +486,7 @@ processor.run(
               case CollectionV2ABI.events.Issue.topic: {
                 event = CollectionV2ABI.events.Issue.decode(log);
                 accountIds.add(event._beneficiary.toLowerCase());
-                const timestamp = BigInt(block.header.timestamp / 1000);
-                analyticsIds.add(
-                  `${(BigInt(timestamp) / BigInt(86400)).toString()}-${
-                    ModelNetwork.POLYGON
-                  }`
-                );
+                analyticsIds.add(analyticDayDataId);
                 itemIds.set(log.address, [
                   ...(itemIds.get(log.address) || []),
                   event._itemId,
@@ -762,7 +763,6 @@ processor.run(
 
         case MarketplaceABI.events.OrderCreated.topic: {
           handleOrderCreated(
-            Network.MATIC,
             event as MarketplaceABI.OrderCreatedEventArgs,
             block,
             log.address,
@@ -781,8 +781,6 @@ processor.run(
             break;
           }
           handleOrderSuccessful(
-            ctx,
-            Network.MATIC,
             event as MarketplaceABI.OrderSuccessfulEventArgs,
             block,
             log.transactionHash,
@@ -795,7 +793,6 @@ processor.run(
         }
         case MarketplaceABI.events.OrderCancelled.topic: {
           handleOrderCancelled(
-            Network.MATIC,
             event as MarketplaceABI.OrderCancelledEventArgs,
             block,
             nfts,
