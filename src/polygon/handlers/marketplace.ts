@@ -93,9 +93,7 @@ export function handleOrderSuccessful(
   const { assetId, buyer, id, nftAddress, seller, totalPrice } = event;
   const { orders, accounts, nfts } = storedData;
 
-  const category = getCategory(Network.ETHEREUM, nftAddress);
-
-  const nftId = getNFTId(nftAddress, assetId.toString(), category);
+  const nftId = getNFTId(nftAddress, assetId.toString());
   const orderId = id;
   const order = orders.get(orderId);
   if (!order) {
