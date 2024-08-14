@@ -159,6 +159,10 @@ processor.run(
     for (let block of ctx.blocks) {
       for (let log of block.logs) {
         const topic = log.topics[0];
+        const timestamp = BigInt(block.header.timestamp / 1000);
+        const analyticDayDataId = `${(
+          BigInt(timestamp) / BigInt(86400)
+        ).toString()}-${ModelNetwork.POLYGON}`;
         switch (topic) {
           case CollectionFactoryABI.events.ProxyCreated.topic:
           case CollectionFactoryV3ABI.events.ProxyCreated.topic: {
@@ -255,8 +259,7 @@ processor.run(
             ]);
             accountIds.add(event.seller); // load sellers acount to update metrics
             accountIds.add(event.buyer); // load buyers acount to update metrics
-            const timestamp = BigInt(block.header.timestamp / 1000);
-            analyticsIds.add((BigInt(timestamp) / BigInt(86400)).toString());
+            analyticsIds.add(analyticDayDataId);
             events.push({
               topic,
               event,
@@ -345,8 +348,7 @@ processor.run(
               ...(tokenIds.get(event._tokenAddress) || []),
               event._tokenId,
             ]);
-            const timestamp = BigInt(block.header.timestamp / 1000);
-            analyticsIds.add((BigInt(timestamp) / BigInt(86400)).toString());
+            analyticsIds.add(analyticDayDataId);
             events.push({
               topic: ERC721BidABI.events.BidAccepted.topic,
               event,
@@ -451,10 +453,6 @@ processor.run(
               break;
             }
             let event;
-            const timestamp = BigInt(block.header.timestamp / 1000);
-            const analyticDayDataId = `${(
-              BigInt(timestamp) / BigInt(86400)
-            ).toString()}-${ModelNetwork.POLYGON}`;
 
             switch (topic) {
               case CollectionV2ABI.events.SetGlobalMinter.topic:

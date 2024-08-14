@@ -302,7 +302,10 @@ processor.run(
             accountIds.add(event.seller); // load sellers acount to update metrics
             accountIds.add(event.buyer); // load buyers acount to update metrics
             const timestamp = BigInt(block.header.timestamp / 1000);
-            analyticsIds.add((BigInt(timestamp) / BigInt(86400)).toString());
+            const analyticDayDataId = `${(
+              BigInt(timestamp) / BigInt(86400)
+            ).toString()}-${ModelNetwork.ETHEREUM}`;
+            analyticsIds.add(analyticDayDataId);
             markteplaceEvents.push({
               topic,
               event,
