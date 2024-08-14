@@ -67,11 +67,13 @@ import {
 import { getNFTId } from "../common/utils";
 import { handleRaritiesSet } from "./handlers/collectionManager";
 import { loadCollections } from "./utils/loaders";
+import { checkCpuUsageAndThrottle } from "../tools/os";
 
 const schemaName = process.env.DB_SCHEMA;
 const addresses = getAddresses(Network.MATIC);
 let bytesRead = 0; // amount of bytes received
 const preloadedCollections = loadCollections().addresses;
+const preloadedCollectionsHeight = loadCollections().height;
 const collectionsCreatedByFactory = new Set<string>();
 
 processor.run(
@@ -121,7 +123,11 @@ processor.run(
       )
     );
 
-    if (!isThereImportantDataInBatch) {
+    if (
+      !isThereImportantDataInBatch &&
+      ctx.blocks[ctx.blocks.length - 1].header.height >
+        preloadedCollectionsHeight
+    ) {
       console.log(
         "INFO: Batch contains important data: ",
         isThereImportantDataInBatch
@@ -594,6 +600,7 @@ processor.run(
             break;
           }
         }
+        await checkCpuUsageAndThrottle();
       }
     }
 
