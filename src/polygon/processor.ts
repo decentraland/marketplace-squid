@@ -22,6 +22,7 @@ import * as CollectionManagerABI from "./abi/CollectionManager";
 import { getBlockRange } from "../config";
 import { getAddresses } from "../common/utils/addresses";
 import { loadCollections } from "./utils/loaders";
+import { startBlockByNetwork } from "./addresses/startBlocks";
 
 const addresses = getAddresses(Network.MATIC);
 const chainId = process.env.POLYGON_CHAIN_ID || ChainId.MATIC_MAINNET;
@@ -99,7 +100,10 @@ export const processor = new EvmBatchProcessor()
       CollectionV2ABI.events.OwnershipTransferred.topic,
       CollectionV2ABI.events.Transfer.topic,
     ],
-    range: { from: 0, to: collections.height },
+    range: {
+      from: startBlockByNetwork[parseInt(chainId.toString())].Factory,
+      to: collections.height,
+    },
   })
   .addLog({
     transaction: true,
