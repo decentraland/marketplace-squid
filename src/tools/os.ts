@@ -1,3 +1,4 @@
+// converts seconds and nanoseconds to milliseconds
 function secNSec2ms(secNSec: number | [number, number]) {
   if (Array.isArray(secNSec)) {
     return secNSec[0] * 1000 + secNSec[1] / 1000000;
@@ -27,11 +28,8 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function checkCpuUsageAndThrottle() {
   const cpuUsage = getCpuPercentage();
-  console.log("cpuUsage: ", cpuUsage);
 
   if (cpuUsage > 90) {
-    console.log(`INFO: CPU usage is ${cpuUsage}%, throttling...`);
     await delay(100); // Adjust the delay as needed
   }
-  getCpuPercentage();
 }
