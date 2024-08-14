@@ -42,8 +42,7 @@ export function handleOrderCreated(
 ): void {
   const { assetId, nftAddress, id, seller, priceInWei, expiresAt } = event;
 
-  const category = getCategory(Network.ETHEREUM, nftAddress);
-  const nftId = getNFTId(nftAddress, assetId.toString(), category);
+  const nftId = getNFTId(nftAddress, assetId.toString());
   const nft = nfts.get(nftId);
   if (nft) {
     const orderId = id;
@@ -51,7 +50,7 @@ export function handleOrderCreated(
     const order = new Order({ id: orderId, network: NetworkModel.POLYGON });
     order.marketplaceAddress = contractAddress;
     order.status = OrderStatus.open;
-    order.category = category ? (category as Category) : Category.wearable;
+    order.category = Category.wearable;
     order.nft = nft;
     order.nftAddress = nftAddress;
     order.tokenId = assetId;
