@@ -600,6 +600,7 @@ processor.run(
             break;
           }
         }
+        await checkCpuUsageAndThrottle();
       }
     }
 

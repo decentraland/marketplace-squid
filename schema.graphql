@@ -341,7 +341,7 @@ enum WearableBodyShape {
 
 # We only track sales from Decentraland's smart contracts
 
-type Sale @entity {
+type Sale @entity @index(fields: ["searchCategory", "network"]) {
   id: ID!
   type: SaleType!
   buyer: String!

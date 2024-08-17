@@ -80,6 +80,7 @@ let db = new Database({
           .then(JSON.parse);
 
         if (!isInit) {
+          collections = addresses;
           isInit = true;
         }
 
