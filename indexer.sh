@@ -49,6 +49,8 @@ echo "Exported DB_SCHEMA: $DB_SCHEMA"
 # Start the processor service and the GraphQL server, and write logs to a file
 LOG_FILE="sqd_run_log_${CURRENT_TIMESTAMP}.txt"
 echo "Starting squid services..."
-nohup sqd run:marketplace > "$LOG_FILE" 2>&1 &
+
+# Start the squid services and limit the CPU usage to 90% using cpulimit
+nohup cpulimit -l 90 -- sqd run:marketplace > "$LOG_FILE" 2>&1 &
 
 echo "Logs are being written to $LOG_FILE"
