@@ -29,6 +29,7 @@ export class Sale {
     @ManyToOne_(() => NFT, {nullable: true})
     nft!: NFT
 
+    @Index_()
     @BigIntColumn_({nullable: false})
     timestamp!: bigint
 

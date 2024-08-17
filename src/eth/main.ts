@@ -100,6 +100,10 @@ processor.run(
       await getOwnerCutsValues(ctx, block);
       for (let log of block.logs) {
         const topic = log.topics[0];
+        const timestamp = BigInt(block.header.timestamp / 1000);
+        const analyticDayDataId = `${(
+          BigInt(timestamp) / BigInt(86400)
+        ).toString()}-${ModelNetwork.ETHEREUM}`;
         switch (topic) {
           case erc721abi.events[
             "Transfer(address,address,uint256,address,bytes,bytes)"
@@ -301,10 +305,7 @@ processor.run(
             });
             accountIds.add(event.seller); // load sellers acount to update metrics
             accountIds.add(event.buyer); // load buyers acount to update metrics
-            const timestamp = BigInt(block.header.timestamp / 1000);
-            const analyticDayDataId = `${(
-              BigInt(timestamp) / BigInt(86400)
-            ).toString()}-${ModelNetwork.ETHEREUM}`;
+
             analyticsIds.add(analyticDayDataId);
             markteplaceEvents.push({
               topic,
@@ -375,6 +376,7 @@ processor.run(
               event._tokenId.toString(),
               event._bidder
             );
+            analyticsIds.add(analyticDayDataId);
             accountIds.add(event._seller); // load sellers acount to update metrics
             accountIds.add(event._bidder); // load buyers acount to update metrics
             bidIds.add(bidId);

@@ -459,6 +459,15 @@ export function handleTransferWearableV1(
     nft.image = item.image;
     nft.createdAt = timestamp;
 
+    // We're defaulting "Estate size" to one to allow the frontend to search for `searchEstateSize_gt: 0`,
+    // necessary because thegraph doesn't support complex queries and we can't do `OR` operations
+    nft.searchEstateSize = 1;
+    // We default the "in bounds" property for parcels and no-parcels alike so we can just add  `searchParcelIsInBounds: true`
+    // to all queries
+    nft.searchParcelIsInBounds = true;
+    nft.searchText = "";
+    nft.searchIsLand = false;
+
     setNFTSearchFields(nft, metadatas, wearables);
 
     const count = buildCount(counts);
