@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, BigIntColumn as BigIntColumn_, Index as Index_, StringColumn as StringColumn_, ManyToOne as ManyToOne_, OneToMany as OneToMany_, OneToOne as OneToOne_, JoinColumn as JoinColumn_, IntColumn as IntColumn_, BooleanColumn as BooleanColumn_} from "@subsquid/typeorm-store"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_, BigIntColumn as BigIntColumn_, StringColumn as StringColumn_, ManyToOne as ManyToOne_, OneToMany as OneToMany_, OneToOne as OneToOne_, JoinColumn as JoinColumn_, IntColumn as IntColumn_, BooleanColumn as BooleanColumn_} from "@subsquid/typeorm-store"
 import {Category} from "./_category"
 import {Account} from "./account.model"
 import {Order} from "./order.model"
@@ -17,6 +17,7 @@ import {Metadata} from "./metadata.model"
 import {EmoteCategory} from "./_emoteCategory"
 import {Network} from "./_network"
 
+@Index_(["searchOrderStatus", "searchOrderExpiresAt", "network"], {unique: false})
 @Entity_()
 export class NFT {
     constructor(props?: Partial<NFT>) {
@@ -80,6 +81,7 @@ export class NFT {
     @JoinColumn_()
     ens!: ENS | undefined | null
 
+    @Index_()
     @BigIntColumn_({nullable: false})
     createdAt!: bigint
 
@@ -104,6 +106,7 @@ export class NFT {
     @BigIntColumn_({nullable: true})
     searchOrderPrice!: bigint | undefined | null
 
+    @Index_()
     @BigIntColumn_({nullable: true})
     searchOrderExpiresAt!: bigint | undefined | null
 
@@ -116,6 +119,7 @@ export class NFT {
     @StringColumn_({nullable: true})
     searchText!: string | undefined | null
 
+    @Index_()
     @BooleanColumn_({nullable: true})
     searchParcelIsInBounds!: boolean | undefined | null
 

@@ -150,7 +150,9 @@ type Data @entity {
   ipns: String
 }
 
-type NFT @entity {
+type NFT
+  @entity
+  @index(fields: ["searchOrderStatus", "searchOrderExpiresAt", "network"]) {
   id: ID!
   tokenId: BigInt! @index
   contractAddress: String! @index
@@ -170,7 +172,7 @@ type NFT @entity {
   wearable: Wearable @unique
   ens: ENS @unique
 
-  createdAt: BigInt!
+  createdAt: BigInt! @index
   updatedAt: BigInt!
   soldAt: BigInt
   transferredAt: BigInt!
@@ -179,16 +181,16 @@ type NFT @entity {
   volume: BigInt!
 
   # search indexes
-  searchOrderStatus: OrderStatus
+  searchOrderStatus: OrderStatus @index
   searchOrderPrice: BigInt
-  searchOrderExpiresAt: BigInt
+  searchOrderExpiresAt: BigInt @index
   searchOrderCreatedAt: BigInt
 
   searchIsLand: Boolean
 
   searchText: String
 
-  searchParcelIsInBounds: Boolean
+  searchParcelIsInBounds: Boolean @index
   searchParcelX: BigInt
   searchParcelY: BigInt
   searchParcelEstateId: String
@@ -346,7 +348,7 @@ type Sale @entity {
   seller: String!
   price: BigInt!
   nft: NFT!
-  timestamp: BigInt!
+  timestamp: BigInt! @index
   txHash: String!
 
   # search
