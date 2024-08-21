@@ -177,15 +177,14 @@ export function setItemWearableSearchFields(
 
 export function setNFTWearableSearchFields(
   nft: NFT,
-  metadatas: Map<string, Metadata>,
-  wearables: Map<string, Wearable>
+  metadatas: Map<string, Metadata>
 ): NFT {
   if (!nft.metadata) {
     return nft;
   }
   const metadata = metadatas.get(nft.metadata.id);
   if (metadata && metadata.wearable) {
-    const wearable = wearables.get(metadata.wearable.id);
+    const wearable = metadata.wearable
 
     if (wearable) {
       nft.searchText = `${wearable.name} ${wearable.description}`;

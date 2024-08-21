@@ -20,7 +20,6 @@ import { Context } from "./processor";
 import { getAddresses } from "../common/utils/addresses";
 import { Network } from "@dcl/schemas";
 import { EthereumInMemoryState } from "./types";
-import { DEFAULT_ID } from "./modules/count";
 
 export const getStoredData = async (
   ctx: Context,
@@ -175,17 +174,15 @@ export const getStoredData = async (
   const collections = await ctx.store
     .find(Collection, {
       where: {
-        network: ModelNetwork.POLYGON,
+        network: ModelNetwork.ETHEREUM,
         id: In([...collectionIds]),
       },
     })
     .then((q) => new Map(q.map((i) => [i.id, i])));
 
   const metadataIds = [
-    ...Array.from(itemIds.entries())
-      .map(([contractAddress, tokenId]) =>
-        tokenId.map((id) => `${contractAddress}-${id}`)
-      )
+    ...Array.from(itemIds.values())
+      .map((tokenIds) => tokenIds.map((id) => id.split("-")[1]))
       .flat(),
   ];
 
@@ -196,7 +193,7 @@ export const getStoredData = async (
         wearable: true,
       },
       where: {
-        network: ModelNetwork.POLYGON,
+        network: ModelNetwork.ETHEREUM,
         id: In([...metadataIds]),
       },
     })

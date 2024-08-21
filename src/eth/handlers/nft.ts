@@ -468,7 +468,7 @@ export function handleTransferWearableV1(
     nft.searchText = "";
     nft.searchIsLand = false;
 
-    setNFTSearchFields(nft, metadatas, wearables);
+    setNFTSearchFields(nft, metadatas);
 
     const count = buildCount(counts);
     count.nftTotal += 1;
