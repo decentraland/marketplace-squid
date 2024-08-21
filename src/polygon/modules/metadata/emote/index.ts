@@ -125,8 +125,7 @@ export function setItemEmoteSearchFields(
 
 export function setNFTEmoteSearchFields(
   nft: NFT,
-  metadatas: Map<string, Metadata>,
-  emotes: Map<string, Emote>
+  metadatas: Map<string, Metadata>
 ): NFT {
   if (!nft.metadata) {
     console.log("ERROR: Metadata not found for NFT:", nft.id);
@@ -135,7 +134,7 @@ export function setNFTEmoteSearchFields(
   const metadata = metadatas.get(nft.metadata.id);
   if (metadata) {
     if (metadata.emote) {
-      const emote = emotes.get(metadata.emote.id);
+      const emote = metadata.emote
       if (emote) {
         nft.searchText = `${emote.name} ${emote.description}`.toLowerCase();
         nft.searchEmoteCategory = emote.category;

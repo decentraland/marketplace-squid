@@ -45,7 +45,7 @@ export function handleMintNFT(
   inMemoryData: PolygonInMemoryState,
   storeContractData: StoreContractData
 ): void {
-  const { counts, collections, accounts, metadatas, wearables, emotes, nfts } =
+  const { counts, collections, accounts, metadatas, nfts } =
     storedData;
   const { mints } = inMemoryData;
   const nftId = getNFTId(collectionAddress, event._tokenId.toString());
@@ -94,7 +94,7 @@ export function handleMintNFT(
   nft.sales = 0;
   nft.volume = BigInt(0);
 
-  setNFTSearchFields(nft, metadatas, wearables, emotes);
+  setNFTSearchFields(nft, metadatas);
 
   createOrLoadAccount(accounts, event._beneficiary, NetworkModel.POLYGON);
 

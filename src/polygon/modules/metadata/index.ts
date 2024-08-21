@@ -98,20 +98,18 @@ export function setItemSearchFields(
 
 export function setNFTSearchFields(
   nft: NFT,
-  metadatas: Map<string, Metadata>,
-  wearables: Map<string, Wearable>,
-  emotes?: Map<string, Emote>
+  metadatas: Map<string, Metadata>
 ): NFT {
   if (
     nft.itemType == itemTypes.WEARABLE_V2 ||
     nft.itemType == itemTypes.WEARABLE_V1 ||
     nft.itemType == itemTypes.SMART_WEARABLE_V1
   ) {
-    return setNFTWearableSearchFields(nft, metadatas, wearables);
+    return setNFTWearableSearchFields(nft, metadatas);
   }
 
-  if (nft.itemType == itemTypes.EMOTE_V1 && !!emotes) {
-    return setNFTEmoteSearchFields(nft, metadatas, emotes);
+  if (nft.itemType == itemTypes.EMOTE_V1) {
+    return setNFTEmoteSearchFields(nft, metadatas);
   }
 
   return nft;
