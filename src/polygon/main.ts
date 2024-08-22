@@ -566,22 +566,20 @@ processor.run(
           }
           case RaritiesABI.events.AddRarity.topic: {
             const event = RaritiesABI.events.AddRarity.decode(log);
-            handleAddRarity(rarities, event, Currency.MANA);
-            break;
-          }
-          case RaritiesWithOracleABI.events.AddRarity.topic: {
-            const event = RaritiesWithOracleABI.events.AddRarity.decode(log);
-            handleAddRarity(rarities, event, Currency.USD);
+            handleAddRarity(
+              rarities,
+              event,
+              log.address === addresses.Rarity ? Currency.MANA : Currency.USD
+            );
             break;
           }
           case RaritiesABI.events.UpdatePrice.topic: {
             const event = RaritiesABI.events.UpdatePrice.decode(log);
-            handleUpdatePrice(rarities, event, Currency.MANA);
-            break;
-          }
-          case RaritiesWithOracleABI.events.UpdatePrice.topic: {
-            const event = RaritiesWithOracleABI.events.UpdatePrice.decode(log);
-            handleUpdatePrice(rarities, event, Currency.USD);
+            handleUpdatePrice(
+              rarities,
+              event,
+              log.address === addresses.Rarity ? Currency.MANA : Currency.USD
+            );
             break;
           }
           case CollectionStoreABI.events.SetFee.topic: {
