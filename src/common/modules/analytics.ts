@@ -15,7 +15,6 @@ export function getOrCreateAnalyticsDayData(
   const dayStartTimestamp = dayID * BigInt(86400);
   let analyticsDayData = analytics.get(id);
   if (!analyticsDayData) {
-    console.log(`DEBUG: creating new analytics day data for ${id}`);
     analyticsDayData = new AnalyticsDayData({
       id,
     });

@@ -52,6 +52,7 @@ export function handleOrderCreated(
     order.status = OrderStatus.open;
     order.category = Category.wearable;
     order.nft = nft;
+    order.item = nft.item;
     order.nftAddress = nftAddress;
     order.tokenId = assetId;
     order.txHash = txHash;
