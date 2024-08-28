@@ -5,16 +5,16 @@ export let BID_SALE_TYPE = "bid";
 export let ORDER_SALE_TYPE = "order";
 
 export function getOrCreateAnalyticsDayData(
-  blockTimestamp: bigint,
+  timestamp: bigint,
   analytics: Map<string, AnalyticsDayData>,
   network: ModelNetwork = ModelNetwork.ETHEREUM
 ): AnalyticsDayData {
-  const timestamp = blockTimestamp;
   const dayID = timestamp / BigInt(86400); // unix timestamp for start of day / 86400 giving a unique day index
   const id = `${dayID.toString()}-${network}`;
   const dayStartTimestamp = dayID * BigInt(86400);
   let analyticsDayData = analytics.get(id);
   if (!analyticsDayData) {
+    console.log(`DEBUG: creating new analytics day data for ${id}`);
     analyticsDayData = new AnalyticsDayData({
       id,
     });

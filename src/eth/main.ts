@@ -101,9 +101,9 @@ processor.run(
       for (let log of block.logs) {
         const topic = log.topics[0];
         const timestamp = BigInt(block.header.timestamp / 1000);
-        const analyticDayDataId = `${(
-          BigInt(timestamp) / BigInt(86400)
-        ).toString()}-${ModelNetwork.ETHEREUM}`;
+        const analyticDayDataId = `${(timestamp / BigInt(86400)).toString()}-${
+          ModelNetwork.ETHEREUM
+        }`;
         switch (topic) {
           case erc721abi.events[
             "Transfer(address,address,uint256,address,bytes,bytes)"
@@ -256,6 +256,7 @@ processor.run(
             });
             break;
           case dclControllerV2abi.events.NameBought.topic:
+            analyticsIds.add(analyticDayDataId);
             ensEvents.push({
               topic,
               event: dclControllerV2abi.events.NameBought.decode(log),
