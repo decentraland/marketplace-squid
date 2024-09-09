@@ -221,6 +221,8 @@ export function handleTransfer(
         nft.searchWearableBodyShapes = wearable.bodyShapes;
         nft.searchWearableRarity = wearable.rarity;
         nft.searchText = wearable.name.toLowerCase();
+      } else {
+        console.log(`ERROR: Wearable not found ${id}`);
       }
     } else {
       const existingWearable = wearables.get(id);
@@ -414,7 +416,9 @@ export function handleTransferWearableV1(
   const item = items.get(itemId);
 
   if (!item) {
-    console.log(`ERROR: No item id found ${itemId} associated for NFT ${representationId}`);
+    console.log(
+      `ERROR: No item id found ${itemId} associated for NFT ${representationId}`
+    );
     return;
   }
 
@@ -454,6 +458,8 @@ export function handleTransferWearableV1(
   if (isMint(from)) {
     nft.itemBlockchainId = item.blockchainId;
     nft.issuedId = BigInt(getIssuedIdFromTokenURI(tokenURI));
+    nft.wearable = buildWearableFromNFT(nft);
+    if (nft.wearable) wearables.set(id, nft.wearable);
     nft.metadata = item.metadata;
     nft.itemType = item.itemType;
     nft.image = item.image;

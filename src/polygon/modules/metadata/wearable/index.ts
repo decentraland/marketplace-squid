@@ -168,8 +168,14 @@ export function setItemWearableSearchFields(
       item.searchWearableCategory = wearable.category;
       item.searchWearableBodyShapes = wearable.bodyShapes;
       item.searchWearableRarity = wearable.rarity;
+    } else {
+      console.log(`ERROR: Wearable not found for item ${item.id}`);
     }
     item.searchItemType = item.itemType;
+  } else if (!metadata) {
+    console.log(`ERROR: Metadata not found for item ${item.id}`);
+  } else if (!metadata.wearable) {
+    console.log(`ERROR: Wearable not found for metadata ${metadata.id}`);
   }
 
   return item;
