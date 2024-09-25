@@ -52,10 +52,14 @@ export const processor = new EvmBatchProcessor()
       ...Object.values(addresses.collections),
     ],
     topic0: [
-      erc721Abi.events["Transfer(address,address,uint256,address,bytes,bytes)"]
+      erc721Abi.events[
+        "Transfer(address indexed,address indexed,uint256 indexed,address,bytes,bytes)"
+      ].topic,
+      erc721Abi.events[
+        "Transfer(address indexed,address indexed,uint256 indexed,address,bytes)"
+      ].topic,
+      erc721Abi.events["Transfer(address indexed,address indexed,uint256)"]
         .topic,
-      erc721Abi.events["Transfer(address,address,uint256,address,bytes)"].topic,
-      erc721Abi.events["Transfer(address,address,uint256)"].topic,
       erc721Abi.events.OwnershipTransferred.topic,
       erc721Abi.events.AddWearable.topic,
       landRegistryAbi.events.Update.topic,
