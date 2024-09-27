@@ -138,8 +138,9 @@ export async function handleOrderSuccessful(
   nft.updatedAt = timestamp;
   updateNFTOrderProperties(nft!, order!);
 
-  trackSale(
-    block,
+  await trackSale(
+    ctx,
+    block.header,
     ORDER_SALE_TYPE,
     buyer,
     seller,

@@ -35,7 +35,8 @@ import { StoreContractData } from "../state";
  * @param collectionAddress
  * @param item
  */
-export function handleMintNFT(
+export async function handleMintNFT(
+  ctx: Context,
   event: IssueEventArgs,
   block: Block,
   transaction: Transaction,
@@ -44,9 +45,8 @@ export function handleMintNFT(
   storedData: PolygonStoredData,
   inMemoryData: PolygonInMemoryState,
   storeContractData: StoreContractData
-): void {
-  const { counts, collections, accounts, metadatas, nfts } =
-    storedData;
+): Promise<void> {
+  const { counts, collections, accounts, metadatas, nfts } = storedData;
   const { mints } = inMemoryData;
   const nftId = getNFTId(collectionAddress, event._tokenId.toString());
   const nft = new NFT({ id: nftId });
@@ -134,7 +134,9 @@ export function handleMintNFT(
   // count primary sale
   if (isStoreMinter) {
     mint.searchPrimarySalePrice = item.price;
-    trackSale(
+    await trackSale(
+      ctx,
+      block,
       storedData,
       inMemoryData,
       SaleType.mint,

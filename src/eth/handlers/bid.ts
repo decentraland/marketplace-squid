@@ -18,6 +18,7 @@ import {
 } from "../../model";
 import { getAddresses } from "../../common/utils/addresses";
 import { getBidId } from "../../common/handlers/bid";
+import { Context } from "../processor";
 
 export function handleBidCreated(
   event: BidCreatedEventArgs,
@@ -78,6 +79,7 @@ export function handleBidCreated(
 }
 
 export async function handleBidAccepted(
+  ctx: Context,
   event: BidAcceptedEventArgs,
   block: BlockData,
   txHash: string,
@@ -115,8 +117,9 @@ export async function handleBidAccepted(
 
     const addresses = getAddresses(Network.ETHEREUM);
 
-    trackSale(
-      block,
+    await trackSale(
+      ctx,
+      block.header,
       BID_SALE_TYPE,
       _bidder,
       _seller,

@@ -65,6 +65,16 @@ export async function getTokenURI(
   return tokenURI;
 }
 
+export async function getOwner(
+  ctx: Context,
+  block: Block,
+  contractAddress: string,
+  tokenId: bigint
+): Promise<string> {
+  const contract = new ERC721Contract(ctx, block, contractAddress);
+  return await contract.ownerOf(tokenId);
+}
+
 export function updateNFTOrderProperties(nft: NFT, order: Order): void {
   if (order.status == OrderStatus.open) {
     addNFTOrderProperties(nft, order);
