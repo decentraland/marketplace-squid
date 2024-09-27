@@ -82,7 +82,7 @@ export async function decodeLANDTokenIdMulticall(
   const results = await multicall.tryAggregate(
     LANDRegistryFunctions.decodeTokenId,
     param,
-    100
+    50
   );
 
   const coordinates = new Map<bigint, Coordinate>();

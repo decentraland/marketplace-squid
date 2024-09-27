@@ -101,19 +101,23 @@ processor.run(
       for (let log of block.logs) {
         const topic = log.topics[0];
         const timestamp = BigInt(block.header.timestamp / 1000);
-        const analyticDayDataId = `${(timestamp / BigInt(86400)).toString()}-${
-          ModelNetwork.ETHEREUM
-        }`;
+        const analyticDayDataId = `${(
+          BigInt(timestamp) / BigInt(86400)
+        ).toString()}-${ModelNetwork.ETHEREUM}`;
         switch (topic) {
           case erc721abi.events[
-            "Transfer(address,address,uint256,address,bytes,bytes)"
+            "Transfer(address indexed,address indexed,uint256 indexed,address,bytes,bytes)"
           ].topic:
           case erc721abi.events[
-            "Transfer(address,address,uint256,address,bytes)"
+            "Transfer(address indexed,address indexed,uint256 indexed,address,bytes)"
           ].topic:
-          case erc721abi.events["Transfer(address,address,uint256)"].topic: {
+          case erc721abi.events[
+            "Transfer(address indexed,address indexed,uint256 indexed)"
+          ].topic: {
             const event =
-              erc721abi.events["Transfer(address,address,uint256)"].decode(log);
+              erc721abi.events[
+                "Transfer(address indexed,address indexed,uint256 indexed)"
+              ].decode(log);
             const contractAddress = log.address;
             markteplaceEvents.push({
               topic,
@@ -638,13 +642,16 @@ processor.run(
           nfts
         );
       } else if (
-        topic === erc721abi.events["Transfer(address,address,uint256)"].topic ||
         topic ===
-          erc721abi.events["Transfer(address,address,uint256,address,bytes)"]
+          erc721abi.events["Transfer(address indexed,address indexed,uint256)"]
             .topic ||
         topic ===
           erc721abi.events[
-            "Transfer(address,address,uint256,address,bytes,bytes)"
+            "Transfer(address indexed,address indexed,uint256 indexed,address,bytes)"
+          ].topic ||
+        topic ===
+          erc721abi.events[
+            "Transfer(address indexed,address indexed,uint256 indexed,address,bytes,bytes)"
           ].topic
       ) {
         if ([...Object.values(addresses.collections)].includes(log.address)) {

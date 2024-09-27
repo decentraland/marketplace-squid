@@ -1,73 +1,73 @@
 import * as p from '@subsquid/evm-codec'
-import { event, fun, indexed, ContractBase } from '@subsquid/evm-abi'
+import { event, fun, viewFun, indexed, ContractBase } from '@subsquid/evm-abi'
 import type { EventParams as EParams, FunctionArguments, FunctionReturn } from '@subsquid/evm-abi'
 
 export const events = {
-    OwnershipTransferred: event("0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0", {"previousOwner": indexed(p.address), "newOwner": indexed(p.address)}),
-    Transfer: event("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef", {"_from": indexed(p.address), "_to": indexed(p.address), "_tokenId": indexed(p.uint256)}),
-    Approval: event("0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925", {"_owner": indexed(p.address), "_approved": indexed(p.address), "_tokenId": indexed(p.uint256)}),
-    ApprovalForAll: event("0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31", {"_owner": indexed(p.address), "_operator": indexed(p.address), "_approved": p.bool}),
-    CreateEstate: event("0xd66691e9db811aef0bc0900328bd314b23f1f2285d5cb6d4baa4d959b3645a3c", {"_owner": indexed(p.address), "_estateId": indexed(p.uint256), "_data": p.string}),
-    AddLand: event("0xff0e52667d53255667dc777a00af81038a4646367b0d73d8ee8540ca5b0c9a2e", {"_estateId": indexed(p.uint256), "_landId": indexed(p.uint256)}),
-    RemoveLand: event("0x7932eb5ab0d4d4d172776074ee15d13d708465ff5476902ed15a4965434fcab1", {"_estateId": indexed(p.uint256), "_landId": indexed(p.uint256), "_destinatary": indexed(p.address)}),
-    Update: event("0x47c705b9219229ad762fca605f08fb024a3415d0ae78af5d319820c72e510414", {"_assetId": indexed(p.uint256), "_holder": indexed(p.address), "_operator": indexed(p.address), "_data": p.string}),
-    UpdateOperator: event("0x9d9dd80a56a16f715df6eb40b771e24ff8cbea6eed9de28473ce0f28fe5602a9", {"_estateId": indexed(p.uint256), "_operator": indexed(p.address)}),
-    UpdateManager: event("0xd79fbfe1644c022b9150727d871532bfcc3e27ffee86fc596a062770ac97b042", {"_owner": indexed(p.address), "_operator": indexed(p.address), "_caller": indexed(p.address), "_approved": p.bool}),
-    SetLANDRegistry: event("0x2e88792af6f2248ed486ffffc86edf9bc197596990f7b406d5f867a1dd930ba5", {"_registry": indexed(p.address)}),
-    Migrated: event("0xdd117a11c22118c9dee4b5a67ce578bc44529dce21ee0ccc439588fbb9fb4ea3", {"contractName": p.string, "migrationId": p.string}),
+    OwnershipTransferred: event("0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0", "OwnershipTransferred(address,address)", {"previousOwner": indexed(p.address), "newOwner": indexed(p.address)}),
+    Transfer: event("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef", "Transfer(address,address,uint256)", {"_from": indexed(p.address), "_to": indexed(p.address), "_tokenId": indexed(p.uint256)}),
+    Approval: event("0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925", "Approval(address,address,uint256)", {"_owner": indexed(p.address), "_approved": indexed(p.address), "_tokenId": indexed(p.uint256)}),
+    ApprovalForAll: event("0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31", "ApprovalForAll(address,address,bool)", {"_owner": indexed(p.address), "_operator": indexed(p.address), "_approved": p.bool}),
+    CreateEstate: event("0xd66691e9db811aef0bc0900328bd314b23f1f2285d5cb6d4baa4d959b3645a3c", "CreateEstate(address,uint256,string)", {"_owner": indexed(p.address), "_estateId": indexed(p.uint256), "_data": p.string}),
+    AddLand: event("0xff0e52667d53255667dc777a00af81038a4646367b0d73d8ee8540ca5b0c9a2e", "AddLand(uint256,uint256)", {"_estateId": indexed(p.uint256), "_landId": indexed(p.uint256)}),
+    RemoveLand: event("0x7932eb5ab0d4d4d172776074ee15d13d708465ff5476902ed15a4965434fcab1", "RemoveLand(uint256,uint256,address)", {"_estateId": indexed(p.uint256), "_landId": indexed(p.uint256), "_destinatary": indexed(p.address)}),
+    Update: event("0x47c705b9219229ad762fca605f08fb024a3415d0ae78af5d319820c72e510414", "Update(uint256,address,address,string)", {"_assetId": indexed(p.uint256), "_holder": indexed(p.address), "_operator": indexed(p.address), "_data": p.string}),
+    UpdateOperator: event("0x9d9dd80a56a16f715df6eb40b771e24ff8cbea6eed9de28473ce0f28fe5602a9", "UpdateOperator(uint256,address)", {"_estateId": indexed(p.uint256), "_operator": indexed(p.address)}),
+    UpdateManager: event("0xd79fbfe1644c022b9150727d871532bfcc3e27ffee86fc596a062770ac97b042", "UpdateManager(address,address,address,bool)", {"_owner": indexed(p.address), "_operator": indexed(p.address), "_caller": indexed(p.address), "_approved": p.bool}),
+    SetLANDRegistry: event("0x2e88792af6f2248ed486ffffc86edf9bc197596990f7b406d5f867a1dd930ba5", "SetLANDRegistry(address)", {"_registry": indexed(p.address)}),
+    Migrated: event("0xdd117a11c22118c9dee4b5a67ce578bc44529dce21ee0ccc439588fbb9fb4ea3", "Migrated(string,string)", {"contractName": p.string, "migrationId": p.string}),
 }
 
 export const functions = {
-    supportsInterface: fun("0x01ffc9a7", {"_interfaceId": p.bytes4}, p.bool),
-    name: fun("0x06fdde03", {}, p.string),
-    updateManager: fun("0x07ecec3e", {"_0": p.address, "_1": p.address}, p.bool),
-    getApproved: fun("0x081812fc", {"_tokenId": p.uint256}, p.address),
-    approve: fun("0x095ea7b3", {"_to": p.address, "_tokenId": p.uint256}, ),
-    landIdEstate: fun("0x0a354fce", {"_0": p.uint256}, p.uint256),
-    totalSupply: fun("0x18160ddd", {}, p.uint256),
-    tokenOfOwnerByIndex: fun("0x2f745c59", {"_owner": p.address, "_index": p.uint256}, p.uint256),
-    estateLandIds: fun("0x3970bfd3", {"_0": p.uint256, "_1": p.uint256}, p.uint256),
-    "safeTransferFrom(address,address,uint256)": fun("0x42842e0e", {"_from": p.address, "_to": p.address, "_tokenId": p.uint256}, ),
-    exists: fun("0x4f558e79", {"_tokenId": p.uint256}, p.bool),
-    tokenByIndex: fun("0x4f6ccce7", {"_index": p.uint256}, p.uint256),
-    ownerOf: fun("0x6352211e", {"_tokenId": p.uint256}, p.address),
-    balanceOf: fun("0x70a08231", {"_owner": p.address}, p.uint256),
-    registry: fun("0x7b103999", {}, p.address),
-    owner: fun("0x8da5cb5b", {}, p.address),
-    symbol: fun("0x95d89b41", {}, p.string),
-    updateOperator: fun("0x9d40b850", {"_0": p.uint256}, p.address),
-    estateLandIndex: fun("0x9f813b1b", {"_0": p.uint256, "_1": p.uint256}, p.uint256),
-    setApprovalForAll: fun("0xa22cb465", {"_to": p.address, "_approved": p.bool}, ),
-    "safeTransferFrom(address,address,uint256,bytes)": fun("0xb88d4fde", {"_from": p.address, "_to": p.address, "_tokenId": p.uint256, "_data": p.bytes}, ),
-    isMigrated: fun("0xc0bac1a8", {"contractName": p.string, "migrationId": p.string}, p.bool),
-    tokenURI: fun("0xc87b56dd", {"_tokenId": p.uint256}, p.string),
-    isApprovedForAll: fun("0xe985e9c5", {"_owner": p.address, "_operator": p.address}, p.bool),
-    transferOwnership: fun("0xf2fde38b", {"newOwner": p.address}, ),
-    mint: fun("0xd0def521", {"to": p.address, "metadata": p.string}, p.uint256),
-    transferLand: fun("0xa506e5dc", {"estateId": p.uint256, "landId": p.uint256, "destinatary": p.address}, ),
-    transferManyLands: fun("0x40807049", {"estateId": p.uint256, "landIds": p.array(p.uint256), "destinatary": p.address}, ),
-    getLandEstateId: fun("0xbb969132", {"landId": p.uint256}, p.uint256),
-    setLANDRegistry: fun("0x535a920c", {"_registry": p.address}, ),
-    ping: fun("0x5c36b186", {}, ),
-    getEstateSize: fun("0xf4a43448", {"estateId": p.uint256}, p.uint256),
-    updateMetadata: fun("0x53c8388e", {"estateId": p.uint256, "metadata": p.string}, ),
-    getMetadata: fun("0xa574cea4", {"estateId": p.uint256}, p.string),
-    isUpdateAuthorized: fun("0x65937ab9", {"operator": p.address, "estateId": p.uint256}, p.bool),
-    setUpdateManager: fun("0xef1db762", {"_owner": p.address, "_operator": p.address, "_approved": p.bool}, ),
-    setUpdateOperator: fun("0xb0b02c60", {"estateId": p.uint256, "operator": p.address}, ),
-    setLandUpdateOperator: fun("0x1d11016a", {"estateId": p.uint256, "landId": p.uint256, "operator": p.address}, ),
-    "initialize(string,string)": fun("0x4cd88b76", {"_name": p.string, "_symbol": p.string}, ),
-    "initialize()": fun("0x8129fc1c", {}, ),
-    "initialize(string,string,address)": fun("0x077f224a", {"_name": p.string, "_symbol": p.string, "_registry": p.address}, ),
-    "initialize(address)": fun("0xc4d66de8", {"_sender": p.address}, ),
-    onERC721Received: fun("0x150b7a02", {"_operator": p.address, "_from": p.address, "_tokenId": p.uint256, "_data": p.bytes}, p.bytes4),
-    getFingerprint: fun("0x159a6475", {"estateId": p.uint256}, p.bytes32),
-    verifyFingerprint: fun("0x8f9f4b63", {"estateId": p.uint256, "fingerprint": p.bytes}, p.bool),
-    "safeTransferManyFrom(address,address,uint256[])": fun("0x73b913fa", {"from": p.address, "to": p.address, "estateIds": p.array(p.uint256)}, ),
-    "safeTransferManyFrom(address,address,uint256[],bytes)": fun("0xd93eeb5c", {"from": p.address, "to": p.address, "estateIds": p.array(p.uint256), "data": p.bytes}, ),
-    updateLandData: fun("0x28b34ef6", {"estateId": p.uint256, "landId": p.uint256, "data": p.string}, ),
-    updateManyLandData: fun("0x426a0af3", {"estateId": p.uint256, "landIds": p.array(p.uint256), "data": p.string}, ),
-    transferFrom: fun("0x23b872dd", {"_from": p.address, "_to": p.address, "_tokenId": p.uint256}, ),
+    supportsInterface: viewFun("0x01ffc9a7", "supportsInterface(bytes4)", {"_interfaceId": p.bytes4}, p.bool),
+    name: viewFun("0x06fdde03", "name()", {}, p.string),
+    updateManager: viewFun("0x07ecec3e", "updateManager(address,address)", {"_0": p.address, "_1": p.address}, p.bool),
+    getApproved: viewFun("0x081812fc", "getApproved(uint256)", {"_tokenId": p.uint256}, p.address),
+    approve: fun("0x095ea7b3", "approve(address,uint256)", {"_to": p.address, "_tokenId": p.uint256}, ),
+    landIdEstate: viewFun("0x0a354fce", "landIdEstate(uint256)", {"_0": p.uint256}, p.uint256),
+    totalSupply: viewFun("0x18160ddd", "totalSupply()", {}, p.uint256),
+    tokenOfOwnerByIndex: viewFun("0x2f745c59", "tokenOfOwnerByIndex(address,uint256)", {"_owner": p.address, "_index": p.uint256}, p.uint256),
+    estateLandIds: viewFun("0x3970bfd3", "estateLandIds(uint256,uint256)", {"_0": p.uint256, "_1": p.uint256}, p.uint256),
+    'safeTransferFrom(address,address,uint256)': fun("0x42842e0e", "safeTransferFrom(address,address,uint256)", {"_from": p.address, "_to": p.address, "_tokenId": p.uint256}, ),
+    exists: viewFun("0x4f558e79", "exists(uint256)", {"_tokenId": p.uint256}, p.bool),
+    tokenByIndex: viewFun("0x4f6ccce7", "tokenByIndex(uint256)", {"_index": p.uint256}, p.uint256),
+    ownerOf: viewFun("0x6352211e", "ownerOf(uint256)", {"_tokenId": p.uint256}, p.address),
+    balanceOf: viewFun("0x70a08231", "balanceOf(address)", {"_owner": p.address}, p.uint256),
+    registry: viewFun("0x7b103999", "registry()", {}, p.address),
+    owner: viewFun("0x8da5cb5b", "owner()", {}, p.address),
+    symbol: viewFun("0x95d89b41", "symbol()", {}, p.string),
+    updateOperator: viewFun("0x9d40b850", "updateOperator(uint256)", {"_0": p.uint256}, p.address),
+    estateLandIndex: viewFun("0x9f813b1b", "estateLandIndex(uint256,uint256)", {"_0": p.uint256, "_1": p.uint256}, p.uint256),
+    setApprovalForAll: fun("0xa22cb465", "setApprovalForAll(address,bool)", {"_to": p.address, "_approved": p.bool}, ),
+    'safeTransferFrom(address,address,uint256,bytes)': fun("0xb88d4fde", "safeTransferFrom(address,address,uint256,bytes)", {"_from": p.address, "_to": p.address, "_tokenId": p.uint256, "_data": p.bytes}, ),
+    isMigrated: viewFun("0xc0bac1a8", "isMigrated(string,string)", {"contractName": p.string, "migrationId": p.string}, p.bool),
+    tokenURI: viewFun("0xc87b56dd", "tokenURI(uint256)", {"_tokenId": p.uint256}, p.string),
+    isApprovedForAll: viewFun("0xe985e9c5", "isApprovedForAll(address,address)", {"_owner": p.address, "_operator": p.address}, p.bool),
+    transferOwnership: fun("0xf2fde38b", "transferOwnership(address)", {"newOwner": p.address}, ),
+    mint: fun("0xd0def521", "mint(address,string)", {"to": p.address, "metadata": p.string}, p.uint256),
+    transferLand: fun("0xa506e5dc", "transferLand(uint256,uint256,address)", {"estateId": p.uint256, "landId": p.uint256, "destinatary": p.address}, ),
+    transferManyLands: fun("0x40807049", "transferManyLands(uint256,uint256[],address)", {"estateId": p.uint256, "landIds": p.array(p.uint256), "destinatary": p.address}, ),
+    getLandEstateId: viewFun("0xbb969132", "getLandEstateId(uint256)", {"landId": p.uint256}, p.uint256),
+    setLANDRegistry: fun("0x535a920c", "setLANDRegistry(address)", {"_registry": p.address}, ),
+    ping: fun("0x5c36b186", "ping()", {}, ),
+    getEstateSize: viewFun("0xf4a43448", "getEstateSize(uint256)", {"estateId": p.uint256}, p.uint256),
+    updateMetadata: fun("0x53c8388e", "updateMetadata(uint256,string)", {"estateId": p.uint256, "metadata": p.string}, ),
+    getMetadata: viewFun("0xa574cea4", "getMetadata(uint256)", {"estateId": p.uint256}, p.string),
+    isUpdateAuthorized: viewFun("0x65937ab9", "isUpdateAuthorized(address,uint256)", {"operator": p.address, "estateId": p.uint256}, p.bool),
+    setUpdateManager: fun("0xef1db762", "setUpdateManager(address,address,bool)", {"_owner": p.address, "_operator": p.address, "_approved": p.bool}, ),
+    setUpdateOperator: fun("0xb0b02c60", "setUpdateOperator(uint256,address)", {"estateId": p.uint256, "operator": p.address}, ),
+    setLandUpdateOperator: fun("0x1d11016a", "setLandUpdateOperator(uint256,uint256,address)", {"estateId": p.uint256, "landId": p.uint256, "operator": p.address}, ),
+    'initialize(string,string)': fun("0x4cd88b76", "initialize(string,string)", {"_name": p.string, "_symbol": p.string}, ),
+    'initialize()': fun("0x8129fc1c", "initialize()", {}, ),
+    'initialize(string,string,address)': fun("0x077f224a", "initialize(string,string,address)", {"_name": p.string, "_symbol": p.string, "_registry": p.address}, ),
+    'initialize(address)': fun("0xc4d66de8", "initialize(address)", {"_sender": p.address}, ),
+    onERC721Received: fun("0x150b7a02", "onERC721Received(address,address,uint256,bytes)", {"_operator": p.address, "_from": p.address, "_tokenId": p.uint256, "_data": p.bytes}, p.bytes4),
+    getFingerprint: viewFun("0x159a6475", "getFingerprint(uint256)", {"estateId": p.uint256}, p.bytes32),
+    verifyFingerprint: viewFun("0x8f9f4b63", "verifyFingerprint(uint256,bytes)", {"estateId": p.uint256, "fingerprint": p.bytes}, p.bool),
+    'safeTransferManyFrom(address,address,uint256[])': fun("0x73b913fa", "safeTransferManyFrom(address,address,uint256[])", {"from": p.address, "to": p.address, "estateIds": p.array(p.uint256)}, ),
+    'safeTransferManyFrom(address,address,uint256[],bytes)': fun("0xd93eeb5c", "safeTransferManyFrom(address,address,uint256[],bytes)", {"from": p.address, "to": p.address, "estateIds": p.array(p.uint256), "data": p.bytes}, ),
+    updateLandData: fun("0x28b34ef6", "updateLandData(uint256,uint256,string)", {"estateId": p.uint256, "landId": p.uint256, "data": p.string}, ),
+    updateManyLandData: fun("0x426a0af3", "updateManyLandData(uint256,uint256[],string)", {"estateId": p.uint256, "landIds": p.array(p.uint256), "data": p.string}, ),
+    transferFrom: fun("0x23b872dd", "transferFrom(address,address,uint256)", {"_from": p.address, "_to": p.address, "_tokenId": p.uint256}, ),
 }
 
 export class Contract extends ContractBase {
@@ -219,8 +219,8 @@ export type TokenOfOwnerByIndexReturn = FunctionReturn<typeof functions.tokenOfO
 export type EstateLandIdsParams = FunctionArguments<typeof functions.estateLandIds>
 export type EstateLandIdsReturn = FunctionReturn<typeof functions.estateLandIds>
 
-export type SafeTransferFromParams_0 = FunctionArguments<typeof functions["safeTransferFrom(address,address,uint256)"]>
-export type SafeTransferFromReturn_0 = FunctionReturn<typeof functions["safeTransferFrom(address,address,uint256)"]>
+export type SafeTransferFromParams_0 = FunctionArguments<typeof functions['safeTransferFrom(address,address,uint256)']>
+export type SafeTransferFromReturn_0 = FunctionReturn<typeof functions['safeTransferFrom(address,address,uint256)']>
 
 export type ExistsParams = FunctionArguments<typeof functions.exists>
 export type ExistsReturn = FunctionReturn<typeof functions.exists>
@@ -252,8 +252,8 @@ export type EstateLandIndexReturn = FunctionReturn<typeof functions.estateLandIn
 export type SetApprovalForAllParams = FunctionArguments<typeof functions.setApprovalForAll>
 export type SetApprovalForAllReturn = FunctionReturn<typeof functions.setApprovalForAll>
 
-export type SafeTransferFromParams_1 = FunctionArguments<typeof functions["safeTransferFrom(address,address,uint256,bytes)"]>
-export type SafeTransferFromReturn_1 = FunctionReturn<typeof functions["safeTransferFrom(address,address,uint256,bytes)"]>
+export type SafeTransferFromParams_1 = FunctionArguments<typeof functions['safeTransferFrom(address,address,uint256,bytes)']>
+export type SafeTransferFromReturn_1 = FunctionReturn<typeof functions['safeTransferFrom(address,address,uint256,bytes)']>
 
 export type IsMigratedParams = FunctionArguments<typeof functions.isMigrated>
 export type IsMigratedReturn = FunctionReturn<typeof functions.isMigrated>
@@ -306,17 +306,17 @@ export type SetUpdateOperatorReturn = FunctionReturn<typeof functions.setUpdateO
 export type SetLandUpdateOperatorParams = FunctionArguments<typeof functions.setLandUpdateOperator>
 export type SetLandUpdateOperatorReturn = FunctionReturn<typeof functions.setLandUpdateOperator>
 
-export type InitializeParams_0 = FunctionArguments<typeof functions["initialize(string,string)"]>
-export type InitializeReturn_0 = FunctionReturn<typeof functions["initialize(string,string)"]>
+export type InitializeParams_0 = FunctionArguments<typeof functions['initialize(string,string)']>
+export type InitializeReturn_0 = FunctionReturn<typeof functions['initialize(string,string)']>
 
-export type InitializeParams_1 = FunctionArguments<typeof functions["initialize()"]>
-export type InitializeReturn_1 = FunctionReturn<typeof functions["initialize()"]>
+export type InitializeParams_1 = FunctionArguments<typeof functions['initialize()']>
+export type InitializeReturn_1 = FunctionReturn<typeof functions['initialize()']>
 
-export type InitializeParams_2 = FunctionArguments<typeof functions["initialize(string,string,address)"]>
-export type InitializeReturn_2 = FunctionReturn<typeof functions["initialize(string,string,address)"]>
+export type InitializeParams_2 = FunctionArguments<typeof functions['initialize(string,string,address)']>
+export type InitializeReturn_2 = FunctionReturn<typeof functions['initialize(string,string,address)']>
 
-export type InitializeParams_3 = FunctionArguments<typeof functions["initialize(address)"]>
-export type InitializeReturn_3 = FunctionReturn<typeof functions["initialize(address)"]>
+export type InitializeParams_3 = FunctionArguments<typeof functions['initialize(address)']>
+export type InitializeReturn_3 = FunctionReturn<typeof functions['initialize(address)']>
 
 export type OnERC721ReceivedParams = FunctionArguments<typeof functions.onERC721Received>
 export type OnERC721ReceivedReturn = FunctionReturn<typeof functions.onERC721Received>
@@ -327,11 +327,11 @@ export type GetFingerprintReturn = FunctionReturn<typeof functions.getFingerprin
 export type VerifyFingerprintParams = FunctionArguments<typeof functions.verifyFingerprint>
 export type VerifyFingerprintReturn = FunctionReturn<typeof functions.verifyFingerprint>
 
-export type SafeTransferManyFromParams_0 = FunctionArguments<typeof functions["safeTransferManyFrom(address,address,uint256[])"]>
-export type SafeTransferManyFromReturn_0 = FunctionReturn<typeof functions["safeTransferManyFrom(address,address,uint256[])"]>
+export type SafeTransferManyFromParams_0 = FunctionArguments<typeof functions['safeTransferManyFrom(address,address,uint256[])']>
+export type SafeTransferManyFromReturn_0 = FunctionReturn<typeof functions['safeTransferManyFrom(address,address,uint256[])']>
 
-export type SafeTransferManyFromParams_1 = FunctionArguments<typeof functions["safeTransferManyFrom(address,address,uint256[],bytes)"]>
-export type SafeTransferManyFromReturn_1 = FunctionReturn<typeof functions["safeTransferManyFrom(address,address,uint256[],bytes)"]>
+export type SafeTransferManyFromParams_1 = FunctionArguments<typeof functions['safeTransferManyFrom(address,address,uint256[],bytes)']>
+export type SafeTransferManyFromReturn_1 = FunctionReturn<typeof functions['safeTransferManyFrom(address,address,uint256[],bytes)']>
 
 export type UpdateLandDataParams = FunctionArguments<typeof functions.updateLandData>
 export type UpdateLandDataReturn = FunctionReturn<typeof functions.updateLandData>

@@ -1,24 +1,24 @@
 import * as p from '@subsquid/evm-codec'
-import { event, fun, indexed, ContractBase } from '@subsquid/evm-abi'
+import { event, fun, viewFun, indexed, ContractBase } from '@subsquid/evm-abi'
 import type { EventParams as EParams, FunctionArguments, FunctionReturn } from '@subsquid/evm-abi'
 
 export const functions = {
-    aggregate: fun("0x252dba42", {"calls": p.array(p.struct({"target": p.address, "callData": p.bytes}))}, {"blockNumber": p.uint256, "returnData": p.array(p.bytes)}),
-    aggregate3: fun("0x82ad56cb", {"calls": p.array(p.struct({"target": p.address, "allowFailure": p.bool, "callData": p.bytes}))}, p.array(p.struct({"success": p.bool, "returnData": p.bytes}))),
-    aggregate3Value: fun("0x174dea71", {"calls": p.array(p.struct({"target": p.address, "allowFailure": p.bool, "value": p.uint256, "callData": p.bytes}))}, p.array(p.struct({"success": p.bool, "returnData": p.bytes}))),
-    blockAndAggregate: fun("0xc3077fa9", {"calls": p.array(p.struct({"target": p.address, "callData": p.bytes}))}, {"blockNumber": p.uint256, "blockHash": p.bytes32, "returnData": p.array(p.struct({"success": p.bool, "returnData": p.bytes}))}),
-    getBasefee: fun("0x3e64a696", {}, p.uint256),
-    getBlockHash: fun("0xee82ac5e", {"blockNumber": p.uint256}, p.bytes32),
-    getBlockNumber: fun("0x42cbb15c", {}, p.uint256),
-    getChainId: fun("0x3408e470", {}, p.uint256),
-    getCurrentBlockCoinbase: fun("0xa8b0574e", {}, p.address),
-    getCurrentBlockDifficulty: fun("0x72425d9d", {}, p.uint256),
-    getCurrentBlockGasLimit: fun("0x86d516e8", {}, p.uint256),
-    getCurrentBlockTimestamp: fun("0x0f28c97d", {}, p.uint256),
-    getEthBalance: fun("0x4d2301cc", {"addr": p.address}, p.uint256),
-    getLastBlockHash: fun("0x27e86d6e", {}, p.bytes32),
-    tryAggregate: fun("0xbce38bd7", {"requireSuccess": p.bool, "calls": p.array(p.struct({"target": p.address, "callData": p.bytes}))}, p.array(p.struct({"success": p.bool, "returnData": p.bytes}))),
-    tryBlockAndAggregate: fun("0x399542e9", {"requireSuccess": p.bool, "calls": p.array(p.struct({"target": p.address, "callData": p.bytes}))}, {"blockNumber": p.uint256, "blockHash": p.bytes32, "returnData": p.array(p.struct({"success": p.bool, "returnData": p.bytes}))}),
+    aggregate: fun("0x252dba42", "aggregate((address,bytes)[])", {"calls": p.array(p.struct({"target": p.address, "callData": p.bytes}))}, {"blockNumber": p.uint256, "returnData": p.array(p.bytes)}),
+    aggregate3: fun("0x82ad56cb", "aggregate3((address,bool,bytes)[])", {"calls": p.array(p.struct({"target": p.address, "allowFailure": p.bool, "callData": p.bytes}))}, p.array(p.struct({"success": p.bool, "returnData": p.bytes}))),
+    aggregate3Value: fun("0x174dea71", "aggregate3Value((address,bool,uint256,bytes)[])", {"calls": p.array(p.struct({"target": p.address, "allowFailure": p.bool, "value": p.uint256, "callData": p.bytes}))}, p.array(p.struct({"success": p.bool, "returnData": p.bytes}))),
+    blockAndAggregate: fun("0xc3077fa9", "blockAndAggregate((address,bytes)[])", {"calls": p.array(p.struct({"target": p.address, "callData": p.bytes}))}, {"blockNumber": p.uint256, "blockHash": p.bytes32, "returnData": p.array(p.struct({"success": p.bool, "returnData": p.bytes}))}),
+    getBasefee: viewFun("0x3e64a696", "getBasefee()", {}, p.uint256),
+    getBlockHash: viewFun("0xee82ac5e", "getBlockHash(uint256)", {"blockNumber": p.uint256}, p.bytes32),
+    getBlockNumber: viewFun("0x42cbb15c", "getBlockNumber()", {}, p.uint256),
+    getChainId: viewFun("0x3408e470", "getChainId()", {}, p.uint256),
+    getCurrentBlockCoinbase: viewFun("0xa8b0574e", "getCurrentBlockCoinbase()", {}, p.address),
+    getCurrentBlockDifficulty: viewFun("0x72425d9d", "getCurrentBlockDifficulty()", {}, p.uint256),
+    getCurrentBlockGasLimit: viewFun("0x86d516e8", "getCurrentBlockGasLimit()", {}, p.uint256),
+    getCurrentBlockTimestamp: viewFun("0x0f28c97d", "getCurrentBlockTimestamp()", {}, p.uint256),
+    getEthBalance: viewFun("0x4d2301cc", "getEthBalance(address)", {"addr": p.address}, p.uint256),
+    getLastBlockHash: viewFun("0x27e86d6e", "getLastBlockHash()", {}, p.bytes32),
+    tryAggregate: fun("0xbce38bd7", "tryAggregate(bool,(address,bytes)[])", {"requireSuccess": p.bool, "calls": p.array(p.struct({"target": p.address, "callData": p.bytes}))}, p.array(p.struct({"success": p.bool, "returnData": p.bytes}))),
+    tryBlockAndAggregate: fun("0x399542e9", "tryBlockAndAggregate(bool,(address,bytes)[])", {"requireSuccess": p.bool, "calls": p.array(p.struct({"target": p.address, "callData": p.bytes}))}, {"blockNumber": p.uint256, "blockHash": p.bytes32, "returnData": p.array(p.struct({"success": p.bool, "returnData": p.bytes}))}),
 }
 
 export class Contract extends ContractBase {
