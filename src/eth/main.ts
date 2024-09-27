@@ -623,6 +623,7 @@ processor.run(
         );
       } else if (topic === erc721Bid.events.BidAccepted.topic) {
         await handleBidAccepted(
+          ctx,
           event as erc721Bid.BidAcceptedEventArgs,
           block,
           log.transactionHash,

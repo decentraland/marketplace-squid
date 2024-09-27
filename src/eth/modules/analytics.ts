@@ -1,4 +1,3 @@
-import { BlockData } from "@subsquid/evm-processor";
 import { createOrLoadAccount } from "../../common/modules/account";
 import { ONE_MILLION } from "../../common/utils/utils";
 import {
@@ -12,12 +11,25 @@ import {
 } from "../../model";
 import { buildCountFromSale } from "./count";
 import { getOrCreateAnalyticsDayData } from "../../common/modules/analytics";
+import { getOwner } from "../../common/utils/nft";
+import { Block, Context } from "../processor";
 
 export let BID_SALE_TYPE = "bid";
 export let ORDER_SALE_TYPE = "order";
 
-export function trackSale(
-  block: BlockData,
+// check if the buyer in a sale was a third party provider (to pay with credit card, cross chain, etc)
+export function isThirdPartySale(buyer: string): boolean {
+  if (
+    buyer == "0xea749fd6ba492dbc14c24fe8a3d08769229b896c" // Axelar Ethereum
+  ) {
+    return true;
+  }
+  return false;
+}
+
+export async function trackSale(
+  ctx: Context,
+  block: Block,
   type: string,
   buyer: string,
   seller: string,
@@ -31,7 +43,7 @@ export function trackSale(
   accounts: Map<string, Account>,
   analytics: Map<string, AnalyticsDayData>,
   counts: Map<string, Count>
-): void {
+): Promise<void> {
   // ignore zero price sales
   if (price === BigInt(0)) {
     console.log("INFO: ignoring zero price sale");
@@ -49,10 +61,12 @@ export function trackSale(
   const saleId = `${BigInt(count.salesTotal).toString()}-${Network.ETHEREUM}`;
   const sale = new Sale({ id: saleId });
   sale.type = type as SaleType;
-  sale.buyer = buyer;
   sale.seller = seller;
   sale.price = price;
   if (nft) {
+    sale.buyer = isThirdPartySale(buyer)
+      ? await getOwner(ctx, block, nft.contractAddress, nft.tokenId)
+      : buyer;
     sale.nft = nft;
     sale.searchTokenId = nft.tokenId;
     sale.searchContractAddress = nft.contractAddress;

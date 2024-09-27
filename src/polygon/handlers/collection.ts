@@ -602,7 +602,7 @@ export function handleUpdateItemData(
   }
 }
 
-export function handleIssue(
+export async function handleIssue(
   ctx: Context,
   collectionAddress: string,
   event: CollectionV2ABI.IssueEventArgs,
@@ -611,7 +611,7 @@ export function handleIssue(
   storedData: PolygonStoredData,
   inMemoryData: PolygonInMemoryState,
   storeContractData: StoreContractData
-): void {
+): Promise<void> {
   const { items } = storedData;
   const itemId = event._itemId.toString();
   const id = getItemId(collectionAddress, itemId);
@@ -621,7 +621,8 @@ export function handleIssue(
   if (item) {
     item.available = item.available - BigInt(1);
     item.totalSupply = item.totalSupply + BigInt(1);
-    handleMintNFT(
+    await handleMintNFT(
+      ctx,
       event,
       block,
       transaction,

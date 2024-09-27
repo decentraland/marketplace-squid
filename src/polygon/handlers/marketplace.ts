@@ -25,6 +25,7 @@ import { PolygonInMemoryState, PolygonStoredData } from "../types";
 import { buildCountFromOrder } from "../../common/modules/count";
 import { getAddresses } from "../../common/utils/addresses";
 import { MarketplaceContractData, MarketplaceV2ContractData } from "../state";
+import { Context } from "../processor";
 
 export type MarkteplaceEvents =
   | OrderCreatedEventArgs
@@ -82,7 +83,8 @@ export function handleOrderCreated(
   }
 }
 
-export function handleOrderSuccessful(
+export async function handleOrderSuccessful(
+  ctx: Context,
   event: OrderSuccessfulEventArgs,
   block: BlockData,
   txHash: string,
@@ -90,7 +92,7 @@ export function handleOrderSuccessful(
   marketplaceV2ContractData: MarketplaceV2ContractData,
   storedData: PolygonStoredData,
   inMemoryData: PolygonInMemoryState
-): void {
+): Promise<void> {
   const { assetId, buyer, id, nftAddress, seller, totalPrice } = event;
   const { orders, accounts, nfts } = storedData;
 
@@ -161,7 +163,9 @@ export function handleOrderSuccessful(
   }
 
   if (nft.item) {
-    trackSale(
+    await trackSale(
+      ctx,
+      block.header,
       storedData,
       inMemoryData,
       SaleType.order,

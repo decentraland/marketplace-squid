@@ -708,7 +708,7 @@ processor.run(
             console.log("ERROR: storeContractData not found");
             break;
           }
-          handleIssue(
+          await handleIssue(
             ctx,
             log.address,
             event as CollectionV2ABI.IssueEventArgs,
@@ -782,7 +782,8 @@ processor.run(
             );
             break;
           }
-          handleOrderSuccessful(
+          await handleOrderSuccessful(
+            ctx,
             event as MarketplaceABI.OrderSuccessfulEventArgs,
             block,
             log.transactionHash,
@@ -818,7 +819,8 @@ processor.run(
             console.log("ERROR: bidV2ContractData not found");
             break;
           }
-          handleBidAccepted(
+          await handleBidAccepted(
+            ctx,
             event as ERC721BidABI.BidAcceptedEventArgs,
             block,
             log.transactionHash,

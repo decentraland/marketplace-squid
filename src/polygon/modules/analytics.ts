@@ -8,6 +8,7 @@ import {
   buildCountFromPrimarySale,
   buildCountFromSecondarySale,
 } from "../../common/modules/count";
+import { getOwner } from "../../common/utils/nft";
 import { ONE_MILLION } from "../../common/utils/utils";
 import {
   AnalyticsDayData,
@@ -17,6 +18,7 @@ import {
   Sale,
   SaleType,
 } from "../../model";
+import { Block, Context } from "../processor";
 import { PolygonInMemoryState, PolygonStoredData } from "../types";
 import {
   updateBuyerAccountsDayData,
@@ -26,7 +28,20 @@ import {
   updateUniqueCollectorsSet,
 } from "./accountsDayData";
 
-export function trackSale(
+// check if the buyer in a sale was a third party provider (to pay with credit card, cross chain, etc)
+export function isThirdPartySale(buyer: string): boolean {
+  if (
+    buyer == "0xed038688ecf1193f8d9717eb3930f0bf0d745cb4" || // Transak Polygon
+    buyer == "0xea749fd6ba492dbc14c24fe8a3d08769229b896c" // Axelar Polygon & Ethereum
+  ) {
+    return true;
+  }
+  return false;
+}
+
+export async function trackSale(
+  ctx: Context,
+  block: Block,
   storedData: PolygonStoredData,
   inMemoryData: PolygonInMemoryState,
   type: SaleType,
@@ -41,7 +56,7 @@ export function trackSale(
   royaltiesCut: bigint,
   timestamp: bigint,
   txHash: string
-): void {
+): Promise<void> {
   const {
     counts,
     nfts,
@@ -83,7 +98,9 @@ export function trackSale(
   const saleId = `${BigInt(count.salesTotal).toString()}-${Network.POLYGON}`;
   const sale = new Sale({ id: saleId });
   sale.type = type;
-  sale.buyer = buyer;
+  sale.buyer = isThirdPartySale(buyer)
+    ? await getOwner(ctx, block, nft.contractAddress, nft.tokenId)
+    : buyer;
   sale.seller = seller;
   sale.beneficiary = Buffer.from(beneficiary.slice(2), "hex");
   sale.price = price;
@@ -195,7 +212,11 @@ export function trackSale(
   // sellerAccount.save();
 
   // update fees collector account
-  const feesCollectorAccount = createOrLoadAccount(accounts, feesCollector, Network.POLYGON);
+  const feesCollectorAccount = createOrLoadAccount(
+    accounts,
+    feesCollector,
+    Network.POLYGON
+  );
   feesCollectorAccount.earned =
     feesCollectorAccount.earned + sale.feesCollectorCut;
   feesCollectorAccount.royalties =

@@ -16,6 +16,7 @@ import { getBidId } from "../../common/handlers/bid";
 import { trackSale } from "../modules/analytics";
 import { PolygonInMemoryState, PolygonStoredData } from "../types";
 import { BidV2ContractData } from "../state";
+import { Context } from "../processor";
 
 export function handleBidCreated(
   event: BidCreatedEventArgs,
@@ -74,14 +75,15 @@ export function handleBidCreated(
   counts.set(count.id, count);
 }
 
-export function handleBidAccepted(
+export async function handleBidAccepted(
+  ctx: Context,
   event: BidAcceptedEventArgs,
   block: BlockData,
   txHash: string,
   bidV2ContractData: BidV2ContractData,
   storedData: PolygonStoredData,
   inMemoryData: PolygonInMemoryState
-): void {
+): Promise<void> {
   const { nfts, bids } = storedData;
   const { _bidder, _tokenAddress, _tokenId, _seller } = event;
 
@@ -118,7 +120,9 @@ export function handleBidAccepted(
     }
 
     nft.item?.id &&
-      trackSale(
+      (await trackSale(
+        ctx,
+        block.header,
         storedData,
         inMemoryData,
         SaleType.bid,
@@ -133,7 +137,7 @@ export function handleBidAccepted(
         bidV2ContractData.royaltiesCutPerMillion,
         timestamp,
         txHash
-      );
+      ));
   } else {
     console.log("ERROR: NFT not found for bid in accepted: ", id);
   }
