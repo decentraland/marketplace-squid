@@ -45,11 +45,8 @@ export const processor = new EvmBatchProcessor()
     address: [
       addresses.LANDRegistry,
       addresses.EstateRegistry,
-      addresses.Marketplace,
       addresses.DCLRegistrar,
-      addresses.ERC721Bid,
-      addresses.DCLControllerV2,
-      ...Object.values(addresses.collections),
+      ...Object.values(addresses.collections as string[]),
     ],
     topic0: [
       erc721Abi.events[
@@ -58,26 +55,50 @@ export const processor = new EvmBatchProcessor()
       erc721Abi.events[
         "Transfer(address indexed,address indexed,uint256 indexed,address,bytes)"
       ].topic,
+      erc721Abi.events[
+        "Transfer(address indexed,address indexed,uint256 indexed)"
+      ].topic,
       erc721Abi.events["Transfer(address indexed,address indexed,uint256)"]
         .topic,
       erc721Abi.events.OwnershipTransferred.topic,
       erc721Abi.events.AddWearable.topic,
+    ],
+  })
+  .addLog({
+    address: [addresses.LANDRegistry, addresses.EstateRegistry],
+    topic0: [
       landRegistryAbi.events.Update.topic,
       estateRegistryAbi.events.CreateEstate.topic,
       estateRegistryAbi.events.AddLand.topic,
       estateRegistryAbi.events.RemoveLand.topic,
       estateRegistryAbi.events.Update.topic,
+    ],
+  })
+  .addLog({
+    address: [addresses.Marketplace],
+    topic0: [
       marketplaceAbi.events.OrderCreated.topic,
       marketplaceAbi.events.OrderSuccessful.topic,
       marketplaceAbi.events.OrderCancelled.topic,
       marketplaceAbi.events.ChangedOwnerCutPerMillion.topic,
-      dclRegistrarAbi.events.NameRegistered.topic,
-      dclControllerV2.events.NameBought.topic,
+    ],
+  })
+  .addLog({
+    address: [addresses.DCLRegistrar],
+    topic0: [dclRegistrarAbi.events.NameRegistered.topic],
+  })
+  .addLog({
+    address: [addresses.ERC721Bid],
+    topic0: [
       erc721BidAbi.events.BidAccepted.topic,
       erc721BidAbi.events.BidCreated.topic,
       erc721BidAbi.events.BidCancelled.topic,
       erc721BidAbi.events.ChangedOwnerCutPerMillion.topic,
     ],
+  })
+  .addLog({
+    address: [addresses.DCLControllerV2],
+    topic0: [dclControllerV2.events.NameBought.topic],
   });
 
 export type Fields = EvmBatchProcessorFields<typeof processor>;
