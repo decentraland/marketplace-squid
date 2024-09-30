@@ -113,15 +113,66 @@ processor.run(
           ].topic:
           case erc721abi.events[
             "Transfer(address indexed,address indexed,uint256 indexed)"
+          ].topic:
+          case erc721abi.events[
+            "Transfer(address indexed,address indexed,uint256)"
           ].topic: {
-            const event =
+            let event;
+            if (
+              topic ===
+              erc721abi.events[
+                "Transfer(address indexed,address indexed,uint256)"
+              ].topic
+            ) {
+              event =
+                erc721abi.events[
+                  "Transfer(address indexed,address indexed,uint256 indexed)"
+                ].decode(log);
+            } else if (
+              topic ===
               erc721abi.events[
                 "Transfer(address indexed,address indexed,uint256 indexed)"
-              ].decode(log);
+              ].topic
+            ) {
+              event =
+                erc721abi.events[
+                  "Transfer(address indexed,address indexed,uint256 indexed)"
+                ].decode(log);
+            } else if (
+              topic ===
+              erc721abi.events[
+                "Transfer(address indexed,address indexed,uint256 indexed,address,bytes)"
+              ].topic
+            ) {
+              event =
+                erc721abi.events[
+                  "Transfer(address indexed,address indexed,uint256 indexed,address,bytes)"
+                ].decode(log);
+            } else if (
+              topic ===
+              erc721abi.events[
+                "Transfer(address indexed,address indexed,uint256 indexed,address,bytes,bytes)"
+              ].topic
+            ) {
+              event =
+                erc721abi.events[
+                  "Transfer(address indexed,address indexed,uint256 indexed,address,bytes,bytes)"
+                ].decode(log);
+            }
+
+            if (!event) {
+              console.log("ERROR: event could not be decoded");
+              break;
+            }
+
             const contractAddress = log.address;
             markteplaceEvents.push({
               topic,
-              event,
+              event: {
+                from: event.from,
+                to: event.to,
+                tokenId: event.tokenId,
+              },
               block,
               log,
               marketplaceOwnerCutPerMillion: getMarketplaceOwnerCutPerMillion(),
