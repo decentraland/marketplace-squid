@@ -290,6 +290,7 @@ enum Category {
   parcel
   estate
   wearable
+  emote
   ens
 }
 
