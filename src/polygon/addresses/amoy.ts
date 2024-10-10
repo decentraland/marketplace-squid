@@ -15,3 +15,4 @@ export const RaritiesWithOracle = "0x25b6b4bac4adb582a0abd475439da6730777fbf7";
 
 export const Rarity = "0xddb3781fff645325c8896aa1f067baa381607ecc";
 export const CollectionManager = "0x5309ae874fc4eb21adcd63f8b6c3f766cc3b1849";
+export const MarketplaceV3 = "0x6ab20ae56673ed65f520b7be332aeb61b3ed727d";
