@@ -7,9 +7,10 @@ import * as dclRegistrarAbi from "../abi/DCLRegistrar";
 import * as marketplaceAbi from "../abi/Marketplace";
 import * as erc721Bid from "../abi/ERC721Bid";
 import * as dclControllerV2abi from "../abi/DCLControllerV2";
+import * as MarketplaceV3ABI from "../abi/DecentralandMarketplaceEthereum";
 import { Order, Sale, Transfer, Network as ModelNetwork } from "../model";
 import { processor } from "./processor";
-import { getNFTId, getTokenURI, isMint } from "../common/utils";
+import { getNFTId } from "../common/utils";
 import { tokenURIMutilcall } from "../common/utils/multicall";
 import { getAddresses } from "../common/utils/addresses";
 import {
@@ -39,6 +40,7 @@ import {
   handleOrderCancelled,
   handleOrderCreated,
   handleOrderSuccessful,
+  handleTraded,
 } from "./handlers/marketplace";
 import { getStoredData } from "./store";
 import { decodeTokenIdsToCoordinates } from "./modules/land";
@@ -484,6 +486,33 @@ processor.run(
             });
             break;
           }
+          case MarketplaceV3ABI.events.Traded.topic: {
+            const event = MarketplaceV3ABI.events.Traded.decode(log);
+            const collectionId = event._trade.sent[0].contractAddress;
+            const tokenId = event._trade.sent[0].value;
+
+            addEventToStateIdsBasedOnCategory(collectionId, tokenId, {
+              landTokenIds,
+              estateTokenIds,
+              ensTokenIds,
+              tokenIds,
+            });
+
+            const seller = event._trade.received[0].beneficiary;
+            const buyer = event._trade.sent[0].beneficiary;
+            accountIds.add(seller); // load sellers acount to update metrics
+            accountIds.add(buyer); // load buyers acount to update metrics
+            analyticsIds.add(analyticDayDataId);
+
+            markteplaceEvents.push({
+              topic,
+              event,
+              block,
+              log,
+            });
+
+            break;
+          }
         }
       }
     }
@@ -642,6 +671,18 @@ processor.run(
           orders,
           nfts,
           counts
+        );
+      } else if (topic === MarketplaceV3ABI.events.Traded.topic) {
+        await handleTraded(
+          ctx,
+          event as MarketplaceV3ABI.TradedEventArgs,
+          block,
+          log.transactionHash,
+          nfts,
+          accounts,
+          analytics,
+          counts,
+          sales
         );
       } else if (topic === marketplaceAbi.events.OrderSuccessful.topic) {
         await handleOrderSuccessful(

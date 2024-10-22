@@ -1,4 +1,4 @@
-import { BlockData } from "@subsquid/evm-processor";
+import { BlockData, Transaction } from "@subsquid/evm-processor";
 import { Network } from "@dcl/schemas";
 import {
   OrderCancelledEventArgs,
@@ -11,6 +11,8 @@ import {
   getNFTId,
   updateNFTOrderProperties,
 } from "../../common/utils";
+import * as CollectionV2ABI from "../abi/CollectionV2";
+import * as MarketplaceV3ABI from "../abi/DecentralandMarketplacePolygon";
 import {
   Category,
   Count,
@@ -26,6 +28,8 @@ import { buildCountFromOrder } from "../../common/modules/count";
 import { getAddresses } from "../../common/utils/addresses";
 import { MarketplaceContractData, MarketplaceV2ContractData } from "../state";
 import { Context } from "../processor";
+import { TradedEventArgs } from "../abi/DecentralandMarketplacePolygon";
+import { encodeTokenId, handleIssue } from "./collection";
 
 export type MarkteplaceEvents =
   | OrderCreatedEventArgs
@@ -214,5 +218,111 @@ export function handleOrderCancelled(
     console.log(
       `ERROR: Order not found for order cancelled orderId:${id}, nftId: ${nftId}`
     );
+  }
+}
+
+export async function handleTraded(
+  ctx: Context,
+  event: TradedEventArgs,
+  block: BlockData,
+  transaction: Transaction & { input: string },
+  storedData: PolygonStoredData,
+  inMemoryData: PolygonInMemoryState
+): Promise<void> {
+  const addresses = getAddresses(Network.MATIC);
+  const { _trade } = event;
+  const { accounts, nfts } = storedData;
+
+  const assetType = Number(event._trade.sent[0].assetType);
+  const collectionAddress = _trade.sent[0].contractAddress;
+  const marketplaceV3Contract = new MarketplaceV3ABI.Contract(
+    ctx,
+    block.header,
+    addresses.MarketplaceV3
+  );
+  const feesCollector = await marketplaceV3Contract.feeCollector();
+  const feeRate = await marketplaceV3Contract.feeRate();
+  const royaltiesRate = await marketplaceV3Contract.royaltiesRate();
+
+  // NFT
+  if (assetType === 3) {
+    const tokenId = event._trade.sent[0].value;
+    const nftId = getNFTId(collectionAddress, tokenId.toString());
+    const timestamp = BigInt(block.header.timestamp / 1000);
+
+    const nft = nfts.get(nftId);
+    if (!nft) {
+      console.log(`ERROR: NFT not found for order successful ${nftId}`);
+      return;
+    }
+
+    const buyer = event._trade.sent[0].beneficiary;
+    const seller = event._trade.received[0].beneficiary;
+    const price = event._trade.received[0].value;
+    const buyerAccount = accounts.get(`${buyer}-${NetworkModel.POLYGON}`);
+    if (buyerAccount) {
+      nft.owner = buyerAccount;
+    } else {
+      console.log("ERROR: Buyer account not found for order successful");
+    }
+
+    nft.updatedAt = timestamp;
+
+    if (nft.item) {
+      await trackSale(
+        ctx,
+        block.header,
+        storedData,
+        inMemoryData,
+        SaleType.order,
+        buyer,
+        seller,
+        seller,
+        nft.item.id,
+        nft.id,
+        price,
+        feeRate,
+        feesCollector,
+        royaltiesRate,
+        BigInt(block.header.timestamp / 1000), // @TODO fix this, has the have the event hash not the block
+        transaction.hash
+      );
+    } else {
+      console.log("ERROR: NFT not found for sale in traded event");
+    }
+  } else if (assetType === 4) {
+    const addresses = getAddresses(Network.MATIC);
+    const itemId = event._trade.sent[0].value;
+    const collectionContract = new CollectionV2ABI.Contract(
+      ctx,
+      block.header,
+      collectionAddress
+    );
+    const item = await collectionContract.items(itemId);
+    const tokenId = encodeTokenId(Number(itemId), Number(item.totalSupply));
+    // simulates an issue event to re-use all the logic inside the `handleIssue` function
+    const issueEvent = {
+      _beneficiary: event._trade.sent[0].beneficiary,
+      _caller: addresses.MarketplaceV3,
+      _itemId: itemId,
+      _tokenId: tokenId,
+      _issuedId: item.totalSupply,
+    };
+    await handleIssue(
+      ctx,
+      collectionAddress,
+      issueEvent,
+      block.header,
+      transaction,
+      storedData,
+      inMemoryData,
+      {
+        fee: feeRate,
+        feeOwner: feesCollector,
+      },
+      event
+    );
+  } else {
+    console.log("ERROR: NFT not found for sale in traded event");
   }
 }
