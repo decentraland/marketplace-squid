@@ -18,6 +18,7 @@ import * as marketplaceAbi from "../abi/Marketplace";
 import * as dclRegistrarAbi from "../abi/DCLRegistrar";
 import * as dclControllerV2 from "../abi/DCLControllerV2";
 import * as erc721BidAbi from "../abi/ERC721Bid";
+import * as MarketplaceV3 from "../abi/DecentralandMarketplaceEthereum";
 
 const addresses = getAddresses(Network.ETHEREUM);
 const chainId = process.env.ETHEREUM_CHAIN_ID || ChainId.ETHEREUM_MAINNET;
@@ -99,6 +100,11 @@ export const processor = new EvmBatchProcessor()
   .addLog({
     address: [addresses.DCLControllerV2],
     topic0: [dclControllerV2.events.NameBought.topic],
+  })
+  .addLog({
+    transaction: true,
+    address: [addresses.MarketplaceV3],
+    topic0: [MarketplaceV3.events.Traded.topic],
   });
 
 export type Fields = EvmBatchProcessorFields<typeof processor>;

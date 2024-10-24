@@ -7,9 +7,10 @@ import * as dclRegistrarAbi from "../abi/DCLRegistrar";
 import * as marketplaceAbi from "../abi/Marketplace";
 import * as erc721Bid from "../abi/ERC721Bid";
 import * as dclControllerV2abi from "../abi/DCLControllerV2";
+import * as MarketplaceV3ABI from "../abi/DecentralandMarketplaceEthereum";
 import { Order, Sale, Transfer, Network as ModelNetwork } from "../model";
 import { processor } from "./processor";
-import { getNFTId, getTokenURI, isMint } from "../common/utils";
+import { getNFTId } from "../common/utils";
 import { tokenURIMutilcall } from "../common/utils/multicall";
 import { getAddresses } from "../common/utils/addresses";
 import {
@@ -39,6 +40,7 @@ import {
   handleOrderCancelled,
   handleOrderCreated,
   handleOrderSuccessful,
+  handleTraded,
 } from "./handlers/marketplace";
 import { getStoredData } from "./store";
 import { decodeTokenIdsToCoordinates } from "./modules/land";
@@ -56,6 +58,10 @@ import { getBidId } from "../common/handlers/bid";
 import { handleInitializeWearablesV1 } from "./handlers/collection";
 import { getItemId } from "../polygon/modules/item";
 import { getWearableIdFromTokenURI } from "./modules/wearable";
+import {
+  getTradeEventData,
+  getTradeEventType,
+} from "../common/utils/marketplaceV3";
 
 const landCoordinates: Map<bigint, Coordinate> = new Map();
 const tokenURIs: Map<string, string> = new Map();
@@ -484,6 +490,36 @@ processor.run(
             });
             break;
           }
+          case MarketplaceV3ABI.events.Traded.topic: {
+            const event = MarketplaceV3ABI.events.Traded.decode(log);
+            const tradeData = getTradeEventData(event, Network.ETHEREUM);
+            const { collectionAddress, tokenId, buyer, seller } = tradeData;
+
+            if (!tokenId) {
+              console.log(`ERROR: tokenId not found in trade event`);
+              break;
+            }
+
+            addEventToStateIdsBasedOnCategory(collectionAddress, tokenId, {
+              landTokenIds,
+              estateTokenIds,
+              ensTokenIds,
+              tokenIds,
+            });
+
+            accountIds.add(seller); // load sellers acount to update metrics
+            accountIds.add(buyer); // load buyers acount to update metrics
+            analyticsIds.add(analyticDayDataId);
+
+            markteplaceEvents.push({
+              topic,
+              event,
+              block,
+              log,
+            });
+
+            break;
+          }
         }
       }
     }
@@ -642,6 +678,18 @@ processor.run(
           orders,
           nfts,
           counts
+        );
+      } else if (topic === MarketplaceV3ABI.events.Traded.topic) {
+        await handleTraded(
+          ctx,
+          event as MarketplaceV3ABI.TradedEventArgs,
+          block,
+          log.transactionHash,
+          nfts,
+          accounts,
+          analytics,
+          counts,
+          sales
         );
       } else if (topic === marketplaceAbi.events.OrderSuccessful.topic) {
         await handleOrderSuccessful(

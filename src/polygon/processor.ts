@@ -19,6 +19,7 @@ import * as CommitteeABI from "./abi/Committee";
 import * as CollectionV2ABI from "./abi/CollectionV2";
 import * as RaritiesABI from "./abi/Rarity";
 import * as CollectionManagerABI from "./abi/CollectionManager";
+import * as MarketplaceV3 from "./abi/DecentralandMarketplacePolygon";
 import { getBlockRange } from "../config";
 import { getAddresses } from "../common/utils/addresses";
 import { loadCollections } from "./utils/loaders";
@@ -139,6 +140,11 @@ export const processor = new EvmBatchProcessor()
     transaction: true,
     address: [addresses.CollectionManager],
     topic0: [CollectionManagerABI.events.RaritiesSet.topic],
+  })
+  .addLog({
+    transaction: true,
+    address: [addresses.MarketplaceV3],
+    topic0: [MarketplaceV3.events.Traded.topic],
   });
 
 export type Fields = EvmBatchProcessorFields<typeof processor>;

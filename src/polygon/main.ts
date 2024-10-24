@@ -16,12 +16,13 @@ import * as MarketplaceABI from "./abi/Marketplace";
 import * as MarketplaceV2ABI from "./abi/MarketplaceV2";
 import * as CommitteeABI from "./abi/Committee";
 import * as RaritiesABI from "./abi/Rarity";
-import * as RaritiesWithOracleABI from "./abi/RaritiesWithOracle";
+import * as MarketplaceV3ABI from "./abi/DecentralandMarketplacePolygon";
 import * as ERC721BidABI from "./abi/ERC721Bid";
 import * as CollectionStoreABI from "./abi/CollectionStore";
 import * as CollectionManagerABI from "./abi/CollectionManager";
 import { getAddresses } from "../common/utils/addresses";
 import {
+  encodeTokenId,
   handleAddItem,
   handleCollectionCreation,
   handleCompleteCollection,
@@ -63,11 +64,16 @@ import {
   handleOrderCancelled,
   handleOrderCreated,
   handleOrderSuccessful,
+  handleTraded,
 } from "./handlers/marketplace";
 import { getNFTId } from "../common/utils";
 import { handleRaritiesSet } from "./handlers/collectionManager";
 import { loadCollections } from "./utils/loaders";
 import { checkCpuUsageAndThrottle } from "../tools/os";
+import {
+  getTradeEventData,
+  getTradeEventType,
+} from "../common/utils/marketplaceV3";
 
 const schemaName = process.env.DB_SCHEMA;
 const addresses = getAddresses(Network.MATIC);
@@ -117,6 +123,7 @@ processor.run(
           log.address === addresses.RaritiesWithOracle ||
           log.address === addresses.Rarity ||
           log.address === addresses.CollectionManager ||
+          log.address === addresses.MarketplaceV3 ||
           preloadedCollections.includes(log.address) ||
           collectionsCreatedByFactory.has(log.address) ||
           collectionIdsNotIncludedInPreloaded.has(log.address)
@@ -597,6 +604,52 @@ processor.run(
             await handleRaritiesSet(ctx, block.header, event, rarities);
             break;
           }
+          case MarketplaceV3ABI.events.Traded.topic: {
+            const event = MarketplaceV3ABI.events.Traded.decode(log);
+            const tradeData = getTradeEventData(event, Network.MATIC);
+            const { collectionAddress, buyer, seller, assetType, itemId } =
+              tradeData;
+            let tokenId = tradeData.tokenId;
+            // secondary sale
+            if (Number(assetType) === 4 && itemId !== undefined) {
+              const collectionContract = new CollectionV2ABI.Contract(
+                ctx,
+                block.header,
+                collectionAddress
+              );
+              const item = await collectionContract.items(itemId);
+              tokenId = encodeTokenId(Number(itemId), Number(item.totalSupply));
+            }
+            collectionIds.add(collectionAddress);
+
+            if (tokenId) {
+              tokenIds.set(collectionAddress, [
+                ...(tokenIds.get(collectionAddress) || []),
+                tokenId,
+              ]);
+            } else {
+              console.log("ERROR: tokenId not found in trade event data");
+              break;
+            }
+            accountIds.add(seller); // load sellers acount to update metrics
+            accountIds.add(buyer); // load buyers acount to update metrics
+            analyticsIds.add(analyticDayDataId);
+
+            events.push({
+              topic,
+              event,
+              block,
+              log,
+              transaction: log.transaction,
+              // make a copy of rarities so it has an snapshot at this block
+              rarities: new Map(
+                Array.from(rarities).map(([k, v]) => [k, { ...v }])
+              ),
+              storeContractData: await getStoreContractData(ctx, block.header),
+            });
+
+            break;
+          }
         }
       }
     }
@@ -703,9 +756,30 @@ processor.run(
             storedData
           );
           break;
+        case MarketplaceV3ABI.events.Traded.topic: {
+          if (!storeContractData || !transaction) {
+            console.log("ERROR: storeContractData not found");
+            break;
+          }
+          await handleTraded(
+            ctx,
+            event as MarketplaceV3ABI.TradedEventArgs,
+            block,
+            transaction,
+            storedData,
+            inMemoryData
+          );
+          break;
+        }
         case CollectionV2ABI.events.Issue.topic:
           if (!storeContractData) {
             console.log("ERROR: storeContractData not found");
+            break;
+          }
+          if (
+            (event as CollectionV2ABI.IssueEventArgs)._caller ===
+            addresses.MarketplaceV3
+          ) {
             break;
           }
           await handleIssue(

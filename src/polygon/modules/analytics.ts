@@ -32,6 +32,10 @@ import {
 export function isThirdPartySale(buyer: string): boolean {
   if (
     buyer == "0xed038688ecf1193f8d9717eb3930f0bf0d745cb4" || // Transak Polygon
+    buyer == "0xcb9bd5acd627e8fccf9eb8d4ba72aeb1cd8ff5ef" || // Transak Multicall Polygon Amoy
+    buyer == "0x4a598b7ec77b1562ad0df7dc64a162695ce4c78a" || // Transak Multicall Polygon Mainnet
+    buyer == "0xab88cd272863b197b48762ea283f24a13f6586dd" || // Transak Multicall Ethereum Mainnet
+    buyer == "0xd84ac4716a082b1f7ecde9301aa91a7c4b62ecd7" || // Transak Multicall Ethereum Sepolia
     buyer == "0xea749fd6ba492dbc14c24fe8a3d08769229b896c" // Axelar Polygon & Ethereum
   ) {
     return true;

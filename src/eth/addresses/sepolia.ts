@@ -9,6 +9,8 @@ export const ERC721Bid = "0x2c2835b95852fd975e087b3b25297322728792e2";
 export const DCLControllerV2 = "0xd2046364317c21fa8d121d84185c39e6e910cf89";
 export const MarketplaceV3 =  "0x54bdd3ffc1448bdab0251f05dd554eec803adb2f";
 
+export const MANA = "0xfa04d2e2ba9aec166c93dfeeba7427b2303befa9";
+
 export const collections = {
   ExclusiveMasksCollection: "0x11a970e744ff69db8f461c2d0fc91d4293914301",
 };

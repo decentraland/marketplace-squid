@@ -13,6 +13,7 @@ import {
   Rarity,
 } from "../../model";
 import * as CollectionV2ABI from "../abi/CollectionV2";
+import * as MarketplaceV3ABI from "../abi/DecentralandMarketplacePolygon";
 import * as RaritiesWithOracleABI from "../abi/RaritiesWithOracle";
 import { Block, Context } from "../processor";
 import { PolygonInMemoryState, PolygonStoredData } from "../types";
@@ -602,6 +603,24 @@ export function handleUpdateItemData(
   }
 }
 
+export function encodeTokenId(itemId: number, issuedId: number): bigint {
+  const MAX_ITEM_ID = BigInt("0xFFFFFFFFFF"); // 40 bits max value
+  const MAX_ISSUED_ID = BigInt(
+    "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
+  ); // 216 bits max value
+
+  if (BigInt(itemId) > MAX_ITEM_ID) {
+    throw new Error("encodeTokenId: INVALID_ITEM_ID");
+  }
+
+  if (BigInt(issuedId) > MAX_ISSUED_ID) {
+    throw new Error("encodeTokenId: INVALID_ISSUED_ID");
+  }
+
+  // Shift the itemId left by 216 bits and OR it with issuedId
+  return (BigInt(itemId) << BigInt(216)) | BigInt(issuedId);
+}
+
 export async function handleIssue(
   ctx: Context,
   collectionAddress: string,
@@ -610,7 +629,8 @@ export async function handleIssue(
   transaction: Transaction & { input: string },
   storedData: PolygonStoredData,
   inMemoryData: PolygonInMemoryState,
-  storeContractData: StoreContractData
+  storeContractData: StoreContractData,
+  tradedEvent?: MarketplaceV3ABI.TradedEventArgs
 ): Promise<void> {
   const { items } = storedData;
   const itemId = event._itemId.toString();
@@ -630,7 +650,8 @@ export async function handleIssue(
       item,
       storedData,
       inMemoryData,
-      storeContractData
+      storeContractData,
+      tradedEvent
     );
   } else {
     console.log(`ERROR: Item not found in handleIssue: ${id}`);
