@@ -58,6 +58,10 @@ import { getBidId } from "../common/handlers/bid";
 import { handleInitializeWearablesV1 } from "./handlers/collection";
 import { getItemId } from "../polygon/modules/item";
 import { getWearableIdFromTokenURI } from "./modules/wearable";
+import {
+  getTradeEventData,
+  getTradeEventType,
+} from "../common/utils/marketplaceV3";
 
 const landCoordinates: Map<bigint, Coordinate> = new Map();
 const tokenURIs: Map<string, string> = new Map();
@@ -488,18 +492,21 @@ processor.run(
           }
           case MarketplaceV3ABI.events.Traded.topic: {
             const event = MarketplaceV3ABI.events.Traded.decode(log);
-            const collectionId = event._trade.sent[0].contractAddress;
-            const tokenId = event._trade.sent[0].value;
+            const tradeData = getTradeEventData(event, Network.ETHEREUM);
+            const { collectionAddress, tokenId, buyer, seller } = tradeData;
 
-            addEventToStateIdsBasedOnCategory(collectionId, tokenId, {
+            if (!tokenId) {
+              console.log(`ERROR: tokenId not found in trade event`);
+              break;
+            }
+
+            addEventToStateIdsBasedOnCategory(collectionAddress, tokenId, {
               landTokenIds,
               estateTokenIds,
               ensTokenIds,
               tokenIds,
             });
 
-            const seller = event._trade.received[0].beneficiary;
-            const buyer = event._trade.sent[0].beneficiary;
             accountIds.add(seller); // load sellers acount to update metrics
             accountIds.add(buyer); // load buyers acount to update metrics
             analyticsIds.add(analyticDayDataId);

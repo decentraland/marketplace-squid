@@ -70,6 +70,10 @@ import { getNFTId } from "../common/utils";
 import { handleRaritiesSet } from "./handlers/collectionManager";
 import { loadCollections } from "./utils/loaders";
 import { checkCpuUsageAndThrottle } from "../tools/os";
+import {
+  getTradeEventData,
+  getTradeEventType,
+} from "../common/utils/marketplaceV3";
 
 const schemaName = process.env.DB_SCHEMA;
 const addresses = getAddresses(Network.MATIC);
@@ -602,37 +606,31 @@ processor.run(
           }
           case MarketplaceV3ABI.events.Traded.topic: {
             const event = MarketplaceV3ABI.events.Traded.decode(log);
-            const collectionId = event._trade.sent[0].contractAddress;
-            const assetType = Number(event._trade.sent[0].assetType);
-
+            const tradeData = getTradeEventData(event, Network.MATIC);
+            const { collectionAddress, buyer, seller, assetType, itemId } =
+              tradeData;
+            let tokenId = tradeData.tokenId;
             // secondary sale
-            let tokenId;
-            if (assetType === 3) {
-              tokenId = event._trade.sent[0].value;
-            } else if (assetType === 4) {
-              const itemId = event._trade.sent[0].value;
+            if (Number(assetType) === 4 && itemId !== undefined) {
               const collectionContract = new CollectionV2ABI.Contract(
                 ctx,
                 block.header,
-                collectionId
+                collectionAddress
               );
               const item = await collectionContract.items(itemId);
               tokenId = encodeTokenId(Number(itemId), Number(item.totalSupply));
             }
-            collectionIds.add(collectionId);
+            collectionIds.add(collectionAddress);
 
             if (tokenId) {
-              tokenIds.set(collectionId, [
-                ...(tokenIds.get(collectionId) || []),
+              tokenIds.set(collectionAddress, [
+                ...(tokenIds.get(collectionAddress) || []),
                 tokenId,
               ]);
             } else {
-              console.log("ERROR: tokenId not found");
+              console.log("ERROR: tokenId not found in trade event data");
               break;
             }
-
-            const seller = event._trade.received[0].beneficiary;
-            const buyer = event._trade.sent[0].beneficiary;
             accountIds.add(seller); // load sellers acount to update metrics
             accountIds.add(buyer); // load buyers acount to update metrics
             analyticsIds.add(analyticDayDataId);

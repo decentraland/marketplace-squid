@@ -30,6 +30,12 @@ import { MarketplaceContractData, MarketplaceV2ContractData } from "../state";
 import { Context } from "../processor";
 import { TradedEventArgs } from "../abi/DecentralandMarketplacePolygon";
 import { encodeTokenId, handleIssue } from "./collection";
+import {
+  getTradeEventData,
+  getTradeEventType,
+  TradeAssetType,
+  TradeType,
+} from "../../common/utils/marketplaceV3";
 
 export type MarkteplaceEvents =
   | OrderCreatedEventArgs
@@ -230,11 +236,12 @@ export async function handleTraded(
   inMemoryData: PolygonInMemoryState
 ): Promise<void> {
   const addresses = getAddresses(Network.MATIC);
-  const { _trade } = event;
   const { accounts, nfts } = storedData;
 
-  const assetType = Number(event._trade.sent[0].assetType);
-  const collectionAddress = _trade.sent[0].contractAddress;
+  const tradeData = getTradeEventData(event, Network.MATIC);
+  const tradeType = getTradeEventType(event, Network.MATIC);
+  const { assetType, collectionAddress, tokenId, buyer, price, seller } =
+    tradeData;
   const marketplaceV3Contract = new MarketplaceV3ABI.Contract(
     ctx,
     block.header,
@@ -245,25 +252,25 @@ export async function handleTraded(
   const royaltiesRate = await marketplaceV3Contract.royaltiesRate();
 
   // NFT
-  if (assetType === 3) {
-    const tokenId = event._trade.sent[0].value;
+  if (Number(assetType) === TradeAssetType.ERC20) {
+    if (!tokenId) {
+      console.log("ERROR: tokenId not found in traded event");
+      return;
+    }
     const nftId = getNFTId(collectionAddress, tokenId.toString());
     const timestamp = BigInt(block.header.timestamp / 1000);
 
     const nft = nfts.get(nftId);
     if (!nft) {
-      console.log(`ERROR: NFT not found for order successful ${nftId}`);
+      console.log(`ERROR: NFT not found for traded event ${nftId}`);
       return;
     }
 
-    const buyer = event._trade.sent[0].beneficiary;
-    const seller = event._trade.received[0].beneficiary;
-    const price = event._trade.received[0].value;
     const buyerAccount = accounts.get(`${buyer}-${NetworkModel.POLYGON}`);
     if (buyerAccount) {
       nft.owner = buyerAccount;
     } else {
-      console.log("ERROR: Buyer account not found for order successful");
+      console.log("ERROR: Buyer account not found for traded event");
     }
 
     nft.updatedAt = timestamp;
@@ -274,7 +281,7 @@ export async function handleTraded(
         block.header,
         storedData,
         inMemoryData,
-        SaleType.order,
+        tradeType === TradeType.Bid ? SaleType.bid : SaleType.order,
         buyer,
         seller,
         seller,
@@ -290,9 +297,13 @@ export async function handleTraded(
     } else {
       console.log("ERROR: NFT not found for sale in traded event");
     }
-  } else if (assetType === 4) {
+  } else if (Number(assetType) === TradeAssetType.ITEM) {
     const addresses = getAddresses(Network.MATIC);
-    const itemId = event._trade.sent[0].value;
+    const itemId = tradeData.itemId;
+    if (itemId === undefined) {
+      console.log("ERROR: itemId not found in traded event");
+      return;
+    }
     const collectionContract = new CollectionV2ABI.Contract(
       ctx,
       block.header,
@@ -302,7 +313,10 @@ export async function handleTraded(
     const tokenId = encodeTokenId(Number(itemId), Number(item.totalSupply));
     // simulates an issue event to re-use all the logic inside the `handleIssue` function
     const issueEvent = {
-      _beneficiary: event._trade.sent[0].beneficiary,
+      _beneficiary:
+        tradeType === TradeType.Order
+          ? event._trade.sent[0].beneficiary
+          : event._trade.received[0].beneficiary,
       _caller: addresses.MarketplaceV3,
       _itemId: itemId,
       _tokenId: tokenId,

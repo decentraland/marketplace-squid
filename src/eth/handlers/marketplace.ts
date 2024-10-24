@@ -22,13 +22,18 @@ import {
   OrderStatus,
   Sale,
   Network as ModelNetwork,
+  SaleType,
 } from "../../model";
 import { ORDER_SALE_TYPE, trackSale } from "../modules/analytics";
 import { Context } from "../processor";
 import { buildCountFromOrder } from "../modules/count";
 import { TradedEventArgs } from "../../abi/DecentralandMarketplaceEthereum";
-import { getAddress } from "ethers";
 import { getAddresses } from "../../common/utils/addresses";
+import {
+  getTradeEventData,
+  getTradeEventType,
+  TradeType,
+} from "../../common/utils/marketplaceV3";
 
 export type MarkteplaceEvents =
   | OrderCreatedEventArgs
@@ -172,14 +177,18 @@ export async function handleTraded(
   counts: Map<string, Count>,
   sales: Map<string, Sale>
 ): Promise<void> {
-  const buyer = event._trade.sent[0].beneficiary;
-  const seller = event._trade.received[0].beneficiary;
-  const price = event._trade.received[0].value;
-  const contractAddress = event._trade.sent[0].contractAddress;
-  const category = getCategory(Network.ETHEREUM, contractAddress);
-  const tokenId = event._trade.sent[0].value;
+  const tradeType = getTradeEventType(event, Network.ETHEREUM);
+  const tradeData = getTradeEventData(event, Network.ETHEREUM);
+  const { collectionAddress, price, buyer, seller, tokenId } = tradeData;
+
+  if (!tokenId) {
+    console.log(`ERROR: tokenId not found in trade event`);
+    return;
+  }
+
+  const category = getCategory(Network.ETHEREUM, collectionAddress);
   const nftId = getNFTId(
-    contractAddress,
+    collectionAddress,
     tokenId.toString(),
     category !== Category.wearable ? category : undefined
   );
@@ -188,7 +197,7 @@ export async function handleTraded(
 
   const nft = nfts.get(nftId);
   if (!nft) {
-    console.log(`ERROR: NFT not found for order successful ${nftId}`);
+    console.log(`ERROR: NFT not found for trade ${nftId}`);
     return;
   }
 
@@ -211,7 +220,7 @@ export async function handleTraded(
   await trackSale(
     ctx,
     block.header,
-    ORDER_SALE_TYPE,
+    tradeType === TradeType.Bid ? SaleType.bid : SaleType.order,
     buyer,
     seller,
     nft.id,
