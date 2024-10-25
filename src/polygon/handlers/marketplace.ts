@@ -252,7 +252,7 @@ export async function handleTraded(
   const royaltiesRate = await marketplaceV3Contract.royaltiesRate();
 
   // NFT
-  if (Number(assetType) === TradeAssetType.ERC20) {
+  if (Number(assetType) === TradeAssetType.ERC721) {
     if (!tokenId) {
       console.log("ERROR: tokenId not found in traded event");
       return;
@@ -337,6 +337,6 @@ export async function handleTraded(
       event
     );
   } else {
-    console.log("ERROR: NFT not found for sale in traded event");
+    console.log("ERROR: Asset type not supported in trade: ", assetType);
   }
 }

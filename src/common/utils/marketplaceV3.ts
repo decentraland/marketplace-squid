@@ -16,22 +16,29 @@ export enum TradeAssetType {
 export const getTradeEventType = (
   event: TradedEventArgs,
   network: Network
-): TradeType => {
+): TradeType | undefined => {
   const addresses = getAddresses(network);
 
   // We're only supporting the case of one trade for the moment. We could have multiple trades in the future
-  const isERC20Asset =
+  const isReceivingERC20 =
     Number(event._trade.received[0].assetType) === TradeAssetType.ERC20;
+  const isSendingERC20 =
+    Number(event._trade.sent[0].assetType) === TradeAssetType.ERC20;
   const contractAddressReceived = event._trade.received[0].contractAddress;
+  const contractAddressSent = event._trade.sent[0].contractAddress;
 
   // if received is MANA, then it's an order. We could also have other ERC20 sent, but for the moment we are only checking for MANA
   if (
-    isERC20Asset &&
+    isReceivingERC20 &&
     [addresses.MANA, addresses.TRANSAK_TOKEN].includes(contractAddressReceived) // support Transak token to track sales in dev
   ) {
     return TradeType.Order;
+  } else if (
+    isSendingERC20 &&
+    [addresses.MANA, addresses.TRANSAK_TOKEN].includes(contractAddressSent)
+  ) {
+    return TradeType.Bid;
   }
-  return TradeType.Bid;
 };
 
 export const getTradeEventData = (event: TradedEventArgs, network: Network) => {
