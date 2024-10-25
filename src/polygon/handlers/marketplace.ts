@@ -337,6 +337,8 @@ export async function handleTraded(
       event
     );
   } else {
-    console.log("ERROR: Asset type not supported in trade: ", assetType);
+    console.log(
+      `ERROR: Asset type not supported in trade: event ${event}, tx hash ${transaction.hash} and assetType ${assetType}`
+    );
   }
 }
