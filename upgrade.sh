@@ -1,3 +1,9 @@
+# Load environment variables from .env file if it exists
+if [ -f .env ]; then
+  export $(grep -v '^#' .env | xargs)
+fi
+
+
 SQUID_TIMESTAMP=$1
 SQUID_SCHEMA="marketplace_squid_${SQUID_TIMESTAMP}"
 SQUID_DB_USER="marketplace_squid_user_${SQUID_TIMESTAMP}"
