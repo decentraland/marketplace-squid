@@ -5,6 +5,7 @@ import {
   OrderCreatedEventArgs,
   OrderSuccessfulEventArgs,
 } from "../../abi/Marketplace";
+import * as MarketplaceV3ABI from "../../abi/DecentralandMarketplaceEthereum";
 import { getCategory } from "../../common/utils/category";
 import {
   cancelActiveOrder,
@@ -21,10 +22,18 @@ import {
   OrderStatus,
   Sale,
   Network as ModelNetwork,
+  SaleType,
 } from "../../model";
 import { ORDER_SALE_TYPE, trackSale } from "../modules/analytics";
 import { Context } from "../processor";
 import { buildCountFromOrder } from "../modules/count";
+import { TradedEventArgs } from "../../abi/DecentralandMarketplaceEthereum";
+import { getAddresses } from "../../common/utils/addresses";
+import {
+  getTradeEventData,
+  getTradeEventType,
+  TradeType,
+} from "../../common/utils/marketplaceV3";
 
 export type MarkteplaceEvents =
   | OrderCreatedEventArgs
@@ -147,6 +156,76 @@ export async function handleOrderSuccessful(
     nft.id,
     order.price,
     ownerCutPerMillionValue,
+    BigInt(block.header.timestamp / 1000), // @TODO fix this, has the have the event hash not the block
+    txHash,
+    nfts,
+    sales,
+    accounts,
+    analytics,
+    counts
+  );
+}
+
+export async function handleTraded(
+  ctx: Context,
+  event: TradedEventArgs,
+  block: BlockData,
+  txHash: string,
+  nfts: Map<string, NFT>,
+  accounts: Map<string, Account>,
+  analytics: Map<string, AnalyticsDayData>,
+  counts: Map<string, Count>,
+  sales: Map<string, Sale>
+): Promise<void> {
+  const tradeType = getTradeEventType(event, Network.ETHEREUM);
+  const tradeData = getTradeEventData(event, Network.ETHEREUM);
+  const { collectionAddress, price, buyer, seller, tokenId } = tradeData;
+
+  if (!tokenId) {
+    console.log(`ERROR: tokenId not found in trade event`);
+    return;
+  }
+
+  const category = getCategory(Network.ETHEREUM, collectionAddress);
+  const nftId = getNFTId(
+    collectionAddress,
+    tokenId.toString(),
+    category !== Category.wearable ? category : undefined
+  );
+
+  const timestamp = BigInt(block.header.timestamp / 1000);
+
+  const nft = nfts.get(nftId);
+  if (!nft) {
+    console.log(`ERROR: NFT not found for trade ${nftId}`);
+    return;
+  }
+
+  const buyerAccount = accounts.get(`${buyer}-${ModelNetwork.ETHEREUM}`);
+  if (buyerAccount) {
+    nft.owner = buyerAccount;
+  } else {
+    console.log("ERROR: Buyer account not found for order successful");
+  }
+
+  nft.updatedAt = timestamp;
+
+  const addresses = getAddresses(Network.ETHEREUM);
+  const marketplaceV3Contract = new MarketplaceV3ABI.Contract(
+    ctx,
+    block.header,
+    addresses.MarketplaceV3
+  );
+
+  await trackSale(
+    ctx,
+    block.header,
+    tradeType === TradeType.Bid ? SaleType.bid : SaleType.order,
+    buyer,
+    seller,
+    nft.id,
+    price,
+    await marketplaceV3Contract.feeRate(),
     BigInt(block.header.timestamp / 1000), // @TODO fix this, has the have the event hash not the block
     txHash,
     nfts,

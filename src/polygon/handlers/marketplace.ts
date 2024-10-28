@@ -1,4 +1,4 @@
-import { BlockData } from "@subsquid/evm-processor";
+import { BlockData, Transaction } from "@subsquid/evm-processor";
 import { Network } from "@dcl/schemas";
 import {
   OrderCancelledEventArgs,
@@ -11,6 +11,8 @@ import {
   getNFTId,
   updateNFTOrderProperties,
 } from "../../common/utils";
+import * as CollectionV2ABI from "../abi/CollectionV2";
+import * as MarketplaceV3ABI from "../abi/DecentralandMarketplacePolygon";
 import {
   Category,
   Count,
@@ -26,6 +28,14 @@ import { buildCountFromOrder } from "../../common/modules/count";
 import { getAddresses } from "../../common/utils/addresses";
 import { MarketplaceContractData, MarketplaceV2ContractData } from "../state";
 import { Context } from "../processor";
+import { TradedEventArgs } from "../abi/DecentralandMarketplacePolygon";
+import { encodeTokenId, handleIssue } from "./collection";
+import {
+  getTradeEventData,
+  getTradeEventType,
+  TradeAssetType,
+  TradeType,
+} from "../../common/utils/marketplaceV3";
 
 export type MarkteplaceEvents =
   | OrderCreatedEventArgs
@@ -213,6 +223,122 @@ export function handleOrderCancelled(
   } else if (!order) {
     console.log(
       `ERROR: Order not found for order cancelled orderId:${id}, nftId: ${nftId}`
+    );
+  }
+}
+
+export async function handleTraded(
+  ctx: Context,
+  event: TradedEventArgs,
+  block: BlockData,
+  transaction: Transaction & { input: string },
+  storedData: PolygonStoredData,
+  inMemoryData: PolygonInMemoryState
+): Promise<void> {
+  const addresses = getAddresses(Network.MATIC);
+  const { accounts, nfts } = storedData;
+
+  const tradeData = getTradeEventData(event, Network.MATIC);
+  const tradeType = getTradeEventType(event, Network.MATIC);
+  const { assetType, collectionAddress, tokenId, buyer, price, seller } =
+    tradeData;
+  const marketplaceV3Contract = new MarketplaceV3ABI.Contract(
+    ctx,
+    block.header,
+    addresses.MarketplaceV3
+  );
+  const feesCollector = await marketplaceV3Contract.feeCollector();
+  const feeRate = await marketplaceV3Contract.feeRate();
+  const royaltiesRate = await marketplaceV3Contract.royaltiesRate();
+
+  // NFT
+  if (Number(assetType) === TradeAssetType.ERC721) {
+    if (!tokenId) {
+      console.log("ERROR: tokenId not found in traded event");
+      return;
+    }
+    const nftId = getNFTId(collectionAddress, tokenId.toString());
+    const timestamp = BigInt(block.header.timestamp / 1000);
+
+    const nft = nfts.get(nftId);
+    if (!nft) {
+      console.log(`ERROR: NFT not found for traded event ${nftId}`);
+      return;
+    }
+
+    const buyerAccount = accounts.get(`${buyer}-${NetworkModel.POLYGON}`);
+    if (buyerAccount) {
+      nft.owner = buyerAccount;
+    } else {
+      console.log("ERROR: Buyer account not found for traded event");
+    }
+
+    nft.updatedAt = timestamp;
+
+    if (nft.item) {
+      await trackSale(
+        ctx,
+        block.header,
+        storedData,
+        inMemoryData,
+        tradeType === TradeType.Bid ? SaleType.bid : SaleType.order,
+        buyer,
+        seller,
+        seller,
+        nft.item.id,
+        nft.id,
+        price,
+        feeRate,
+        feesCollector,
+        royaltiesRate,
+        BigInt(block.header.timestamp / 1000), // @TODO fix this, has the have the event hash not the block
+        transaction.hash
+      );
+    } else {
+      console.log("ERROR: NFT not found for sale in traded event");
+    }
+  } else if (Number(assetType) === TradeAssetType.ITEM) {
+    const addresses = getAddresses(Network.MATIC);
+    const itemId = tradeData.itemId;
+    if (itemId === undefined) {
+      console.log("ERROR: itemId not found in traded event");
+      return;
+    }
+    const collectionContract = new CollectionV2ABI.Contract(
+      ctx,
+      block.header,
+      collectionAddress
+    );
+    const item = await collectionContract.items(itemId);
+    const tokenId = encodeTokenId(Number(itemId), Number(item.totalSupply));
+    // simulates an issue event to re-use all the logic inside the `handleIssue` function
+    const issueEvent = {
+      _beneficiary:
+        tradeType === TradeType.Order
+          ? event._trade.sent[0].beneficiary
+          : event._trade.received[0].beneficiary,
+      _caller: addresses.MarketplaceV3,
+      _itemId: itemId,
+      _tokenId: tokenId,
+      _issuedId: item.totalSupply,
+    };
+    await handleIssue(
+      ctx,
+      collectionAddress,
+      issueEvent,
+      block.header,
+      transaction,
+      storedData,
+      inMemoryData,
+      {
+        fee: feeRate,
+        feeOwner: feesCollector,
+      },
+      event
+    );
+  } else {
+    console.log(
+      `ERROR: Asset type not supported in trade: event ${event}, tx hash ${transaction.hash} and assetType ${assetType}`
     );
   }
 }

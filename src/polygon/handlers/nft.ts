@@ -21,7 +21,7 @@ import {
   SaleType,
 } from "../../model";
 import { IssueEventArgs, TransferEventArgs } from "../abi/CollectionV2";
-import * as CollectionStore from "../abi/CollectionStore";
+import { TradedEventArgs } from "../abi/DecentralandMarketplacePolygon";
 import { setNFTSearchFields } from "../modules/metadata";
 import { Block, Context } from "../processor";
 import { PolygonInMemoryState, PolygonStoredData } from "../types";
@@ -44,7 +44,8 @@ export async function handleMintNFT(
   item: Item,
   storedData: PolygonStoredData,
   inMemoryData: PolygonInMemoryState,
-  storeContractData: StoreContractData
+  storeContractData: StoreContractData,
+  tradedEvent?: TradedEventArgs
 ): Promise<void> {
   const { counts, collections, accounts, metadatas, nfts } = storedData;
   const { mints } = inMemoryData;
@@ -133,6 +134,18 @@ export async function handleMintNFT(
     return;
   }
 
+  let beneficiary =
+    item.beneficiary !== ZERO_ADDRESS ? item.beneficiary : item.creator;
+
+  const price =
+    minterAddress === addresses.MarketplaceV3 && tradedEvent
+      ? tradedEvent._trade.received[0].value
+      : item.price;
+
+  if (minterAddress === addresses.MarketplaceV3 && tradedEvent) {
+    beneficiary = tradedEvent._trade.received[0].beneficiary;
+  }
+
   // count primary sale
   if (isStoreMinter) {
     mint.searchPrimarySalePrice = item.price;
@@ -144,10 +157,10 @@ export async function handleMintNFT(
       SaleType.mint,
       event._beneficiary,
       item.creator,
-      item.beneficiary !== ZERO_ADDRESS ? item.beneficiary : item.creator,
+      beneficiary,
       item.id,
       nft.id,
-      item.price,
+      price,
       fee,
       feeOwner,
       BigInt(0),

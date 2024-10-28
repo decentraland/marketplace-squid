@@ -9,6 +9,8 @@ export const ERC721Bid = "0xe479dfd9664c693b2e2992300930b00bfde08233";
 export const DCLControllerV2 = "0xbe92b49aee993adea3a002adcda189a2b7dec56c";
 export const MarketplaceV3 =  "0x2d6b3508f9aca32d2550f92b2addba932e73c1ff";
 
+export const MANA = "0x0f5d2fb29fb7d3cfee444a200298f468908cc942";
+
 export const collections = {
   AtariLaunch: "0x4c290f486bae507719c562b6b524bdb71a2570c9",
   BinanceUsCollection: "0xa8ee490e4c4da48cc1653502c1a77479d4d818de",
