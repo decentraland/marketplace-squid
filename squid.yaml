@@ -11,3 +11,5 @@ deploy:
       cmd: ["sqd", "process:prod:eth"]
     - name: polygon-processor
       cmd: ["sqd", "process:prod:polygon"]
+  api:
+    cmd: ["sqd", "serve:prod"]

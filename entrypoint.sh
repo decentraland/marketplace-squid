@@ -11,5 +11,7 @@ fi
 export DB_URL=postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME
 
 # Start the processor service and the GraphQL server
-echo "Starting squid API..."
-sqd serve:prod
+echo "Starting the indexer and the GraphQL API..."
+
+./indexer.sh
+
