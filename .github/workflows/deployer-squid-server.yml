@@ -10,7 +10,7 @@ on:
           - dev
           - stg
           - prd
-        default: prd
+        default: dev
         description: Environment
       deployment-server:
         required: true
@@ -37,7 +37,7 @@ jobs:
         id: deploy
         uses: decentraland/dcl-deploy-action@main
         with:
-          dockerImage: "quay.io/decentraland/marketplace-squid:${{ inputs.tag }}"
+          dockerImage: "quay.io/decentraland/marketplace-squid-core:${{ inputs.tag }}"
           serviceName: "marketplace-squid-server-${{ inputs.deployment-server }}"
           env: ${{ inputs.deployment-environment }}
           token: ${{ secrets.GITHUB_TOKEN }}
