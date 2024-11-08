@@ -34,7 +34,7 @@ jobs:
     environment: ${{ inputs.deployment-environment }}
     steps:
       - name: Trigger deployment
-        id: deploy
+        id: deploy_from_marketplace-squid-core
         uses: decentraland/dcl-deploy-action@main
         with:
           dockerImage: "quay.io/decentraland/marketplace-squid-core:${{ inputs.tag }}"
