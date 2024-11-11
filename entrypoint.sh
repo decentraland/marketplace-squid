@@ -13,8 +13,8 @@ export DB_URL=postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME
 # Check if SQUID_ENABLED is true
 if [ "$SQUID_ENABLED" = "true" ]; then
     echo "Starting indexer & GraphQL API..."
-    ./indexer.sh
+    exec ./indexer.sh
 else
     echo "Starting squid GraphQL API..."
-    sqd serve:prod
+    exec sqd serve:prod
 fi
