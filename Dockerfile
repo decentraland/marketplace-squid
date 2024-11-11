@@ -35,6 +35,9 @@ COPY --from=builder /squid/schema.graphql schema.graphql
 COPY --from=builder /squid/squid.yaml squid.yaml
 # remove if no commands.json is in the root
 ADD commands.json .
+# add indexer script
+ADD indexer.sh /squid/indexer.sh
+RUN chmod +x /squid/indexer.sh
 RUN echo -e "loglevel=silent\\nupdate-notifier=false" > /squid/.npmrc
 RUN npm i -g @subsquid/cli@latest && mv $(which sqd) /usr/local/bin/sqd
 ENV GQL_PORT 5000
