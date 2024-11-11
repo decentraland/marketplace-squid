@@ -54,6 +54,5 @@ LOG_FILE="sqd_run_log_${CURRENT_TIMESTAMP}.txt"
 echo "Starting squid services..."
 
 # Start the squid services and limit the CPU usage to 90% using cpulimit
-nohup sqd run:marketplace > "$LOG_FILE" 2>&1 &
+sqd run:marketplace
 
-echo "Logs are being written to $LOG_FILE"
