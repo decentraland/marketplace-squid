@@ -29,7 +29,7 @@ jobs:
         id: deploy
         uses: decentraland/dcl-deploy-action@main
         with:
-          dockerImage: "quay.io/decentraland/marketplace-squid:${{ inputs.tag }}"
-          serviceName: "marketplace-squid"
+          dockerImage: "quay.io/decentraland/marketplace-squid-core:${{ inputs.tag }}"
+          serviceName: "marketplace-squid-core"
           env: ${{ inputs.deployment-environment }}
           token: ${{ secrets.GITHUB_TOKEN }}
