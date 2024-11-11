@@ -51,4 +51,4 @@ RUN touch /squid/.env
 # Entry point script
 ADD entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-ENTRYPOINT ["exec", "/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
