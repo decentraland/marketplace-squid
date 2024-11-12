@@ -22,6 +22,7 @@ echo "Generated user: $NEW_DB_USER"
 export PGPASSWORD=$DB_PASSWORD
 
 # Fetch metadata and extract service name in one command
+export PATH="$PATH:$(dirname $(which aws))"
 SERVICE_NAME=$(aws ecs describe-tasks \
   --cluster "$(curl -s http://169.254.170.2/v4/task | jq -r '.Cluster')" \
   --tasks "$(curl -s http://169.254.170.2/v4/task | jq -r '.TaskARN' | awk -F'/' '{print $NF}')" \
