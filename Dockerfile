@@ -1,6 +1,6 @@
 FROM node:16-alpine AS node
 FROM node AS node-with-gyp
-RUN apk add g++ make python3
+RUN apk add --no-cache g++ make python3
 
 FROM node-with-gyp AS builder
 WORKDIR /squid
@@ -40,11 +40,17 @@ ADD indexer.sh /squid/indexer.sh
 RUN chmod +x /squid/indexer.sh
 RUN echo -e "loglevel=silent\\nupdate-notifier=false" > /squid/.npmrc
 RUN npm i -g @subsquid/cli@latest && mv $(which sqd) /usr/local/bin/sqd
+
+# Install jq and AWS CLI
+RUN apk update && apk add --no-cache tini postgresql-client curl jq unzip \
+    && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+    && unzip awscliv2.zip \
+    && ./aws/install \
+    && rm -rf awscliv2.zip aws
+
 ENV ETH_PROMETHEUS_PORT 3000
 ENV POLYGON_PROMETHEUS_PORT 3001
 ENV GQL_PORT 5000
-
-RUN apk update && apk add --no-cache tini postgresql-client curl
 
 RUN touch /squid/.env
 
