@@ -21,6 +21,14 @@ echo "Generated user: $NEW_DB_USER"
 # Set PGPASSWORD to handle password prompt
 export PGPASSWORD=$DB_PASSWORD
 
+# Fetch metadata and extract service name in one command
+SERVICE_NAME=$(aws ecs describe-tasks \
+  --cluster "$(curl -s http://169.254.170.2/v4/task | jq -r '.Cluster')" \
+  --tasks "$(curl -s http://169.254.170.2/v4/task | jq -r '.TaskARN' | awk -F'/' '{print $NF}')" \
+  --query 'tasks[0].group' --output text | sed 's|service:||')
+
+echo "Service Name: $SERVICE_NAME"
+
 # Connect to the database and create the new schema and user
 psql -v ON_ERROR_STOP=1 --username "$DB_USER" --dbname "$DB_NAME" --host "$DB_HOST" --port "$DB_PORT" <<-EOSQL
   CREATE SCHEMA $NEW_SCHEMA_NAME;
@@ -32,6 +40,10 @@ psql -v ON_ERROR_STOP=1 --username "$DB_USER" --dbname "$DB_NAME" --host "$DB_HO
   GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA $NEW_SCHEMA_NAME TO $API_READER_USER;
   GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO $NEW_DB_USER;
   ALTER USER $NEW_DB_USER SET search_path TO $NEW_SCHEMA_NAME;
+  
+  -- Insert a new record into the indexers table
+  INSERT INTO indexers (service, schema, db_user, created_at)
+  VALUES ('$SERVICE_NAME', '$NEW_SCHEMA_NAME', '$NEW_DB_USER', NOW());
 EOSQL
 
 # Unset PGPASSWORD
