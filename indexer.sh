@@ -21,6 +21,12 @@ echo "Generated user: $NEW_DB_USER"
 # Set PGPASSWORD to handle password prompt
 export PGPASSWORD=$DB_PASSWORD
 
+# Debug issue
+echo "Initial PATH: $PATH"
+which aws || echo "AWS CLI not found in PATH"
+command -v aws || echo "AWS CLI not found with command"
+type -P aws || echo "AWS CLI not found with type"
+
 # Fetch metadata and extract service name in one command
 export PATH="$PATH:$(dirname $(which aws))"
 SERVICE_NAME=$(aws ecs describe-tasks \
