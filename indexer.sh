@@ -22,13 +22,8 @@ echo "Generated user: $NEW_DB_USER"
 export PGPASSWORD=$DB_PASSWORD
 
 # DEBUG
-METADATA=$(curl -s http://169.254.170.2/v4/task)
-echo "Metadata: $METADATA"
-# Try different metadata versions
-for version in v4 v3 v2; do
-  METADATA=$(curl -s http://169.254.170.2/$version/task)
-  echo "Metadata with $version: $METADATA"
-done
+METADATA=$(curl -s "$ECS_CONTAINER_METADATA_URI_V4/task")
+echo "Metadata retrieved: $METADATA"
 
 # Fetch metadata and extract service name in one command
 SERVICE_NAME=$(aws ecs describe-tasks \
