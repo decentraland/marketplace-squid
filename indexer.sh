@@ -1,10 +1,5 @@
 #!/bin/sh
 
-# Load environment variables from .env file if it exists
-if [ -f .env ]; then
-  export $(grep -v '^#' .env | xargs)
-fi
-
 # Generate a unique schema name and user credentials using a timestamp
 CURRENT_TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 NEW_SCHEMA_NAME="marketplace_squid_${CURRENT_TIMESTAMP}"
