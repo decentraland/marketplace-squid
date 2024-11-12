@@ -41,12 +41,10 @@ RUN chmod +x /squid/indexer.sh
 RUN echo -e "loglevel=silent\\nupdate-notifier=false" > /squid/.npmrc
 RUN npm i -g @subsquid/cli@latest && mv $(which sqd) /usr/local/bin/sqd
 
-# Install jq and AWS CLI
-RUN apk update && apk add --no-cache tini postgresql-client curl jq unzip \
-    && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
-    && unzip awscliv2.zip \
-    && ./aws/install \
-    && rm -rf awscliv2.zip aws
+# Install jq and AWS CLI v1
+RUN apk update && apk add --no-cache tini postgresql-client curl jq python3 py3-pip \
+    && pip3 install awscli \
+    && rm -rf /var/cache/apk/*
 
 ENV ETH_PROMETHEUS_PORT 3000
 ENV POLYGON_PROMETHEUS_PORT 3001
