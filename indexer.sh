@@ -24,6 +24,14 @@ export PGPASSWORD=$DB_PASSWORD
 # DEBUG
 METADATA=$(curl -s http://169.254.170.2/v4/task)
 echo "Metadata: $METADATA"
+# Try different metadata versions
+for version in v4 v3 v2; do
+  METADATA=$(curl -s http://169.254.170.2/$version/task)
+  if [ "$METADATA" != "V4 container metadata handler: container lookup failed" ]; then
+    echo "Metadata found with $version: $METADATA"
+    break
+  fi
+done
 
 # Fetch metadata and extract service name in one command
 SERVICE_NAME=$(aws ecs describe-tasks \
