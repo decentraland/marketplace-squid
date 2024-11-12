@@ -27,10 +27,7 @@ echo "Metadata: $METADATA"
 # Try different metadata versions
 for version in v4 v3 v2; do
   METADATA=$(curl -s http://169.254.170.2/$version/task)
-  if [ "$METADATA" != "V4 container metadata handler: container lookup failed" ]; then
-    echo "Metadata found with $version: $METADATA"
-    break
-  fi
+  echo "Metadata with $version: $METADATA"
 done
 
 # Fetch metadata and extract service name in one command
