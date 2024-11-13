@@ -42,7 +42,7 @@ psql -v ON_ERROR_STOP=1 --username "$DB_USER" --dbname "$DB_NAME" --host "$DB_HO
   ALTER USER $NEW_DB_USER SET search_path TO $NEW_SCHEMA_NAME;
   
   -- Insert a new record into the indexers table
-  INSERT INTO indexers (service, schema, db_user, created_at)
+  INSERT INTO public.indexers (service, schema, db_user, created_at)
   VALUES ('$SERVICE_NAME', '$NEW_SCHEMA_NAME', '$NEW_DB_USER', NOW());
 EOSQL
 
