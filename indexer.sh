@@ -21,14 +21,10 @@ echo "Generated user: $NEW_DB_USER"
 # Set PGPASSWORD to handle password prompt
 export PGPASSWORD=$DB_PASSWORD
 
-# DEBUG
-METADATA=$(curl -s "$ECS_CONTAINER_METADATA_URI_V4/task")
-echo "Metadata retrieved: $METADATA"
-
 # Fetch metadata and extract service name in one command
 SERVICE_NAME=$(aws ecs describe-tasks \
-  --cluster "$(curl -s http://169.254.170.2/v4/task | jq -r '.Cluster')" \
-  --tasks "$(curl -s http://169.254.170.2/v4/task | jq -r '.TaskARN' | awk -F'/' '{print $NF}')" \
+  --cluster "$(curl -s $ECS_CONTAINER_METADATA_URI_V4/task | jq -r '.Cluster')" \
+  --tasks "$(curl -s $ECS_CONTAINER_METADATA_URI_V4/task | jq -r '.TaskARN' | awk -F'/' '{print $NF}')" \
   --query 'tasks[0].group' --output text | sed 's|service:||')
 
 echo "Service Name: $SERVICE_NAME"
