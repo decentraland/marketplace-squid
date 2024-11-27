@@ -81,6 +81,7 @@ let bytesRead = 0; // amount of bytes received
 const preloadedCollections = loadCollections().addresses;
 const preloadedCollectionsHeight = loadCollections().height;
 const collectionsCreatedByFactory = new Set<string>();
+const collectionIdsNotIncludedInPreloaded = new Set<string>();
 
 processor.run(
   new TypeormDatabase({
@@ -98,15 +99,6 @@ processor.run(
     const rarities = await ctx.store
       .find(Rarity)
       .then((q) => new Map(q.map((i) => [i.id, i])));
-
-    const collectionIdsNotIncludedInPreloaded = await ctx.store
-      .find(Collection, {
-        where: {
-          id: Not(In(preloadedCollections)),
-          network: ModelNetwork.POLYGON,
-        },
-      })
-      .then((q) => new Set(q.map((c) => c.id)));
 
     const isThereImportantDataInBatch = ctx.blocks.some((block) =>
       block.logs.some(
@@ -923,6 +915,13 @@ processor.run(
     }
 
     console.time("about to upsert");
+
+    // add new collections to the list of ids from the not preloaded
+    storedData.collections.forEach((collection) => {
+      if (!preloadedCollections.includes(collection.id)) {
+        collectionIdsNotIncludedInPreloaded.add(collection.id);
+      }
+    });
 
     await ctx.store.upsert([...rarities.values()]);
     for (const [key, value] of Object.entries(storedData)) {
