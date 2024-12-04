@@ -67,5 +67,5 @@ LOG_FILE="sqd_run_log_${CURRENT_TIMESTAMP}.txt"
 echo "Starting squid services..."
 
 # Start the squid services and limit the CPU usage to 90% using cpulimit
-sqd run:marketplace
+sqd run:marketplace --node-options="--max-old-space-size=4096"
 
