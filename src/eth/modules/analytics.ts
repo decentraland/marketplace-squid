@@ -20,7 +20,8 @@ export let ORDER_SALE_TYPE = "order";
 // check if the buyer in a sale was a third party provider (to pay with credit card, cross chain, etc)
 export function isThirdPartySale(buyer: string): boolean {
   if (
-    buyer == "0xea749fd6ba492dbc14c24fe8a3d08769229b896c" // Axelar Ethereum
+    buyer == "0xea749fd6ba492dbc14c24fe8a3d08769229b896c" || // Axelar Ethereum old contract
+    buyer == "0xad6cea45f98444a922a2b4fe96b8c90f0862d2f4" // Axelar Ethereum new contract
   ) {
     return true;
   }
