@@ -2,7 +2,6 @@ module.exports = class Data1733931298042 {
     name = 'Data1733931298042'
 
     async up(db) {
-        await db.query(`DROP INDEX "IDX_f62820212723900a3c028db24e"`)
         await db.query(`ALTER TABLE "nft" ADD "search_order_expires_at_normalized" TIMESTAMP WITH TIME ZONE`)
         await db.query(`ALTER TABLE "order" ADD "expires_at_normalized" TIMESTAMP WITH TIME ZONE NOT NULL`)
         await db.query(`CREATE INDEX "IDX_83603c168bc00b20544539fbea" ON "account" ("address") `)
@@ -15,7 +14,6 @@ module.exports = class Data1733931298042 {
     }
 
     async down(db) {
-        await db.query(`CREATE INDEX "IDX_f62820212723900a3c028db24e" ON "nft" ("item_id") `)
         await db.query(`ALTER TABLE "nft" DROP COLUMN "search_order_expires_at_normalized"`)
         await db.query(`ALTER TABLE "order" DROP COLUMN "expires_at_normalized"`)
         await db.query(`DROP INDEX "public"."IDX_83603c168bc00b20544539fbea"`)
