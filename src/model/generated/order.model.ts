@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, ManyToOne as ManyToOne_, Index as Index_, BigIntColumn as BigIntColumn_} from "@subsquid/typeorm-store"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, StringColumn as StringColumn_, ManyToOne as ManyToOne_, Index as Index_, BigIntColumn as BigIntColumn_, DateTimeColumn as DateTimeColumn_} from "@subsquid/typeorm-store"
 import {Category} from "./_category"
 import {NFT} from "./nft.model"
 import {OrderStatus} from "./_orderStatus"
@@ -50,6 +50,10 @@ export class Order {
 
     @BigIntColumn_({nullable: false})
     expiresAt!: bigint
+
+    @Index_()
+    @DateTimeColumn_({nullable: false})
+    expiresAtNormalized!: Date
 
     @BigIntColumn_({nullable: false})
     createdAt!: bigint

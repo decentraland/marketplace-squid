@@ -61,6 +61,7 @@ type Order @entity {
   status: OrderStatus!
   blockNumber: BigInt!
   expiresAt: BigInt!
+  expiresAtNormalized: DateTime! @index
   createdAt: BigInt!
   updatedAt: BigInt!
 
@@ -152,11 +153,13 @@ type Data @entity {
 
 type NFT
   @entity
-  @index(fields: ["searchOrderStatus", "searchOrderExpiresAt", "network"]) {
+  @index(fields: ["item", "owner"])
+  @index(fields: ["searchOrderStatus", "searchOrderExpiresAt", "network"])
+  @index(fields: ["searchOrderStatus", "searchOrderExpiresAt", "category"]) {
   id: ID!
   tokenId: BigInt! @index
   contractAddress: String! @index
-  category: Category!
+  category: Category! @index
   owner: Account!
   tokenURI: String
 
@@ -184,9 +187,10 @@ type NFT
   searchOrderStatus: OrderStatus @index
   searchOrderPrice: BigInt
   searchOrderExpiresAt: BigInt @index
+  searchOrderExpiresAtNormalized: DateTime @index
   searchOrderCreatedAt: BigInt
 
-  searchIsLand: Boolean
+  searchIsLand: Boolean @index
 
   searchText: String
 
@@ -257,7 +261,7 @@ type Estate @entity {
 
 type Account @entity {
   id: ID! # ETH addr
-  address: String!
+  address: String! @index
   nfts: [NFT!] @derivedFrom(field: "owner")
   # analytics
   sales: Int!

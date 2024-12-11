@@ -45,3 +45,12 @@ export function parseCSV(csv: string): Array<string> {
 
   return values;
 }
+
+export function normalizeTimestamp(timestamp: bigint): Date {
+  const timestampStr = timestamp.toString();
+  const timestampMs = timestampStr.length <= 13
+    ? Number(timestamp)           // Safe to convert directly
+    : Number(timestamp) / 1000;   // Divide by 1000 if the number is too large
+
+  return new Date(timestampMs);
+}
