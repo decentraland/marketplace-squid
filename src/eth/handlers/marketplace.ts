@@ -34,6 +34,7 @@ import {
   getTradeEventType,
   TradeType,
 } from "../../common/utils/marketplaceV3";
+import { normalizeTimestamp } from "../../common/utils/utils";
 
 export type MarkteplaceEvents =
   | OrderCreatedEventArgs
@@ -74,7 +75,10 @@ export function handleOrderCreated(
     order.owner = seller;
     order.price = priceInWei;
     order.expiresAt = expiresAt;
-    order.blockNumber = BigInt(block.header.height); // @TODO review this type
+
+    order.expiresAtNormalized = normalizeTimestamp(expiresAt);
+
+    order.blockNumber = BigInt(block.header.height);
     const timestamp = BigInt(block.header.timestamp / 1000);
     order.createdAt = timestamp;
     order.updatedAt = timestamp;
@@ -84,6 +88,8 @@ export function handleOrderCreated(
 
       if (oldOrder) {
         cancelActiveOrder(oldOrder, timestamp);
+      } else {
+        console.log(`ERROR: Order not found when trying to cancel order ${nft.activeOrder.id}`);
       }
     }
     nft.updatedAt = timestamp;

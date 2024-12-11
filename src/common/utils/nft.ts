@@ -43,6 +43,7 @@ import {
   isWearableAccessory,
   isWearableHead,
 } from "../modules/metadata/wearable";
+import { normalizeTimestamp } from "./utils";
 
 export function getNFTId(
   contractAddress: string,
@@ -92,6 +93,7 @@ export function addNFTOrderProperties(nft: NFT, order: Order) {
   nft.searchOrderPrice = order.price;
   nft.searchOrderCreatedAt = order.createdAt;
   nft.searchOrderExpiresAt = order.expiresAt;
+  nft.searchOrderExpiresAtNormalized = normalizeTimestamp(order.expiresAt);
 }
 
 export function clearNFTOrderProperties(nft: NFT): void {
@@ -100,6 +102,7 @@ export function clearNFTOrderProperties(nft: NFT): void {
   nft.searchOrderPrice = null;
   nft.searchOrderCreatedAt = null;
   nft.searchOrderExpiresAt = null;
+  nft.searchOrderExpiresAtNormalized = null;
 }
 
 export function cancelActiveOrder(order: Order, now: bigint): Order {

@@ -178,7 +178,7 @@ export function handleTransferNFT(
   block: Block,
   storedData: PolygonStoredData
 ): void {
-  const { nfts } = storedData;
+  const { nfts, orders } = storedData;
   if (event.tokenId.toString() === "") {
     return;
   }
@@ -203,7 +203,13 @@ export function handleTransferNFT(
   nft.updatedAt = timestamp;
   nft.transferredAt = timestamp;
 
-  if (nft.activeOrder && cancelActiveOrder(nft.activeOrder, timestamp)) {
-    clearNFTOrderProperties(nft);
+  if (nft.activeOrder) {
+    const order = orders.get(nft.activeOrder.id);
+    if (order) {
+      cancelActiveOrder(order, timestamp);
+      clearNFTOrderProperties(nft);
+    } else {
+      console.log(`ERROR: Order not found for NFT ${nft.id}`);
+    }
   }
 }

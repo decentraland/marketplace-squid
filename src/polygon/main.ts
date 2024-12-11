@@ -134,8 +134,6 @@ processor.run(
       return;
     }
 
-    console.time("blocks iteration");
-
     const collectionIdsCreatedInBatch = new Set<string>();
     const inMemoryData = getBatchInMemoryState();
     const {
@@ -660,7 +658,6 @@ processor.run(
       storedData;
 
     // Collection Factory Events
-    console.time("handleCollectionCreation");
     for (const { block, event } of collectionFactoryEvents) {
       await handleCollectionCreation(
         ctx,
@@ -669,11 +666,7 @@ processor.run(
         storedData
       );
     }
-    console.timeEnd("handleCollectionCreation");
 
-    console.log(`About to processes ${events.length} events`);
-
-    console.time("handleCollectionEvents");
     // Collection Events
     for (const {
       block,
@@ -907,14 +900,11 @@ processor.run(
         }
       }
     }
-    console.timeEnd("handleCollectionEvents");
 
     // Committee Events
     for (const event of committeeEvents) {
       handleMemeberSet(accounts, event);
     }
-
-    console.time("about to upsert");
 
     // add new collections to the list of ids from the not preloaded
     storedData.collections.forEach((collection) => {
@@ -965,8 +955,6 @@ processor.run(
     await ctx.store.insert([...mints.values()]);
     await ctx.store.insert([...transfers.values()]);
     await ctx.store.insert([...curations.values()]);
-    console.timeEnd("about to upsert");
-    console.timeEnd("blocks iteration");
     // console.log('accounts polygon: ', accounts);
     ctx.log.info(
       `Batch from block: ${ctx.blocks[0].header.height} to ${

@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_, BigIntColumn as BigIntColumn_, StringColumn as StringColumn_, ManyToOne as ManyToOne_, OneToMany as OneToMany_, OneToOne as OneToOne_, JoinColumn as JoinColumn_, IntColumn as IntColumn_, BooleanColumn as BooleanColumn_} from "@subsquid/typeorm-store"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_, BigIntColumn as BigIntColumn_, StringColumn as StringColumn_, ManyToOne as ManyToOne_, OneToMany as OneToMany_, OneToOne as OneToOne_, JoinColumn as JoinColumn_, IntColumn as IntColumn_, DateTimeColumn as DateTimeColumn_, BooleanColumn as BooleanColumn_} from "@subsquid/typeorm-store"
 import {Category} from "./_category"
 import {Account} from "./account.model"
 import {Order} from "./order.model"
@@ -17,7 +17,9 @@ import {Metadata} from "./metadata.model"
 import {EmoteCategory} from "./_emoteCategory"
 import {Network} from "./_network"
 
+@Index_(["item", "owner"], {unique: false})
 @Index_(["searchOrderStatus", "searchOrderExpiresAt", "network"], {unique: false})
+@Index_(["searchOrderStatus", "searchOrderExpiresAt", "category"], {unique: false})
 @Entity_()
 export class NFT {
     constructor(props?: Partial<NFT>) {
@@ -35,6 +37,7 @@ export class NFT {
     @StringColumn_({nullable: false})
     contractAddress!: string
 
+    @Index_()
     @Column_("varchar", {length: 8, nullable: false})
     category!: Category
 
@@ -110,9 +113,14 @@ export class NFT {
     @BigIntColumn_({nullable: true})
     searchOrderExpiresAt!: bigint | undefined | null
 
+    @Index_()
+    @DateTimeColumn_({nullable: true})
+    searchOrderExpiresAtNormalized!: Date | undefined | null
+
     @BigIntColumn_({nullable: true})
     searchOrderCreatedAt!: bigint | undefined | null
 
+    @Index_()
     @BooleanColumn_({nullable: true})
     searchIsLand!: boolean | undefined | null
 
@@ -172,7 +180,6 @@ export class NFT {
     @ManyToOne_(() => Collection, {nullable: true})
     collection!: Collection | undefined | null
 
-    @Index_()
     @ManyToOne_(() => Item, {nullable: true})
     item!: Item | undefined | null
 
