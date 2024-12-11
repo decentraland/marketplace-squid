@@ -761,6 +761,7 @@ processor.run(
             event as erc721abi.TransferEventArgs_2,
             collections,
             items,
+            orders,
             accounts,
             metadatas,
             wearables,

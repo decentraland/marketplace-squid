@@ -1,10 +1,5 @@
 #!/bin/sh
 
-# Load environment variables from .env file if it exists
-if [ -f .env ]; then
-  export $(grep -v '^#' .env | xargs)
-fi
-
 # Generate a unique schema name and user credentials using a timestamp
 CURRENT_TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 NEW_SCHEMA_NAME="marketplace_squid_${CURRENT_TIMESTAMP}"
@@ -26,17 +21,35 @@ echo "Generated user: $NEW_DB_USER"
 # Set PGPASSWORD to handle password prompt
 export PGPASSWORD=$DB_PASSWORD
 
+# Fetch metadata and extract service name in one command
+SERVICE_NAME=$(aws ecs describe-tasks \
+  --cluster "$(curl -s $ECS_CONTAINER_METADATA_URI_V4/task | jq -r '.Cluster')" \
+  --tasks "$(curl -s $ECS_CONTAINER_METADATA_URI_V4/task | jq -r '.TaskARN' | awk -F'/' '{print $NF}')" \
+  --query 'tasks[0].group' --output text | sed 's|service:||')
+
+echo "Service Name: $SERVICE_NAME"
+
 # Connect to the database and create the new schema and user
 psql -v ON_ERROR_STOP=1 --username "$DB_USER" --dbname "$DB_NAME" --host "$DB_HOST" --port "$DB_PORT" <<-EOSQL
   CREATE SCHEMA $NEW_SCHEMA_NAME;
   CREATE USER $NEW_DB_USER WITH PASSWORD '$DB_PASSWORD';
   GRANT ALL PRIVILEGES ON SCHEMA $NEW_SCHEMA_NAME TO $NEW_DB_USER;
-  GRANT ALL PRIVILEGES ON SCHEMA $NEW_SCHEMA_NAME TO $SQUID_READER_USER;
-  GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA $NEW_SCHEMA_NAME TO $SQUID_READER_USER;
-  GRANT ALL PRIVILEGES ON SCHEMA $NEW_SCHEMA_NAME TO $API_READER_USER;
-  GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA $NEW_SCHEMA_NAME TO $API_READER_USER;
   GRANT ALL PRIVILEGES ON DATABASE $DB_NAME TO $NEW_DB_USER;
   ALTER USER $NEW_DB_USER SET search_path TO $NEW_SCHEMA_NAME;
+
+  -- Grant schema usage to reader users
+  GRANT USAGE ON SCHEMA $NEW_SCHEMA_NAME TO $API_READER_USER, $SQUID_READER_USER;
+
+  -- Make squid_server_user able to grant permissions on objects in this schema
+  GRANT $NEW_DB_USER TO $DB_USER;
+
+  -- Set default privileges for tables created by NEW_DB_USER
+  ALTER DEFAULT PRIVILEGES FOR ROLE $NEW_DB_USER IN SCHEMA $NEW_SCHEMA_NAME
+    GRANT SELECT ON TABLES TO $API_READER_USER, $SQUID_READER_USER;
+
+  -- Insert a new record into the indexers table
+  INSERT INTO public.indexers (service, schema, db_user, created_at)
+  VALUES ('$SERVICE_NAME', '$NEW_SCHEMA_NAME', '$NEW_DB_USER', NOW());
 EOSQL
 
 # Unset PGPASSWORD
@@ -53,7 +66,6 @@ echo "Exported DB_SCHEMA: $DB_SCHEMA"
 LOG_FILE="sqd_run_log_${CURRENT_TIMESTAMP}.txt"
 echo "Starting squid services..."
 
-# Start the squid services and limit the CPU usage to 90% using cpulimit
-nohup sqd run:marketplace > "$LOG_FILE" 2>&1 &
+# Start the squid services with the specified node options
+sqd run:marketplace --node-options=$NODE_OPTIONS
 
-echo "Logs are being written to $LOG_FILE"

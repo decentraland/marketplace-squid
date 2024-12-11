@@ -385,6 +385,7 @@ export function handleTransferWearableV1(
   event: ERC721Abi.TransferEventArgs_2,
   collections: Map<string, Collection>,
   items: Map<string, Item>,
+  orders: Map<string, Order>,
   accounts: Map<string, Account>,
   metadatas: Map<string, Metadata>,
   wearables: Map<string, Wearable>,
@@ -511,7 +512,9 @@ export function handleTransferWearableV1(
     }
     const activeOrder = oldNFT.activeOrder;
     if (activeOrder) {
-      if (cancelActiveOrder(activeOrder, timestamp)) {
+      const order = orders.get(activeOrder.id);
+      if (order) {
+        cancelActiveOrder(order, timestamp);
         clearNFTOrderProperties(nft);
       }
     }

@@ -10,6 +10,11 @@ fi
 # Construct the DB_URL with the new user
 export DB_URL=postgresql://$DB_USER:$DB_PASSWORD@$DB_HOST:$DB_PORT/$DB_NAME
 
-# Start the processor service and the GraphQL server
-echo "Starting squid API..."
-sqd serve:prod
+# Check if SQUID_ENABLED is true
+if [ "$SQUID_ENABLED" = "true" ]; then
+    echo "Starting indexer & GraphQL API..."
+    exec ./indexer.sh
+else
+    echo "Starting squid GraphQL API..."
+    exec sqd serve:prod
+fi
