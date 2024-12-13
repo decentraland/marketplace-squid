@@ -359,7 +359,7 @@ type Sale @entity @index(fields: ["searchCategory", "network"]) {
   # search
   searchTokenId: BigInt!
   searchContractAddress: String!
-  searchCategory: String!
+  searchCategory: String! @index
 
   ## collections subgraph fields
 
