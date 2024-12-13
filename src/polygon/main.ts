@@ -968,6 +968,6 @@ processor.run(
         transfers.size
       }, curations: ${curations.size}`
     );
-    console.log("bytes read: ", bytesRead);
+    console.log("bytes read so far: ", bytesRead);
   }
 );
