@@ -100,40 +100,6 @@ processor.run(
       .find(Rarity)
       .then((q) => new Map(q.map((i) => [i.id, i])));
 
-    const isThereImportantDataInBatch = ctx.blocks.some((block) =>
-      block.logs.some(
-        (log) =>
-          log.address === addresses.CollectionFactory ||
-          log.address === addresses.CollectionFactoryV3 ||
-          log.address === addresses.BidV2 ||
-          log.address === addresses.ERC721Bid ||
-          log.address === addresses.Marketplace ||
-          log.address === addresses.MarketplaceV2 ||
-          log.address === addresses.OldCommittee ||
-          log.address === addresses.Committee ||
-          log.address === addresses.CollectionStore ||
-          log.address === addresses.RaritiesWithOracle ||
-          log.address === addresses.Rarity ||
-          log.address === addresses.CollectionManager ||
-          log.address === addresses.MarketplaceV3 ||
-          preloadedCollections.includes(log.address) ||
-          collectionsCreatedByFactory.has(log.address) ||
-          collectionIdsNotIncludedInPreloaded.has(log.address)
-      )
-    );
-
-    if (
-      !isThereImportantDataInBatch &&
-      ctx.blocks[ctx.blocks.length - 1].header.height >
-        preloadedCollectionsHeight
-    ) {
-      console.log(
-        "INFO: Batch contains important data: ",
-        isThereImportantDataInBatch
-      );
-      return;
-    }
-
     const collectionIdsCreatedInBatch = new Set<string>();
     const inMemoryData = getBatchInMemoryState();
     const {
