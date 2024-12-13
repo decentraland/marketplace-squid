@@ -80,8 +80,6 @@ const addresses = getAddresses(Network.MATIC);
 let bytesRead = 0; // amount of bytes received
 const preloadedCollections = loadCollections().addresses;
 const preloadedCollectionsHeight = loadCollections().height;
-const collectionsCreatedByFactory = new Set<string>();
-const collectionIdsNotIncludedInPreloaded = new Set<string>();
 
 processor.run(
   new TypeormDatabase({
@@ -99,6 +97,48 @@ processor.run(
     const rarities = await ctx.store
       .find(Rarity)
       .then((q) => new Map(q.map((i) => [i.id, i])));
+
+    const collectionIdsNotIncludedInPreloaded = await ctx.store
+      .find(Collection, {
+        where: {
+          id: Not(In(preloadedCollections)),
+          network: ModelNetwork.POLYGON,
+        },
+      })
+      .then((q) => new Set(q.map((c) => c.id)));
+
+    const isThereImportantDataInBatch = ctx.blocks.some((block) =>
+      block.logs.some(
+        (log) =>
+          log.address === addresses.CollectionFactory ||
+          log.address === addresses.CollectionFactoryV3 ||
+          log.address === addresses.BidV2 ||
+          log.address === addresses.ERC721Bid ||
+          log.address === addresses.Marketplace ||
+          log.address === addresses.MarketplaceV2 ||
+          log.address === addresses.OldCommittee ||
+          log.address === addresses.Committee ||
+          log.address === addresses.CollectionStore ||
+          log.address === addresses.RaritiesWithOracle ||
+          log.address === addresses.Rarity ||
+          log.address === addresses.CollectionManager ||
+          log.address === addresses.MarketplaceV3 ||
+          preloadedCollections.includes(log.address) ||
+          collectionIdsNotIncludedInPreloaded.has(log.address)
+      )
+    );
+
+    if (
+      !isThereImportantDataInBatch &&
+      ctx.blocks[ctx.blocks.length - 1].header.height >
+        preloadedCollectionsHeight
+    ) {
+      console.log(
+        "INFO: Batch contains important data: ",
+        isThereImportantDataInBatch
+      );
+      return;
+    }
 
     const collectionIdsCreatedInBatch = new Set<string>();
     const inMemoryData = getBatchInMemoryState();
@@ -872,13 +912,6 @@ processor.run(
       handleMemeberSet(accounts, event);
     }
 
-    // add new collections to the list of ids from the not preloaded
-    storedData.collections.forEach((collection) => {
-      if (!preloadedCollections.includes(collection.id)) {
-        collectionIdsNotIncludedInPreloaded.add(collection.id);
-      }
-    });
-
     await ctx.store.upsert([...rarities.values()]);
     for (const [key, value] of Object.entries(storedData)) {
       if (
@@ -927,7 +960,7 @@ processor.run(
         ctx.blocks[ctx.blocks.length - 1].header.height
       } saved, counts: ${counts.size}, accounts: ${
         accounts.size
-      }, collections: ${collectionsCreatedByFactory.size}, nfts: ${
+      }, collections: ${storedData.collections.size}, nfts: ${
         nfts.size
       }, items: ${items.size}, metadatas: ${metadatas.size}, bids: ${
         bids.size
