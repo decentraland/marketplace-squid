@@ -47,17 +47,12 @@ export function parseCSV(csv: string): Array<string> {
 }
 
 export function normalizeTimestamp(timestamp: bigint): Date {
-  // const timestampStr = timestamp.toString();
-  // const timestampMs =
-  //   timestampStr.length <= 13
-  //     ? Number(timestamp) // Safe to convert directly
-  //     : Number(timestamp) / 1000; // Divide by 1000 if the number is too large
-
-  // const validTimestampMs = isNaN(timestampMs) ? Date.now() : timestampMs;
-
-  // if (isNaN(timestampMs)) {
-  //   console.error(`ERROR: Invalid timestamp: ${timestamp}`);
-  // }
-
-  return new Date();
+  const timestampStr = timestamp.toString();
+  return timestampStr.length > 13
+    ? new Date() // mark it as expired already
+    : new Date(
+        timestampStr.length === 13
+          ? Number(timestamp) / 1000
+          : Number(timestamp)
+      ); // Convert milliseconds to seconds if necessary
 }
