@@ -203,9 +203,18 @@ export function handleTransfer(
       nft.searchAdjacentToRoad = false;
       nft.searchEstateSize = estate.size;
     } else {
-      if (estate) estate.owner = nft.owner;
+      // console.log("DETECTED A TRANSFER OF THE ESTATE: ", id);
+      if (estate) {
+        estate.owner = nft.owner;
+      } else {
+        console.log(
+          `ERROR: Estate with tokenId ${nft.tokenId} not found on handleTransfer. Ownership not updated correclty`
+        );
+      }
     }
-    if (estate) estates.set(id, estate);
+    if (estate) {
+      estates.set(id, estate);
+    }
   } else if (category == Category.wearable) {
     let wearable: Wearable | undefined = undefined;
     if (isMint(from)) {

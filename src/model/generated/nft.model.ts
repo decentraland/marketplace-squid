@@ -18,6 +18,7 @@ import {EmoteCategory} from "./_emoteCategory"
 import {Network} from "./_network"
 
 @Index_(["item", "owner"], {unique: false})
+@Index_(["contractAddress", "tokenId"], {unique: false})
 @Index_(["searchOrderStatus", "searchOrderExpiresAt", "network"], {unique: false})
 @Index_(["searchOrderStatus", "searchOrderExpiresAt", "category"], {unique: false})
 @Entity_()
@@ -33,7 +34,6 @@ export class NFT {
     @BigIntColumn_({nullable: false})
     tokenId!: bigint
 
-    @Index_()
     @StringColumn_({nullable: false})
     contractAddress!: string
 

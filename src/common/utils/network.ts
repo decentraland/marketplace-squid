@@ -8,7 +8,7 @@ export function getNetwork(network: Network): string {
   const chainName =
     network === Network.ETHEREUM
       ? chainId === ChainId.ETHEREUM_MAINNET.toString()
-        ? "mainnet"
+        ? "ethereum"
         : "sepolia"
       : chainId === ChainId.MATIC_MAINNET.toString()
       ? "matic"
