@@ -1,4 +1,4 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, ManyToOne as ManyToOne_, Index as Index_, BigIntColumn as BigIntColumn_, StringColumn as StringColumn_, OneToMany as OneToMany_, IntColumn as IntColumn_, BooleanColumn as BooleanColumn_} from "@subsquid/typeorm-store"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, Index as Index_, ManyToOne as ManyToOne_, BigIntColumn as BigIntColumn_, StringColumn as StringColumn_, OneToMany as OneToMany_, IntColumn as IntColumn_, BooleanColumn as BooleanColumn_} from "@subsquid/typeorm-store"
 import {Collection} from "./collection.model"
 import {ItemType} from "./_itemType"
 import {Metadata} from "./metadata.model"
@@ -8,6 +8,7 @@ import {WearableBodyShape} from "./_wearableBodyShape"
 import {EmoteCategory} from "./_emoteCategory"
 import {Network} from "./_network"
 
+@Index_(["collection", "blockchainId"], {unique: false})
 @Entity_()
 export class Item {
     constructor(props?: Partial<Item>) {
@@ -17,7 +18,6 @@ export class Item {
     @PrimaryColumn_()
     id!: string
 
-    @Index_()
     @ManyToOne_(() => Collection, {nullable: true})
     collection!: Collection
 

@@ -29,6 +29,7 @@ export class Estate {
     @IntColumn_({nullable: true})
     adjacentToRoadCount!: number | undefined | null
 
+    @Index_()
     @IntColumn_({nullable: true})
     size!: number | undefined | null
 

@@ -25,15 +25,6 @@ export type EthereumInMemoryState = {
     string,
     { event: erc721abi.TransferEventArgs_2; block: BlockData }[]
   >;
-  estateEvents: {
-    topic: string;
-    event:
-      | estateRegistryABI.CreateEstateEventArgs
-      | estateRegistryABI.UpdateEventArgs
-      | estateRegistryABI.AddLandEventArgs
-      | estateRegistryABI.RemoveLandEventArgs;
-    block: BlockData;
-  }[];
   parcelEvents: {
     topic: string;
     event: landRegistryABI.UpdateEventArgs;
@@ -58,7 +49,11 @@ export type EthereumInMemoryState = {
       | erc721abi.TransferEventArgs_2
       | erc721abi.OwnershipTransferredEventArgs
       | erc721abi.AddWearableEventArgs
-      | MarketplaceV3ABI.TradedEventArgs;
+      | MarketplaceV3ABI.TradedEventArgs
+      | estateRegistryABI.CreateEstateEventArgs
+      | estateRegistryABI.UpdateEventArgs
+      | estateRegistryABI.AddLandEventArgs
+      | estateRegistryABI.RemoveLandEventArgs;
     block: BlockData;
     log: Log & { transactionHash: string };
     marketplaceOwnerCutPerMillion?: bigint | null;

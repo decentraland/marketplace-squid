@@ -88,7 +88,6 @@ processor.run(
       collectionIds,
       itemIds,
       accountIds,
-      estateEvents,
       estateTokenIds,
       landTokenIds,
       ensTokenIds,
@@ -259,10 +258,11 @@ processor.run(
             break;
           }
           case estateRegistryABI.events.CreateEstate.topic: {
-            estateEvents.push({
+            markteplaceEvents.push({
               topic,
               event: estateRegistryABI.events.CreateEstate.decode(log),
               block,
+              log,
             });
             break;
           }
@@ -271,10 +271,11 @@ processor.run(
             if (log.address === addresses.EstateRegistry) {
               const event = estateRegistryABI.events.Update.decode(log);
               estateTokenIds.add(event._assetId);
-              estateEvents.push({
+              markteplaceEvents.push({
                 topic,
                 event,
                 block,
+                log,
               });
             } else if (log.address === addresses.LANDRegistry) {
               const event = landRegistryABI.events.Update.decode(log);
@@ -290,20 +291,22 @@ processor.run(
           case estateRegistryABI.events.AddLand.topic: {
             const event = estateRegistryABI.events.AddLand.decode(log);
             estateTokenIds.add(event._estateId);
-            estateEvents.push({
+            markteplaceEvents.push({
               topic: estateRegistryABI.events.AddLand.topic,
               event,
               block,
+              log,
             });
             break;
           }
           case estateRegistryABI.events.RemoveLand.topic: {
             const event = estateRegistryABI.events.RemoveLand.decode(log);
             estateTokenIds.add(event._estateId);
-            estateEvents.push({
+            markteplaceEvents.push({
               topic: estateRegistryABI.events.RemoveLand.topic,
               event,
               block,
+              log,
             });
 
             break;
@@ -801,31 +804,47 @@ processor.run(
           wearables,
           metadatas
         );
-      }
-    }
-
-    for (const { block, event, topic } of estateEvents) {
-      if (
+      } else if (
         topic === estateRegistryABI.events.CreateEstate.topic &&
-        isCreateEstateEvent(event)
+        isCreateEstateEvent(event as estateRegistryABI.CreateEstateEventArgs)
       ) {
-        handleCreateEstate(block, event, nfts, estates, accounts, datas);
+        handleCreateEstate(
+          block,
+          event as estateRegistryABI.CreateEstateEventArgs,
+          nfts,
+          estates,
+          accounts,
+          datas
+        );
       } else if (
         topic === estateRegistryABI.events.Update.topic &&
-        isUpdateEvent(event)
+        isUpdateEvent(event as estateRegistryABI.UpdateEventArgs)
       ) {
-        handleEstateUpdate(event, block, estates, nfts, datas);
+        handleEstateUpdate(
+          event as estateRegistryABI.UpdateEventArgs,
+          block,
+          estates,
+          nfts,
+          datas
+        );
       } else if (
         topic === estateRegistryABI.events.AddLand.topic &&
-        isAddLandEvent(event)
+        isAddLandEvent(event as estateRegistryABI.AddLandEventArgs)
       ) {
-        handleAddLand(event, estates, nfts, parcels, accounts, landCoordinates);
+        handleAddLand(
+          event as estateRegistryABI.AddLandEventArgs,
+          estates,
+          nfts,
+          parcels,
+          accounts,
+          landCoordinates
+        );
       } else if (
         topic === estateRegistryABI.events.RemoveLand.topic &&
-        isRemoveLandEvent(event)
+        isRemoveLandEvent(event as estateRegistryABI.RemoveLandEventArgs)
       ) {
         handleRemoveLand(
-          event,
+          event as estateRegistryABI.RemoveLandEventArgs,
           estates,
           nfts,
           parcels,

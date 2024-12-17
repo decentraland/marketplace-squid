@@ -188,8 +188,8 @@ export function handleRemoveLand(
     // @TODO check why && estate.size is needed, try to put at mandatory and start in -1
     estate.size -= 1;
   } else {
-    console.log('ERROR: estate: ', estate);
-    console.log('ERROR: estate.size: ', estate?.size);
+    console.log("ERROR: estate: ", estate);
+    console.log("ERROR: estate.size: ", estate?.size);
   }
 
   const estateNFT = nfts.get(id);
