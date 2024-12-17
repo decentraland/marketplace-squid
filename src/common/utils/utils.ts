@@ -48,11 +48,12 @@ export function parseCSV(csv: string): Array<string> {
 
 export function normalizeTimestamp(timestamp: bigint): Date {
   const timestampStr = timestamp.toString();
-  return timestampStr.length > 13
-    ? new Date() // mark it as expired already
-    : new Date(
-        timestampStr.length === 13
-          ? Number(timestamp) / 1000
-          : Number(timestamp)
-      ); // Convert milliseconds to seconds if necessary
+
+  if (timestampStr.length === 13) {
+    return new Date(Number(timestamp)); // Handle milliseconds
+  } else if (timestampStr.length === 10) {
+    return new Date(Number(timestamp) * 1000); // Handle seconds (convert to milliseconds)
+  } else {
+    return new Date(); // Handle invalid timestamps (more than 13 characters)
+  }
 }
