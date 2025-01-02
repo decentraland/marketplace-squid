@@ -89,7 +89,9 @@ export function handleOrderCreated(
       if (oldOrder) {
         cancelActiveOrder(oldOrder, timestamp);
       } else {
-        console.log(`ERROR: Order not found when trying to cancel order ${nft.activeOrder.id}`);
+        console.log(
+          `ERROR: Order not found when trying to cancel order ${nft.activeOrder.id}`
+        );
       }
     }
     nft.updatedAt = timestamp;
@@ -146,6 +148,7 @@ export async function handleOrderSuccessful(
   const buyerAccount = accounts.get(`${buyer}-${ModelNetwork.ETHEREUM}`);
   if (buyerAccount) {
     nft.owner = buyerAccount;
+    nft.ownerAddress = buyerAccount.address;
   } else {
     console.log("ERROR: Buyer account not found for order successful");
   }
@@ -210,6 +213,7 @@ export async function handleTraded(
   const buyerAccount = accounts.get(`${buyer}-${ModelNetwork.ETHEREUM}`);
   if (buyerAccount) {
     nft.owner = buyerAccount;
+    nft.ownerAddress = buyerAccount.address;
   } else {
     console.log("ERROR: Buyer account not found for order successful");
   }

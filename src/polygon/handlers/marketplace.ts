@@ -138,6 +138,7 @@ export async function handleOrderSuccessful(
   const buyerAccount = accounts.get(`${buyer}-${NetworkModel.POLYGON}`);
   if (buyerAccount) {
     nft.owner = buyerAccount;
+    nft.ownerAddress = buyer;
   } else {
     console.log("ERROR: Buyer account not found for order successful");
   }
@@ -276,6 +277,7 @@ export async function handleTraded(
     const buyerAccount = accounts.get(`${buyer}-${NetworkModel.POLYGON}`);
     if (buyerAccount) {
       nft.owner = buyerAccount;
+      nft.ownerAddress = buyer;
     } else {
       console.log("ERROR: Buyer account not found for traded event");
     }

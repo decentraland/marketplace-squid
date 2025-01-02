@@ -77,6 +77,7 @@ export async function handleMintNFT(
   );
   if (owner) {
     nft.owner = owner;
+    nft.ownerAddress = owner.id;
   } else {
     console.log(
       `ERROR: Owner not found ${event._beneficiary} for NFT ${nftId}`
@@ -200,14 +201,14 @@ export function handleTransferNFT(
   const timestamp = BigInt(block.timestamp / 1000);
 
   nft.owner = ownerAccount;
+  nft.ownerAddress = ownerAccount.id;
   nft.updatedAt = timestamp;
   nft.transferredAt = timestamp;
 
   if (nft.activeOrder) {
     const order = orders.get(nft.activeOrder.id);
     if (order) {
-      cancelActiveOrder(order, timestamp);
-      clearNFTOrderProperties(nft);
+      clearNFTOrderProperties(nft); // do not cancel active order
     } else {
       console.log(`ERROR: Order not found for NFT ${nft.id}`);
     }
