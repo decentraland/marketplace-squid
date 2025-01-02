@@ -115,6 +115,7 @@ export function handleTransfer(
 
   nft.tokenId = tokenId;
   nft.owner = toAccount;
+  nft.ownerAddress = to;
   nft.contractAddress = contractAddress;
   nft.category = category as Category;
   nft.updatedAt = timestamp;
@@ -161,7 +162,6 @@ export function handleTransfer(
       if (nftActiveOrder) {
         const order = orders.get(nftActiveOrder.id);
         if (order) {
-          cancelActiveOrder(order, timestamp);
           clearNFTOrderProperties(nft!);
         } else {
           console.log(`ERROR: Order not found ${nftActiveOrder.id}`);
@@ -447,6 +447,7 @@ export function handleTransferWearableV1(
     accounts.set(`${to}-${ModelNetwork.ETHEREUM}`, toAccount);
   }
   nft.owner = toAccount;
+  nft.ownerAddress = to;
   nft.contractAddress = collectionAddress;
   const timestamp = BigInt(block.timestamp / 1000);
   // nft.createdAt = timestamp;
@@ -523,7 +524,6 @@ export function handleTransferWearableV1(
     if (activeOrder) {
       const order = orders.get(activeOrder.id);
       if (order) {
-        cancelActiveOrder(order, timestamp);
         clearNFTOrderProperties(nft);
       }
     }

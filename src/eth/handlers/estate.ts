@@ -143,6 +143,7 @@ export function handleAddLand(
   if (parcelNFT) {
     parcelNFT.searchParcelEstateId = id;
     parcelNFT.owner = estateRegistryAccount;
+    parcelNFT.ownerAddress = estateRegistryAccount.address;
   }
 
   if (!!estateNFT && !!estate) {
@@ -232,6 +233,7 @@ export function handleRemoveLand(
     parcelNFT.network = ModelNetwork.ETHEREUM;
     parcelNFT.searchParcelEstateId = null;
     parcelNFT.owner = owner;
+    parcelNFT.ownerAddress = owner.address;
     nfts.set(parcelId, parcelNFT);
   }
 

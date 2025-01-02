@@ -45,6 +45,10 @@ export class NFT {
     @ManyToOne_(() => Account, {nullable: true})
     owner!: Account
 
+    @Index_()
+    @StringColumn_({nullable: false})
+    ownerAddress!: string
+
     @StringColumn_({nullable: true})
     tokenURI!: string | undefined | null
 
