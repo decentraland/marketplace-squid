@@ -162,6 +162,7 @@ type NFT
   contractAddress: String! @index
   category: Category! @index
   owner: Account! @index
+  ownerAddress: String! @index
   tokenURI: String
 
   orders: [Order!] @derivedFrom(field: "nft") # History of all orders. Should only ever be ONE open order. all others must be cancelled or sold
