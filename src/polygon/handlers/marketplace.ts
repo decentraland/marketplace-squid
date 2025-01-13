@@ -102,9 +102,6 @@ export function handleOrderCreated(
 
     if (nft.activeOrder || nftActiveOrder) {
       const id = nft.activeOrder ? nft.activeOrder.id : nftActiveOrder?.id;
-      // console.log("id", id);
-      // console.log("id gotten from nft.activeOrder", nft.activeOrder?.id);
-      // console.log("id gotten from nftActiveOrder", nftActiveOrder?.id);
       const oldOrder = id ? orders.get(id) : null;
 
       if (oldOrder) {
