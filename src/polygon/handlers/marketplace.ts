@@ -78,15 +78,39 @@ export function handleOrderCreated(
     order.createdAt = timestamp;
     order.updatedAt = timestamp;
 
-    if (nft.activeOrder) {
-      const oldOrder = orders.get(nft.activeOrder.id);
+    // get open order for the nft since nft.activeOrder can be undefined but an order could still be open
+    const nftActiveOrder = Array.from(orders.values()).reduce<Order | null>(
+      (newestOrder, currentOrder) => {
+        if (
+          currentOrder.nftAddress === nft.contractAddress &&
+          currentOrder.tokenId === nft.tokenId &&
+          currentOrder.status === OrderStatus.open &&
+          (!newestOrder || currentOrder.createdAt > newestOrder.createdAt)
+        ) {
+          return currentOrder;
+        }
+        return newestOrder;
+      },
+      null
+    );
+
+    if (nft.activeOrder && !nftActiveOrder) {
+      console.log(
+        `ERROR: Active order not found for NFT ${nft.id} and order ${nft.activeOrder.id}`
+      );
+    }
+
+    if (nft.activeOrder || nftActiveOrder) {
+      const id = nft.activeOrder ? nft.activeOrder.id : nftActiveOrder?.id;
+      // console.log("id", id);
+      // console.log("id gotten from nft.activeOrder", nft.activeOrder?.id);
+      // console.log("id gotten from nftActiveOrder", nftActiveOrder?.id);
+      const oldOrder = id ? orders.get(id) : null;
 
       if (oldOrder) {
         cancelActiveOrder(oldOrder, timestamp);
       } else {
-        console.log(
-          `ERROR: Order not found when trying to cancel order ${nft.activeOrder.id}`
-        );
+        console.log(`ERROR: Order not found when trying to cancel order ${id}`);
       }
     }
 
