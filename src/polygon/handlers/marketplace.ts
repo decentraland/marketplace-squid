@@ -94,11 +94,6 @@ export function handleOrderCreated(
       null
     );
 
-    if (nft.id === 'estate-0x959e104e1a4db6317fa58f8295f586e1a978c297-3831') {
-      console.log('currentOpenOrder: ', currentOpenOrder)
-      console.log('nft.activeOrder: ', nft.activeOrder)
-    }
-
     if (nft.activeOrder && !currentOpenOrder) {
       console.log(
         `ERROR: Active order not found for NFT ${nft.id} and order ${nft.activeOrder.id}`
@@ -106,17 +101,9 @@ export function handleOrderCreated(
     }
 
     if (nft.activeOrder || currentOpenOrder) {
-      // const id = nft.activeOrder ? nft.activeOrder.id : nftActiveOrder?.id;
-      // const oldOrder = id ? orders.get(id) : null;
       const oldOrder = currentOpenOrder || nft.activeOrder;
-      if (nft.id === 'estate-0x959e104e1a4db6317fa58f8295f586e1a978c297-3831') {
-        console.log('oldOrder: ', oldOrder)
-      }
 
       if (oldOrder) {
-        if (nft.id === 'estate-0x959e104e1a4db6317fa58f8295f586e1a978c297-3831') {
-          console.log('cancelling oldOrder: ', oldOrder.id)
-        }
         cancelActiveOrder(oldOrder, timestamp);
       } else {
         console.log(`ERROR: Order not found when trying to cancel order ${id}`);
