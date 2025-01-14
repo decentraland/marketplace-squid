@@ -79,7 +79,7 @@ export function handleOrderCreated(
     order.updatedAt = timestamp;
 
     // get open order for the nft since nft.activeOrder can be undefined but an order could still be open
-    const nftActiveOrder = Array.from(orders.values()).reduce<Order | null>(
+    const currentOpenOrder = Array.from(orders.values()).reduce<Order | null>(
       (newestOrder, currentOrder) => {
         if (
           currentOrder.nftAddress === nft.contractAddress &&
@@ -94,15 +94,14 @@ export function handleOrderCreated(
       null
     );
 
-    if (nft.activeOrder && !nftActiveOrder) {
+    if (nft.activeOrder && !currentOpenOrder) {
       console.log(
         `ERROR: Active order not found for NFT ${nft.id} and order ${nft.activeOrder.id}`
       );
     }
 
-    if (nft.activeOrder || nftActiveOrder) {
-      const id = nft.activeOrder ? nft.activeOrder.id : nftActiveOrder?.id;
-      const oldOrder = id ? orders.get(id) : null;
+    if (nft.activeOrder || currentOpenOrder) {
+      const oldOrder = currentOpenOrder || nft.activeOrder;
 
       if (oldOrder) {
         cancelActiveOrder(oldOrder, timestamp);
