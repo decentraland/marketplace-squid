@@ -77,7 +77,7 @@ export async function handleMintNFT(
   );
   if (owner) {
     nft.owner = owner;
-    nft.ownerAddress = owner.id;
+    nft.ownerAddress = owner.address;
   } else {
     console.log(
       `ERROR: Owner not found ${event._beneficiary} for NFT ${nftId}`
@@ -201,7 +201,7 @@ export function handleTransferNFT(
   const timestamp = BigInt(block.timestamp / 1000);
 
   nft.owner = ownerAccount;
-  nft.ownerAddress = ownerAccount.id;
+  nft.ownerAddress = ownerAccount.address;
   nft.updatedAt = timestamp;
   nft.transferredAt = timestamp;
 
