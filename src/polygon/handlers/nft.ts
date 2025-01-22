@@ -4,7 +4,6 @@ import {
   cancelActiveOrder,
   clearNFTOrderProperties,
   getNFTId,
-  setNFTOrderTransferred,
 } from "../../common/utils";
 import {
   ZERO_ADDRESS,

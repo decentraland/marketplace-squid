@@ -51,7 +51,6 @@ import {
   getNFTId,
   getTokenURI,
   isMint,
-  setNFTOrderTransferred,
 } from "../../common/utils";
 import {
   ZERO_ADDRESS,
