@@ -105,15 +105,6 @@ export function clearNFTOrderProperties(nft: NFT): void {
   nft.searchOrderExpiresAtNormalized = null;
 }
 
-export function setNFTOrderTransferred(nft: NFT): void {
-  nft.activeOrder = null;
-  nft.searchOrderStatus = OrderStatus.transferred;
-  nft.searchOrderPrice = null;
-  nft.searchOrderCreatedAt = null;
-  nft.searchOrderExpiresAt = null;
-  nft.searchOrderExpiresAtNormalized = null;
-}
-
 export function cancelActiveOrder(order: Order, now: bigint): Order {
   if (
     order &&

@@ -168,7 +168,11 @@ export function handleTransfer(
           order.status = isComingBackToOrderOwner
             ? OrderStatus.open
             : OrderStatus.transferred;
-          setNFTOrderTransferred(nft); // do not cancel active order
+          if (order.status === OrderStatus.transferred) {
+            nft.searchOrderStatus = OrderStatus.transferred;
+          } else {
+            nft.searchOrderStatus = OrderStatus.open;
+          }
         } else {
           console.log(`ERROR: Order not found ${nftActiveOrder.id}`);
         }
