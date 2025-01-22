@@ -304,6 +304,7 @@ enum OrderStatus {
   open
   sold
   cancelled
+  transferred
 }
 
 enum WearableCategory {

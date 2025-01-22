@@ -4,6 +4,7 @@ import {
   cancelActiveOrder,
   clearNFTOrderProperties,
   getNFTId,
+  setNFTOrderTransferred,
 } from "../../common/utils";
 import {
   ZERO_ADDRESS,
@@ -18,6 +19,7 @@ import {
   Mint,
   NFT,
   Network as NetworkModel,
+  OrderStatus,
   SaleType,
 } from "../../model";
 import { IssueEventArgs, TransferEventArgs } from "../abi/CollectionV2";
@@ -207,8 +209,14 @@ export function handleTransferNFT(
 
   if (nft.activeOrder) {
     const order = orders.get(nft.activeOrder.id);
+    // const currentOpenOrder = getCurrentOpenOrder(nft, orders);
     if (order) {
-      clearNFTOrderProperties(nft); // do not cancel active order
+      console.log(`Setting order status to transferred for order ${order.id}`);
+      const isComingBackToOrderOwner = order.owner === nft.owner.address;
+      order.status = isComingBackToOrderOwner
+        ? OrderStatus.open
+        : OrderStatus.transferred;
+      setNFTOrderTransferred(nft); // do not cancel active order
     } else {
       console.log(`ERROR: Order not found for NFT ${nft.id}`);
     }

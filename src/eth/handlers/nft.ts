@@ -18,6 +18,7 @@ import {
   Metadata,
   ItemType,
   Mint,
+  OrderStatus,
 } from "../../model";
 import { Network } from "@dcl/schemas";
 import { bigint } from "../../model/generated/marshal";
@@ -50,6 +51,7 @@ import {
   getNFTId,
   getTokenURI,
   isMint,
+  setNFTOrderTransferred,
 } from "../../common/utils";
 import {
   ZERO_ADDRESS,
@@ -162,7 +164,14 @@ export function handleTransfer(
       if (nftActiveOrder) {
         const order = orders.get(nftActiveOrder.id);
         if (order) {
-          clearNFTOrderProperties(nft!);
+          console.log(
+            `Setting order status to transferred for order ${order.id}`
+          );
+          const isComingBackToOrderOwner = order.owner === nft.owner.address;
+          order.status = isComingBackToOrderOwner
+            ? OrderStatus.open
+            : OrderStatus.transferred;
+          setNFTOrderTransferred(nft); // do not cancel active order
         } else {
           console.log(`ERROR: Order not found ${nftActiveOrder.id}`);
         }

@@ -41,7 +41,7 @@ export class Bid {
     @BytesColumn_({nullable: true})
     fingerprint!: Uint8Array | undefined | null
 
-    @Column_("varchar", {length: 9, nullable: false})
+    @Column_("varchar", {length: 11, nullable: false})
     status!: OrderStatus
 
     @StringColumn_({nullable: false})

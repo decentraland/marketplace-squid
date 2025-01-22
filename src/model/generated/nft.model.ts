@@ -107,7 +107,7 @@ export class NFT {
     @BigIntColumn_({nullable: false})
     volume!: bigint
 
-    @Column_("varchar", {length: 9, nullable: true})
+    @Column_("varchar", {length: 11, nullable: true})
     searchOrderStatus!: OrderStatus | undefined | null
 
     @BigIntColumn_({nullable: true})

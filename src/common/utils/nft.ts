@@ -105,8 +105,21 @@ export function clearNFTOrderProperties(nft: NFT): void {
   nft.searchOrderExpiresAtNormalized = null;
 }
 
+export function setNFTOrderTransferred(nft: NFT): void {
+  nft.activeOrder = null;
+  nft.searchOrderStatus = OrderStatus.transferred;
+  nft.searchOrderPrice = null;
+  nft.searchOrderCreatedAt = null;
+  nft.searchOrderExpiresAt = null;
+  nft.searchOrderExpiresAtNormalized = null;
+}
+
 export function cancelActiveOrder(order: Order, now: bigint): Order {
-  if (order && order.status == OrderStatus.open) {
+  if (
+    order &&
+    (order.status == OrderStatus.open ||
+      order.status == OrderStatus.transferred)
+  ) {
     // Here we are setting old orders as cancelled, because the smart contract allows new orders to be created
     // and they just overwrite them in place. But the subgraph stores all orders ever
     // you can also overwrite ones that are expired
@@ -119,3 +132,23 @@ export function cancelActiveOrder(order: Order, now: bigint): Order {
 export function isMint(from: string): boolean {
   return from === "0x0000000000000000000000000000000000000000"; // @TODO: enhance this check
 }
+
+// export const getCurrentOpenOrder = (
+//   nft: NFT,
+//   orders: Map<string, Order>
+// ): Order | null => {
+//   return Array.from(orders.values()).reduce<Order | null>(
+//     (newestOrder, currentOrder) => {
+//       if (
+//         currentOrder.nftAddress === nft.contractAddress &&
+//         currentOrder.tokenId === nft.tokenId &&
+//         currentOrder.status === OrderStatus.open &&
+//         (!newestOrder || currentOrder.createdAt > newestOrder.createdAt)
+//       ) {
+//         return currentOrder;
+//       }
+//       return newestOrder;
+//     },
+//     null
+//   );
+// };
