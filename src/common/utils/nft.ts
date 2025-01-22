@@ -132,23 +132,3 @@ export function cancelActiveOrder(order: Order, now: bigint): Order {
 export function isMint(from: string): boolean {
   return from === "0x0000000000000000000000000000000000000000"; // @TODO: enhance this check
 }
-
-// export const getCurrentOpenOrder = (
-//   nft: NFT,
-//   orders: Map<string, Order>
-// ): Order | null => {
-//   return Array.from(orders.values()).reduce<Order | null>(
-//     (newestOrder, currentOrder) => {
-//       if (
-//         currentOrder.nftAddress === nft.contractAddress &&
-//         currentOrder.tokenId === nft.tokenId &&
-//         currentOrder.status === OrderStatus.open &&
-//         (!newestOrder || currentOrder.createdAt > newestOrder.createdAt)
-//       ) {
-//         return currentOrder;
-//       }
-//       return newestOrder;
-//     },
-//     null
-//   );
-// };

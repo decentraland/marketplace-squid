@@ -164,9 +164,6 @@ export function handleTransfer(
       if (nftActiveOrder) {
         const order = orders.get(nftActiveOrder.id);
         if (order) {
-          console.log(
-            `Setting order status to transferred for order ${order.id}`
-          );
           const isComingBackToOrderOwner = order.owner === nft.owner.address;
           order.status = isComingBackToOrderOwner
             ? OrderStatus.open
