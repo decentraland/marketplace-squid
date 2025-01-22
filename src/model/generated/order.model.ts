@@ -42,7 +42,7 @@ export class Order {
     @BigIntColumn_({nullable: false})
     price!: bigint
 
-    @Column_("varchar", {length: 9, nullable: false})
+    @Column_("varchar", {length: 11, nullable: false})
     status!: OrderStatus
 
     @BigIntColumn_({nullable: false})

@@ -18,6 +18,7 @@ import {
   Metadata,
   ItemType,
   Mint,
+  OrderStatus,
 } from "../../model";
 import { Network } from "@dcl/schemas";
 import { bigint } from "../../model/generated/marshal";
@@ -162,7 +163,15 @@ export function handleTransfer(
       if (nftActiveOrder) {
         const order = orders.get(nftActiveOrder.id);
         if (order) {
-          clearNFTOrderProperties(nft!);
+          const isComingBackToOrderOwner = order.owner === nft.owner.address;
+          order.status = isComingBackToOrderOwner
+            ? OrderStatus.open
+            : OrderStatus.transferred;
+          if (order.status === OrderStatus.transferred) {
+            nft.searchOrderStatus = OrderStatus.transferred;
+          } else {
+            nft.searchOrderStatus = OrderStatus.open;
+          }
         } else {
           console.log(`ERROR: Order not found ${nftActiveOrder.id}`);
         }

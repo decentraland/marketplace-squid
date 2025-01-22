@@ -83,30 +83,8 @@ export function handleOrderCreated(
     order.createdAt = timestamp;
     order.updatedAt = timestamp;
 
-    const currentOpenOrder = Array.from(orders.values()).reduce<Order | null>(
-      (newestOrder, currentOrder) => {
-        if (
-          currentOrder.nftAddress === nft.contractAddress &&
-          currentOrder.tokenId === nft.tokenId &&
-          currentOrder.status === OrderStatus.open &&
-          (!newestOrder || currentOrder.createdAt > newestOrder.createdAt)
-        ) {
-          return currentOrder;
-        }
-        return newestOrder;
-      },
-      null
-    );
-
-    if (nft.activeOrder && !currentOpenOrder) {
-      console.log(
-        `ERROR: Active order not found for NFT ${nft.id} and order ${nft.activeOrder.id}`
-      );
-    }
-
-    if (nft.activeOrder || currentOpenOrder) {
-      const oldOrder = currentOpenOrder || nft.activeOrder;
-
+    if (nft.activeOrder) {
+      const oldOrder = orders.get(nft.activeOrder.id);
       if (oldOrder) {
         cancelActiveOrder(oldOrder, timestamp);
       } else {

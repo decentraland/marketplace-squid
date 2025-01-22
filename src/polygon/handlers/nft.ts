@@ -18,6 +18,7 @@ import {
   Mint,
   NFT,
   Network as NetworkModel,
+  OrderStatus,
   SaleType,
 } from "../../model";
 import { IssueEventArgs, TransferEventArgs } from "../abi/CollectionV2";
@@ -208,7 +209,15 @@ export function handleTransferNFT(
   if (nft.activeOrder) {
     const order = orders.get(nft.activeOrder.id);
     if (order) {
-      clearNFTOrderProperties(nft); // do not cancel active order
+      const isComingBackToOrderOwner = order.owner === nft.owner.address;
+      order.status = isComingBackToOrderOwner
+        ? OrderStatus.open
+        : OrderStatus.transferred;
+      if (order.status === OrderStatus.transferred) {
+        nft.searchOrderStatus = OrderStatus.transferred;
+      } else {
+        nft.searchOrderStatus = OrderStatus.open;
+      }
     } else {
       console.log(`ERROR: Order not found for NFT ${nft.id}`);
     }

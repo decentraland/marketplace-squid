@@ -8,7 +8,6 @@ module.exports = class Data1733931298042 {
         await db.query(`CREATE INDEX "IDX_3baa214ec3db0ce29708750e3b" ON "nft" ("category") `)
         await db.query(`CREATE INDEX "IDX_e0e405184c1c9253bbe95b6cc7" ON "nft" ("search_order_expires_at_normalized") `)
         await db.query(`CREATE INDEX "IDX_b53fdf02d6f6047c1758ae885a" ON "nft" ("search_is_land") `)
-        await db.query(`CREATE INDEX "IDX_5f8cc4778564d0bd3c4ac3436d" ON "nft" ("search_order_status", "search_order_expires_at", "category") `)
         await db.query(`CREATE INDEX "IDX_4c7d1118621f3ea97740a1d876" ON "nft" ("item_id", "owner_id") `)
         await db.query(`CREATE INDEX "IDX_2485593ed8c9972197aeaf7da6" ON "order" ("expires_at_normalized") `)
     }
@@ -20,7 +19,6 @@ module.exports = class Data1733931298042 {
         await db.query(`DROP INDEX "public"."IDX_3baa214ec3db0ce29708750e3b"`)
         await db.query(`DROP INDEX "public"."IDX_e0e405184c1c9253bbe95b6cc7"`)
         await db.query(`DROP INDEX "public"."IDX_b53fdf02d6f6047c1758ae885a"`)
-        await db.query(`DROP INDEX "public"."IDX_5f8cc4778564d0bd3c4ac3436d"`)
         await db.query(`DROP INDEX "public"."IDX_4c7d1118621f3ea97740a1d876"`)
         await db.query(`DROP INDEX "public"."IDX_2485593ed8c9972197aeaf7da6"`)
     }
