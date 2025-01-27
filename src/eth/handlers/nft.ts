@@ -533,7 +533,15 @@ export function handleTransferWearableV1(
     if (activeOrder) {
       const order = orders.get(activeOrder.id);
       if (order) {
-        clearNFTOrderProperties(nft);
+        const isComingBackToOrderOwner = order.owner === nft.owner.address;
+        order.status = isComingBackToOrderOwner
+          ? OrderStatus.open
+          : OrderStatus.transferred;
+        if (order.status === OrderStatus.transferred) {
+          nft.searchOrderStatus = OrderStatus.transferred;
+        } else {
+          nft.searchOrderStatus = OrderStatus.open;
+        }
       }
     }
   }
