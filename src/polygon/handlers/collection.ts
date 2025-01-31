@@ -861,6 +861,7 @@ export function handleTransferCreatorship(
       const item = items.get(itemId);
       if (item) {
         item.creator = newCreator;
+        item.updatedAt = timestamp;
       } else {
         console.log(
           `ERROR: Item not found in handleTransferCreatorship: ${itemId}`
