@@ -855,6 +855,7 @@ export function handleTransferCreatorship(
   const timestamp = BigInt(block.timestamp / 1000);
   if (collection) {
     collection.creator = newCreator;
+    collection.updatedAt = timestamp;
     let itemCount = collection.itemsCount;
     for (let i = 0; i < itemCount; i++) {
       let itemId = getItemId(collection.id, i.toString());
@@ -868,7 +869,6 @@ export function handleTransferCreatorship(
         );
       }
     }
-    collection.updatedAt = timestamp;
   } else {
     console.log(
       `ERROR: Collection not found in handleTransferCreatorship: ${collectionAddress}`
