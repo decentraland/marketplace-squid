@@ -846,11 +846,13 @@ export function handleCompleteCollection(
 export function handleTransferCreatorship(
   collectionAddress: string,
   event: CollectionV2ABI.CreatorshipTransferredEventArgs,
+  block: Block,
   storedData: PolygonStoredData
 ): void {
   const { collections, items } = storedData;
   const collection = collections.get(collectionAddress);
   const newCreator = event._newCreator;
+  const timestamp = BigInt(block.timestamp / 1000);
   if (collection) {
     collection.creator = newCreator;
     let itemCount = collection.itemsCount;
@@ -865,6 +867,7 @@ export function handleTransferCreatorship(
         );
       }
     }
+    collection.updatedAt = timestamp;
   } else {
     console.log(
       `ERROR: Collection not found in handleTransferCreatorship: ${collectionAddress}`
@@ -875,12 +878,15 @@ export function handleTransferCreatorship(
 export function handleTransferOwnership(
   collectionAddress: string,
   event: CollectionV2ABI.OwnershipTransferredEventArgs,
+  block: Block,
   storedData: PolygonStoredData
 ): void {
   const { collections } = storedData;
   const collection = collections.get(collectionAddress);
+  const timestamp = BigInt(block.timestamp / 1000);
   if (collection) {
     collection.owner = event.newOwner;
+    collection.updatedAt = timestamp;
   } else {
     console.log(
       `ERROR: Collection not found in handleTransferOwnership: ${collectionAddress}`
