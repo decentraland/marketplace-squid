@@ -809,6 +809,7 @@ processor.run(
           handleTransferCreatorship(
             log.address,
             event as CollectionV2ABI.CreatorshipTransferredEventArgs,
+            block.header,
             storedData
           );
           break;
@@ -816,6 +817,7 @@ processor.run(
           handleTransferOwnership(
             log.address,
             event as CollectionV2ABI.OwnershipTransferredEventArgs,
+            block.header,
             storedData
           );
           break;
